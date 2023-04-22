@@ -1,0 +1,24 @@
+---
+version: "3"
+
+tasks:
+  verify:
+    desc: Verify linkerd meets the prerequisites
+    cmds:
+      - linkerd check --pre
+
+  install:
+    desc: Install Linkerd into your cluster
+    cmds:
+      - linkerd install --crds | kubectl apply -f -
+      - linkerd install | kubectl apply -f -
+
+  install-viz:
+    desc: Install on-cluster metrics stack
+    cmds:
+      - linkerd viz install | kubectl apply -f -
+
+  check:
+    desc: Verify installation
+    cmds:
+      - linkerd check

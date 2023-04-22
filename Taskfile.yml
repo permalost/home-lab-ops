@@ -1,0 +1,20 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  CLUSTER_DIR: "{{.ROOT_DIR}}/kubernetes"
+  PROVISION_DIR: "{{.ROOT_DIR}}/provision"
+
+env:
+  KUBECONFIG: ./kubeconfig
+
+includes:
+  gen: .taskfiles/General/Tasks.yml
+  flux: .taskfiles/Flux/Tasks.yml
+  k3sup: .taskfiles/K3sup/Tasks.yml
+
+tasks:
+  default:
+    silent: true
+    cmds: ["task -l"]

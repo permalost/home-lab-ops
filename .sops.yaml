@@ -1,0 +1,10 @@
+creation_rules:
+  - path_regex: .*/.*\.sops\.ya?ml
+    encrypted_regex: ^(data|stringData)$
+    age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+  - path_regex: .*/secret\.ya?ml
+    encrypted_regex: ^(data|stringData)$
+    age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+  - path_regex: .*/configMap\.ya?ml
+    encrypted_regex: ^(data|stringData)$
+    age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z

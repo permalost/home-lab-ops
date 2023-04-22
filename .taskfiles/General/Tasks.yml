@@ -1,0 +1,12 @@
+---
+version: "3"
+
+tasks:
+  validate:
+    desc: Validation script to be run locally before merged into Flux in-cluster.
+    cmds:
+      - sh scripts/validate.sh
+  tools:
+    desc: Install tools via Homebrew
+    cmds:
+      - brew bundle
