@@ -5,9 +5,15 @@ version: "3"
 vars:
   CLUSTER_DIR: "{{.ROOT_DIR}}/kubernetes"
   PROVISION_DIR: "{{.ROOT_DIR}}/provision"
+  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
+  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
+  TERRAFORM_DIR: "{{.ROOT_DIR}}/terraform"
+
+dotenv: [".config.env"]
 
 env:
   KUBECONFIG: ./kubeconfig
+  SOPS_AGE_KEY_FILE: ~/.config/sops/age/keys.txt
 
 includes:
   gen: .taskfiles/General/Tasks.yml
