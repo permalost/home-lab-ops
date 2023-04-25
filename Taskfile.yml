@@ -8,6 +8,8 @@ vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
   ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
   TERRAFORM_DIR: "{{.ROOT_DIR}}/terraform"
+  INFRA_DIR: "{{.KUBERNETES_DIR}}/infrastructure"
+  LINKERD_DIR: "{{.INFRA_DIR}}/linkerd"
 
 dotenv: [".config.env"]
 
@@ -19,6 +21,7 @@ includes:
   gen: .taskfiles/General/Tasks.yml
   flux: .taskfiles/Flux/Tasks.yml
   k3sup: .taskfiles/K3sup/Tasks.yml
+  link: .taskfiles/Linkerd/Tasks.yml
 
 tasks:
   default:
