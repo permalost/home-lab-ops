@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: pihole-helm-chart-values
+    namespace: pihole
+data:
+    values.yaml: ENC[AES256_GCM,data:ZYr8NA9zdB09iejThfjkVwRQ1HhNvqbREw7jH4YRekkUo1GdD9jpOhnUt8SabJyf313ySg2sz63RS8zNy7E6C+221xunC59f0IjczJqK7BOs82ERLH9YUhxwi8oJwev1Zv5zUAjKbg7+SqRtsyyXGxIhOEbk/gshvvwRMklIE/yoLkxBq5qOGPXfLJjxvZnQ2sOxzUefqsollZlkwG+t+N48WK+2zla9abfqwhPSSbHBjQsP94nD209JsoSO8RjZsnrEeYivF/TG1/n+QaOxsB8CRjbLjlxV4s7Vc7+OEaCsuXhx8qOrvGtnSMX3MCCFsDthRU7upUS5bD0FpkkVpqYdc6qlIqeKszFF6SeaY4ki0BtM3fSU9xzWuqadVkc0iY8Ggdx+GOLKvNCxtWdSibUNUTDcPrpih4Tl4VX40tRpZ2I4UNBMuRXVPyHGcHeD8vct2S2VxagS9+FDEmP6CxVjtZUlEd/Fk6KYG4on8jYIAJoaJDg09Vck3YDyntWVT4n0AvM4/oz0yWb6X3DFLj5KSyjuvG0axQCrkE+ze0TvrmuympGTKBs3jtEPTKlaPpj4XFUptppdvlrGGF8SKZ5u1GWVbwzYwFw/xsV7iL+psDoYogls6+mJRsxpwPxvocqbrnTtDumILsnqs0xTtfotj170eQDVLO+/m0PLQ3yX5FLv+jodDBhmVUk3Q2Pfy7KuIjSi7qxRDotoNJT11iai1neuU63d3lgxG/ogtKqy05LVCiotrN6lfKs2GMgng/pQcIWG1xKE0ofvxDJVs5gE40jfzMoNRGyRlFuc9BraC0JTAm5EMs8F/RHyneRjnfRdEk0nQ+V4ImOP4g2PPcdyHQxRq54qwyWJ3TIE78Hu4A/SV9JFQyhOEYjIYD12A/v1lPamOFTh6wIrZv4ooqsVjikkFL7aTzsBaSxoFnHVw5f1LwZAI9tpPC8IndQQ+HaIB/x0A03MlC82lwANIWahhyrtGWSASA6JA+0MJTw24wdu5+Br4KOVfRy0eWlgt6T65Dx3c2DJIUymIoROcwgrvWa59YCb2P1POXU3Xg==,iv:/LygccWFFmtR0oropWBm62rR6tA8lQmPDs1AFi8uE6k=,tag:Vye1Jq59MTupACiHeZALgQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzYVFwdVB4bXNtUHRlVUtK
+            aVgxODBVSElpL2JkcmE2d0gxcGhJa1V1dlNzCnF0R2ozbHBUNkI1WmZmSVNhR1Q3
+            cW5KamtkZG50TVk4MEdRM0dManE3NWMKLS0tIHRGZUYrVklwMXAwS2o4N0dQVGJV
+            T2E2OE5hcDM5c3BNeWIrM2pqMGdad2sKQBmzzSK0Zx+PkWFf4jST3ZXEK6SjZ+xI
+            x1Qw5lubmNE6Csc/eMA4m0q5EwIBk0LZy6WhwTdqM7zvE4OVGwiwQw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2023-04-29T06:40:22Z"
+    mac: ENC[AES256_GCM,data:z3i45nD8CB0N1GtqdG5Lb8qQlOUhbHTLirVe5gJxkplhph3qVdeG4h6oZDtuBAYCV9CIOKnEZr0J1hMEz4S1C7s9lpH4xp/gbljzDF4mpomzsBf2Ys/zF4/AXgyau4MgJFnvoizuvfXUSH+3k/OpGWocqxfqyZpYC3GBjOiZhI8=,iv:MpzVH1P76tqrp7wKebWrGiTx2bEpwC+45ZClznGLWjY=,tag:qtCwNa9oC7UJgS1xE2hhMg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

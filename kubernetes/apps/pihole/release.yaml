@@ -21,3 +21,7 @@ spec:
       retries: 3
   # Default values
   # https://github.com/permalost/pihole-helm/blob/main/charts/pihole/values.yaml
+  valuesFrom:
+    - kind: ConfigMap
+      name: pihole-helm-chart-values
+      valuesKey: values.yaml
