@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pihole
+  labels:
+    toolkit.fluxcd.io/tenant: dev-team
+  annotations:
+    linkerd.io/inject: enabled
