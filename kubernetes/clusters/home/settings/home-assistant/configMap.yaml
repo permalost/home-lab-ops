@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: home-assistant-helm-chart-values
+    namespace: home-assistant
+data:
+    values.yaml: ENC[AES256_GCM,data:coMgyknMFtUCwxEkrDQZ+OA3nPGraZLWyu3e6QeX26hGkgOCxHSPmbTiQQ2/VDIMg0cxZCCw8fqc+Ow2iWOa3yxG6OLWZo/WpYjU5GmuxOwVDPh4vF31fmPbLtLJVQexn800qpoXwyaVZqt8DpYV+9x0+VHRbMEYyprjDPUAkyY12ignL9ohloJUQcRLU46y+/He+sldz8NTFagQPyQqdcm1AfbMxl8dx4aE7C1KAzcLAtNlefFfmtnuWKmOt9/ZlBCqOA4Opno0aSJy5ZFNVfcLbZozH+dV7am9fEIAQG7Fb2HH5nGE73CvMviOCfO36UgaOYz/aBm0AhX3LGMR2+ZFxFbYONLUPe+0OE+QfaKCqq4FzUoEuprzYT1ZUXooYPy/itQNT9kU5Ae7OKMx5hgTzywIHvl77GMiAsSF0WklBJQkYn4FgLtoKQQ40GglSv/SW78jWzupEIBlt5J4P6W4Sjgu8gag+1IwuDsmFRCMWFD57c4eV9UmReioUj/qj+It3VyQKtJI4buyiZsMwaAa8XB5te9ipm8MlOkMQRDvP5dSUGQKflFZa32tTNll7QO1e41aNxNbnq2JsE2RZXSsLP3MI9j4hSnOB0POJHrccZ2Ze2P5aDAPvLxZwTFVciaR23WsrioU2vPRjZvfUzqTASClA3CxGAfamIbYCflB3BIOG9wrRGaKSy2ZY0081zdTnPSI7524xu2c9omTafkmTFV3q/9624/1ZMu+HtauEXG2H9fRDK0DEMURAwb8/Lj6zN33aLro+W8uRmHBLbClELLgcqD75U0MGWRRloDxGhTfteCIgXonxCc2EdKQcBbiPqb+7fWmPodub7XKPajgNdoP7Sww5E0v/Dm8c/IZJ4b6PPWRjAMPuqmBX+Ko8HGIjKW4gjS4E+5Y+mZkvVCIavYRITeqcs2aU87QJy2Ks13kGpRTOW3QHsGpwrAg9Rtt5nGnk9vnDc3W8se9MlzFELFgYkXDY/YIDqeJm+3xcbVYhsUd6B+IkZ8nCxOGTW9SBlwC4hP9niz6BbBpRnXcK5762OOWydesYvwYVpMt1QAHOQ6HhU3xhOBAojmCsb7DpbetH/qU2EWLOHth7fr5Qfu8xuwFT1sv5orWdhOPFTgeTwyhDtCQSe+QM9wWirULIZjcxDiA7DPUIVfXYMoCMZDRcuCTOKWJh9G4RF1si73cxV0NLh6Xk9dGjpDV1hAlhFw7VqdMo+254FEKtKFBFFT/3LgeuWJ3AaMQs1VpFWlMxM6OgNtQ9bKmfBq45UkIxIN75iBRrM4hgJCyILZAIuIjWVl0fZyPICN9he9iEv/7Xq39yJns6e02N6WGkIuGlYd65V0LsyGketzrsBWFheuaS6yMVokkK1onJ5JZl95oyTMtVRhZYKmx284aHM/ojqtbFYq0F+fm34tUQ7YdjlaoBPWHFQoa2dljfWlMquYvTjGUxj/V+Yl7o4qdgQI24chF0jpc6N4lxmHuqk7CG/AFiL1cciqaBK9RZklz/ofrtA2DPG8hG0WcKW52oCrRecXfjGzy2xLPKu8BhWYZuX376cz82eGL5wDX0TauNZGKp4vEqx87ls7Eeb4MTixxZsDUQT56USqnMvpF9SWqjWioJLgO2hVkIyf2GF9NnIL8lqphbcaSQPpVdNwlBOegJ/P+MmaBrCPXWYovzANamr7XT1a5JMlT+uzFEJsXvAh6d0DXE2CHruOScIIvpRByjnyef3KYqm5yEvB5SVNRNLZPzJwDf1DO7czA6Lhx3yVkeWttEQv6IuHTMBeHzLYjKZV02FqWZ0/haEGT63ZMsGfjVVoaEMjiG2LylPs81jnB7mDqmHnep0ClgVs5Shag2hN3ypsee3hbAGkZ9TpK9JiCzy+jBIUCE/AZQNFIqUDXreCUb+hDVnM76Rd3EUxIKSu5BC88LzyFSm0RX/0=,iv:V9ZEGbgZVZVS20Goyn1UntvESUoTMM2HKgAbdI6gPdk=,tag:jmf1ct5IqxMMdESPprF5yA==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvaC9CbE1XOW1mbCsreDNG
+            aHpZK2VTdzhVTkNraDh1ZFNyMStNMkN4VFdJCmJ1dzVBYTNnbzJMcnM1ZzF4SXVs
+            ZGs3RzBNYmNOQ2kwRDBxNHhnZUNUdlEKLS0tIDdKVHZjN0JCMTd3QjQ5MjRaU2Fo
+            ZWFHS0FqTVB3SXpYc21DOFY0WU5DUGsKxcqCxFnKOlNft1Ws1e7PuC9RHPNLvzzB
+            EkE5YbSB/r/9sPyNGnVQALXccEmZtajHOYEwJRFEmw8nWhrA++QfYg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2023-05-01T05:59:14Z"
+    mac: ENC[AES256_GCM,data:eSQ5QzE8LFPIBzSpWOH22CYZgyEKtGxBf4579lzBYVWhADQxLpRVPN0+a6jwxCuC1jFPwtNRrR7H/mdz+VbZlOki2mp2+qiz7O2m2DZqKjiyUuXTpL+1CEZVR0MHOsfPx6pEKWAva+LnNxxD2yXNpJgUt4lZqsPLNNZ1yWBDYDw=,iv:ksnXi4gawY2bgZDkFtpB9wrzLT4fm/ZXlYvmQ2uwiB0=,tag:mVUH52eyrG1dBcmxxpflbw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3
