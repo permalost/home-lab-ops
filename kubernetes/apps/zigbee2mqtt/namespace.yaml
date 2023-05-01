@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home-assistant
+  labels:
+    toolkit.fluxcd.io/tenant: dev-team
+  annotations:
+    linkerd.io/inject: enabled
