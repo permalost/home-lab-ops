@@ -5,4 +5,4 @@ metadata:
   labels:
     toolkit.fluxcd.io/tenant: dev-team
   annotations:
-    linkerd.io/inject: disabled
+    linkerd.io/inject: enabled
