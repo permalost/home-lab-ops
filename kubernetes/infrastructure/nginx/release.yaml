@@ -17,6 +17,7 @@ spec:
     controller:
       podAnnotations:
         linkerd.io/inject: enabled
+      setAsDefaultIngress: true
     metrics:
       port: 10254
       enabled: true
