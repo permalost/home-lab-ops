@@ -5,6 +5,7 @@ metadata:
   name: zigbee2mqtt
   namespace: home-assistant
 spec:
+  suspend: true
   interval: 5m
   chart:
     spec:
