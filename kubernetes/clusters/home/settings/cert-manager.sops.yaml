@@ -5,7 +5,7 @@ metadata:
     namespace: cert-manager
 type: Opaque
 stringData:
-    api-token: ENC[AES256_GCM,data:sVyxQv0pPybQEnRQaoECEH/XX4+jrRD1mReDCLkC1YTe3+JxM4mU1A==,iv:gHMtocbQO5KsGYy3hc5cg8lPwWGzyg7oCBap5GgawoY=,tag:wuu9etSYETjVbgYVLD/2Wg==,type:str]
+    api-token: ENC[AES256_GCM,data:7SvloGSgFQ6wiY0itw3u9CUCS2wGuoW2zsM+ecP5B+IuZYYqW26PLQ==,iv:PB/J/B8t1/OhO5waG4gBUekhvubopazpcPzF7KyNXYA=,tag:CXKhRFu4riK4ySvytJ+3qQ==,type:str]
     email: ENC[AES256_GCM,data:LbWtn+iqGr8gzIciWR98g4CnLsD+QJduzGlrzXUsZy3WnQpOBK8OtJs=,iv:p1gxPWF1i2rPghwszaNPdIIV3TtKVhtFf2olzM/EOQM=,tag:RPrkrg5YojbtKbvaLgtSuQ==,type:str]
 sops:
     kms: []
@@ -22,8 +22,8 @@ sops:
             ZkdGbFFSQnF2RERnZm1QdWhrRnkvU2sKFaO1Kc7fe/yPg3AfD8TTuGKFVK2jj3Je
             hAZEsqh1BwWMLKobEO840YDwAuMlWKoLEGhU9b7Is1NkMoiERBEmaQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2023-03-13T06:36:17Z"
-    mac: ENC[AES256_GCM,data:4+cEZ6bcwoSYJyzx4isQScL4wOg2MpOweHc6sCvo84BCuY2RnWE0R7K4KKX698T3app8A+p4UDPFuP/nFLFgKfRNTwqzJlJC5gp+tC7B7gMksypZpNHwflUswFiVCrNxyKq4bzDVJuJio2bx9yPTbvVCXog1y7uKdt2Xg3i85sQ=,iv:Q7VjGvdhFkWKzf9laEbd3iys7oA7B5pmWvG3ZOIdcWw=,tag:G9kk2POvZh5Jprf4YG2HhQ==,type:str]
+    lastmodified: "2023-06-21T02:18:47Z"
+    mac: ENC[AES256_GCM,data:lS7AV6T+yMEgkF5VrFGmbIlIXWWSOGNX/Ni7aHfGStUk7PkPo3W87AjUTTrUlxPNF2/PRyCFf3tXeb6LC2DFlPnCnF3KeSvDhnaxjk/fTZZsvYa7cznfhFSyxluRKdzn1B27cKzMkh/CsQT538V49/LTg84q+uzYfzYGFDRKAzw=,iv:li0o0ba1sy/P4S5L/Z8kzSV1fzzOBH1KsMGzexxThgY=,tag:tNIqgeKYdioKzq8KULy33w==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
