@@ -1,0 +1,15 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: faces
+spec:
+  interval: 10m
+  url: https://github.com/BuoyantIO/faces-demo
+  ref:
+    branch: main
+  ignore: |
+    /*
+    !/k8s/01-base/*-profile.yaml
+    !/k8s/01-base/faces.yaml
+    !/k8s/01-base/faces-gui.yaml
