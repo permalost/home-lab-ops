@@ -16,4 +16,4 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./apps/faces
+  path: ./kubernetes/apps/faces
