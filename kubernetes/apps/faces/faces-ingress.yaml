@@ -5,11 +5,12 @@ metadata:
   labels:
     app: faces-gui
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/service-upstream: "true" # IMPORTANT!!! -> Required for AB testing using NGINX with Linkerd
 spec:
   ingressClassName: nginx
   rules:
-    - host: "*.faces.sslip.io"
+    - host: "faces.norseamerican.com"
       http:
         paths:
           - pathType: Prefix
@@ -40,3 +41,7 @@ spec:
                 name: smiley
                 port:
                   name: http
+  tls:
+    - hosts:
+        - faces.norseamerican.com
+      secretName: na-faces
