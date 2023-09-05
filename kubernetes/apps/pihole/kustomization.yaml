@@ -5,3 +5,4 @@ resources:
   - repository.yaml
   - secret.yaml
   - release.yaml
+  - canary.yaml
