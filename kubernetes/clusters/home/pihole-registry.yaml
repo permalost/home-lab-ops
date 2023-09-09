@@ -5,5 +5,5 @@ metadata:
   name: pihole
   namespace: flux-system
 spec:
-  image: pihole/pihole
+  image: registry.hub.docker.com/pihole/pihole
   interval: 5m0s
