@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      labels:
+        app: pihole
+      name: pihole
+      namespace: pihole
+    spec:
+      ingressClassName: nginx
+      rules:
+        - host: dns2.norseamerican.com
+          http:
+            paths:
+              - backend:
+                  service:
+                    name: pihole
+                    port:
+                      name: http
+                path: /
+                pathType: Prefix
+      tls:
+        - hosts:
+            - dns2.norseamerican.com
+          secretName: na-dns
+    status:
+      loadBalancer:
+        ingress:
+          - ip: 192.168.2.242

@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:2022.07
+          imagePullPolicy: Always
+          stdin: true
+          tty: true
+          resources:
+            limits:
+              cpu: 100m
+              memory: 1Gi
+          env:
+            - name: TZ
+              value: America/Boise
+            - name: FTLCONF_REPLY_ADDR4
+              value: 192.168.2.240
+            - name: PIHOLE_DNS_
+              value: 127.0.0.1;8.8.8.8;1.1.1.1
+            - name: VIRTUAL_HOST
+              value: dns.norseamerican.com
+            - name: TEMPERATUREUNIT
+              value: F
+            - name: WEBTHEME
+              value: default-dark
+            - name: WEBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: webpassword
+                  name: pihole-admin
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 443
+              name: https
+              protocol: TCP
+            - containerPort: 53
+              name: dns1
+              protocol: TCP
+            - containerPort: 53
+              name: dns2
+              protocol: UDP
+          volumeMounts:
+            - mountPath: /etc/pihole
+              name: pvc
+              subPath: pihole
+            - mountPath: /etc/dnsmasq.d
+              name: pvc
+              subPath: dnsmasq
+            - mountPath: /etc/dnsmasq.d/05-custom.conf
+              name: config
+              subPath: 05-custom.conf
+            - mountPath: /etc/pihole/whitelist.txt
+              name: config
+              subPath: whitelist.txt
+            - mountPath: /etc/pihole/adlists.list
+              name: config
+              subPath: adlists.list
+            - mountPath: /etc/pihole/custom.list
+              name: config
+              subPath: custom.list
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: pihole-config
+          name: config
+        - name: pvc
+          persistentVolumeClaim:
+            claimName: pihole-pvc

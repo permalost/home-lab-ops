@@ -8,7 +8,7 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: pihole-pihole
+    name: pihole
   progressDeadlineSeconds: 60
   service:
     port: 80
