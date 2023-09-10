@@ -82,4 +82,4 @@ spec:
           name: config
         - name: pvc
           persistentVolumeClaim:
-            claimName: pihole-pvc
+            claimName: pihole-pvc2
