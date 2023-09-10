@@ -26,7 +26,7 @@ items:
       tls:
         - hosts:
             - dns2.norseamerican.com
-          secretName: na-dns
+          secretName: na-dns2
     status:
       loadBalancer:
         ingress:
