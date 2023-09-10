@@ -9,4 +9,4 @@ spec:
     name: pihole
   policy:
     semver:
-      range: 2022.8.x
+      range: 2022.7.x
