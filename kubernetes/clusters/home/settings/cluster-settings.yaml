@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  cloudflareEmail: permalost.commercial+cloudflare@gmail.com
+  democraticCsiHost: 192.168.2.52
+  democraticCsiUser: k8s
+  democraticCsiGroup: kubernetes
+  democraticCsiPermUser: "1111"
+  democraticCsiPermGroup: "1111"
