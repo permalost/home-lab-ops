@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 data:
   cloudflareEmail: permalost.commercial+cloudflare@gmail.com
-  democraticCsiHost: 192.168.2.52
+  democraticCsiHost: 192.168.10.232
   democraticCsiUser: k8s
   democraticCsiGroup: kubernetes
   democraticCsiPermUser: "1111"
