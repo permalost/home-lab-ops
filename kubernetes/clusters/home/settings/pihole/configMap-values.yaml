@@ -4,7 +4,7 @@ metadata:
     name: pihole-helm-chart-values
     namespace: pihole
 data:
-    values.yaml: ENC[AES256_GCM,data:CXF/BlI0KjkMmY7Ebisayb7EQSW+fo/6LrLHo6QqFMMAAjbBiuPGK+bpPLT6H9Dv0Pz6VzflQ/L3vJbuQH9MPOTVIntuvO8wWNrBXJu8TsitbFm25apuBSQzYr8CqU/TUsk1UCF+nVpfGzL4Kc3f8Yf5GUvAMtFhHS+gB5jqqpZB5TolXGNheSKuk3iruXhSTpUaJ7vGOQZmgq9vrycKubhaKeslo8s2lsK+vCzUDuCJo7vgWwGn/4NZqTHDEeVi/mt2u/ThhJOB2emBhfFt0gppozSWxX+5t2VHAZweiqi9ZOo0Abb/dBNecAE2ehx/xDkx6/cKZwFsh04wTAS2MljGPlLPV5OAr3tFTpk4UYi5iUDSB53p4VF+gh0h6gtJ+OEjHD++Kex2jMv/hwU4Z03XSMLf7KqGX2Wc5WrkYYwIUDBWkINWAmeIh6R1CXYJv26AVz2kY4ABEpdDy50bdhmvve9UGc7H+sWVidD3dgoWPef2SPmalihnIkQc6Z7AwTuO2I+PFaeooVRhGOm2C6QU3YDUTtS5VKIM1YAm6VEfobnQirdRIFtN7soLV2cxj6EcJGsHu6FGRlM8ltjRDOttnTjBb+d86x8FdRbCd8+Yt4QN9R7vKYqvtWHIKuCi2us5vZ64IiiDGitnHtxisXic1fkMdshSnkJ/fPGcdTMGn64DqLo5SVvc23fFbPtO7E4YTHMwcMb10WvpSde9UlKJNXfvFEYgoPGB6m3Xu1YT7czDKOXrt7fnmtmoMdCliOJUe0pRBwXwXO2HuJ5blECFrU/x6zbeJXET38AfG3FM4ga9tLBwUqMIDMzWDMdQzuSVSKlH2T2MVY2hAU8bTVn9nfKPP6mvfcO8B3Zz45LPlfaCoMzTvh6TuUoP2Iw5nXB2eHKd8WHhdC3yOdiALAl1YQcwfRv5WHJxCGLwsJ6pkU/t4FiuMe/9ebUw8ooZ+WI5K7ZVGwRu2NjByA+a5Js8ZlLCv+lUTggQKRA27FtIZESqaY0bF5xUlWJc0RJwwKhbTZSHIh3q2GxSjFYSNmCUF6iotTY2wCA0CZRORThmGDnVoCdyPlDcOp9QaixXXG4wzZ/V5CwDOYQe6WI=,iv:+3QZ03YuS6cPu2IL7dwlbA8vEV+wAkOfV/L3j4dQpVo=,tag:XwQmNIvCfnLh5Qjwv7M0nw==,type:str]
+    values.yaml: ENC[AES256_GCM,data:i/gRdkakfvBb2z0qqnWnr/5ZorduNEn2SPlBWF0jzsSRnM5I2mQ8p/LEmdFFCfJF6o0SiygbANYLGrUETAz8gzp8Z+rTWTL3DiJi+56GBc2XxPVqhfpOWk4B5mNLwGSnJj+lIJAfX5dsBn7wHKKfY68vfGRYha4UeQywwM/mKia+q7BDYgUl2/9MCqvXyoz0ix7jrqRuqrs22ABSwRSm7E+YqUIpMxOuo/NSRpEfTmOdurJRnQhujv90LAU6aEYJtgcg+epcFl4m0SYWmigPQmuprriH3KyHYt1oJUx34XWuzcRZbuXT94pvwgiwOKUEZcW6srcvEmMcep7H2H84F1v8eddfIkf3WpQscF9ZYeZV+N5ynKsGt2Rrg/I291rgCG5EN9XzkIsXmDsw8foZpg7L+uYBmPRqerkKrttlavAJS+ovzDuBc1fAoLv28HfeR+zxCmYyq2kkusnybE8Rff64Dl9ab+7z3J665J0uPy8p+w5oIA282UH/tLYBzbiVppvQBrd706iB7dwZcbR5wbEmPx4EdxmNJh1zU1mcztOPLu22cdrNDKbxQWb0UoUcYwGgrYU2RsRKFdc0h7JOTqoWY4T1I+ltC7PdRZ+3o1T+xu9k1AMzbhU6JIXDgkXqRnVWH1iYyIUzHsYrx2KDdMvTbbSlpB7sVvsIMVLy7NPJ8YqGykTbZH1RSFb7F7kSDgd7tNJy286ajJaogcFOYtIlp6/OHnAI65J1OkZEpL2ISSgU6fhDQV/4ZsOTkmLnM6HpJGB+mspHF993ZLUtzgpY6m/2UDbITWYQFO90XHp4QikZf5pR6Ri/wvdnId9fJh77kA+ozyViwUW9+8h1wlEImQoB+CDVjk+oMuySu1AZEmctkeXXrvbsTjdMnkC1I+Rt28CTdCVZn9BSxaE8HQkQZxBuXqmwC7RHjXC9Ec8rBc+fjWOiTsNLKikhvu3RpsrLlQzccVNkj+lUXGUAwr1uMmL6upzFEnp8zn8sYCCn336pVFEsCjqaj651aQ84+ttM12Y1/RhpOV2rHnWSK0oBtUlJoG7QBR1WGeIzw2Qs3yCDhnEQNoSbB4dTyj4sGfL8OLETX0Wb9VORUGnU,iv:VbjjxwKFbBeOv0wkETQZkShSCeKWIZOjcb5WSxXPcig=,tag:Flkz9xy4zfMPoARUGl2bZg==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -20,8 +20,8 @@ sops:
             T2E2OE5hcDM5c3BNeWIrM2pqMGdad2sKQBmzzSK0Zx+PkWFf4jST3ZXEK6SjZ+xI
             x1Qw5lubmNE6Csc/eMA4m0q5EwIBk0LZy6WhwTdqM7zvE4OVGwiwQw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-05-13T08:01:20Z"
-    mac: ENC[AES256_GCM,data:P5caYbgAXwEKFJNCsuBIeKao7CraK/R9Noe41NLAt7b7hjwByCiyqz436VeAqDiYGag8sgoQW5UizKBr5HGW4vi8GLVJg2Vv3hc6Xzu5q1uScyQNaj/Ig3lr8f9vcbznzu5RojttrOQS9c9r4DYMVjM52LxvG86YGUYzffqJEVM=,iv:85pGM6MS9vWEnFYLHxvkbBXzCP6J1t3WmzkESzIzcdg=,tag:cVteT+/kd45P2HHntpOk7w==,type:str]
+    lastmodified: "2024-05-13T10:27:34Z"
+    mac: ENC[AES256_GCM,data:Vsl3uni0hYXA9cegWuM2WXoKBCTmPBHdUwGZysi7TLaaJEjLw2DO5WL9L1fHb33+uBzd3RY83XlpWfPINmaTthvUUqvfVyjdV2r/PfE97v3y4TdLFVkIKrqz/hS7cwaS04PzJ4JCDjgmpNlnho9V7+sfwSUmcDWdWCe1tlmd8JA=,iv:A04MaWDgfIQn+2c6c/pQbHy0mW6UVQYf0Frh/LlIF+A=,tag:UJF2fBEAa+MDnHeIiugKhw==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
