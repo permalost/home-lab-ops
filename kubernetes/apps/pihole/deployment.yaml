@@ -57,12 +57,12 @@ spec:
               name: dns2
               protocol: UDP
           volumeMounts:
-            - mountPath: /etc/pihole
-              name: pvc
-              subPath: pihole
-            - mountPath: /etc/dnsmasq.d
-              name: pvc
-              subPath: dnsmasq
+            # - mountPath: /etc/pihole
+            #   name: pvc
+            #   subPath: pihole
+            # - mountPath: /etc/dnsmasq.d
+            #   name: pvc
+            #   subPath: dnsmasq
             - mountPath: /etc/dnsmasq.d/05-custom.conf
               name: config
               subPath: 05-custom.conf
@@ -80,6 +80,6 @@ spec:
             defaultMode: 420
             name: pihole-config
           name: config
-        - name: pvc
-          persistentVolumeClaim:
-            claimName: pihole-pvc
+        # - name: pvc
+        #   persistentVolumeClaim:
+        #     claimName: pihole-pvc

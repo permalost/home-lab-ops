@@ -8,6 +8,6 @@ resources:
   # - pihole-registry.yaml
   # - pihole-policy.yaml
   - ingress.yaml
-  - pvc.yaml
+  # - pvc.yaml
   - secret.yaml
   - service.yaml
