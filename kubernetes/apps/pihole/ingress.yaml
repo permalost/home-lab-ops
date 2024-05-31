@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - dns2.norseamerican.com
-      secretName: na-dns2
+        - dns.${domain}
+      secretName: na-dns
   rules:
-    - host: dns2.norseamerican.com
+    - host: dns.${domain}
       http:
         paths:
           - path: /
