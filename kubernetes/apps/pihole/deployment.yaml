@@ -28,14 +28,12 @@ spec:
           env:
             - name: TZ
               value: America/Boise
-            - name: FTLCONF_REPLY_ADDR4
-              value: ${externalIp}
             - name: FTLCONF_LOCAL_IPV4
               value: ${externalIp}
             - name: PIHOLE_DNS_
               value: 127.0.0.1;8.8.8.8;1.1.1.1
             - name: VIRTUAL_HOST
-              value: dns2.${domain}
+              value: dns.${domain}
             - name: TEMPERATUREUNIT
               value: f
             - name: WEBTHEME

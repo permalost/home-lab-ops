@@ -6,7 +6,7 @@ metadata:
         app: pihole
 data:
     05-custom.conf: ENC[AES256_GCM,data:eHS0OUIMGTc6c8T6kvxLlcZZg65uotP/uWPFKlHeYEY=,iv:ihUjgOlPzbiVV8u1uQTv9HjwRF3k0qzRTfpcfRbhHU4=,tag:EB9smfn0SUmYehnGq+o4wA==,type:str]
-    adlists.list: ENC[AES256_GCM,data:Ga5s0/+Io7v969nWXmGjEcEj6Q==,iv:w+bPUuBsrHcosSNCNVMDH8CFID14SppS+BcjzydAk3U=,tag:lBcZAZ+ZGfAK2x8NblqUtg==,type:str]
+    adlists.list: ENC[AES256_GCM,data:C1VjwqEXHqEIRGfK+4TGcaThrA==,iv:oF/H61500OO6Uvwjhutex27N7AxBVpkGmQ3PkI+WuHs=,tag:ra6anfwwsmlAYvc3n6CqjQ==,type:str]
     custom.list: ENC[AES256_GCM,data:UEb1uzYXJES0SSAClZZWIrsyqoyXiHs=,iv:nzQZdGFcpZOcxMbRifUAquXVhWKSzZbYLAc7fcH0644=,tag:NPhmXS4OfgYK31Y3WxnhIw==,type:str]
     whitelist.txt: ENC[AES256_GCM,data:6CW5p6XEI3o54Q==,iv:dFxvce1loqyTY1qS/F2mg/NDWeN8gGQhc2TO7xGMdU0=,tag:HOTEUSQeh0qViJLXA0h/VQ==,type:str]
 sops:
@@ -24,8 +24,8 @@ sops:
             MW1PY1hteXhBUUh5R3gxcWZjS1drZHcKPJM1S07LJ7Ymzt3BSPuIAIuYs5N8wZI1
             CunhosvA611HcpwJhq0j+10/bxdIG+NBxMQfl5cnw6N/+aRKn4iHFA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-05-31T18:03:27Z"
-    mac: ENC[AES256_GCM,data:3DtVaSVwDf0loEibGBOCDJ+M3tK82I6LmUfakd+OZRqMoQZYjbZ4VCvsl9fJm1BzHDiqRGtURea/2uy8akNAV6uWWKfYkOyac/AnHuTSpxvDm9FcGItXdwpTDI41mRiJTMc6Gx0/nxAyzkT91tAHOOum0h5SopLC2vYanIuF5/w=,iv:Z7tJvRNzGnweyjAj4+qihC/Y5qOrZErfZEip44CxMZc=,tag:T8enU3O08CUVue7R2KnNfw==,type:str]
+    lastmodified: "2024-05-31T19:04:38Z"
+    mac: ENC[AES256_GCM,data:1iDwZ99/PcTAlx7/j6OBqukb0ZmfpfaNtjCE9qkEzr4Yyr5fgCceSmpWaoVgL/+oka5RnMx7afnP/ou9liZ94//mCN/8I6hWAXv2MNad3SVZWzNgOd+F1wtLKGQa/JkNfPzaxtbqhJIZE0dEUQp72obE04MUmt3FAuN2qPH1JAU=,iv:4OSBgxYvaahBYeMuUvRl2bijeoTBNKDQ2hA/JbcuqLU=,tag:Fh2qojdhpiP742vLG4KdHw==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
