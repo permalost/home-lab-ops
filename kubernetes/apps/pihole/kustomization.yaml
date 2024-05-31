@@ -5,7 +5,7 @@ resources:
   # - canary.yaml
   - configMap.yaml
   - deployment.yaml
-  - pihole-registry.yaml
+  # - pihole-registry.yaml
   # - pihole-policy.yaml
   - ingress.yaml
   - pvc.yaml

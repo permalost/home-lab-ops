@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: pihole-helm-chart-values
+    namespace: pihole
+data:
+    values.yaml: ENC[AES256_GCM,data:5bo3zUCx1ctjeZP4jC3/mJaUAFzzca37T48/Tpvp/2wKJwLDm8jI76/Cc7yyuQei3oThWsAhckq1uCPSk4AjOGCCWAntWzcAO8JmwL+stKrP/mGpSB0G+LTVL+UGo3+9JNvkDFJdjZk6AiSKuG2qYqTlfNzWyUXpvT5KLaIS9ddAMCooTtaTxDh7NlJkJsF8egl4CHbCsqN4eOutMikhv0OsQ/l5MFUBw2AL4zUIFsPMqcYTWsqOeLlcft8dVJJETRWM2NO56a3+e2hFNIzyElGtb67QBLeaxBUxROsaXZi9W26kFFPSsBqn+7CYOG68qG88VvbvSPyrpyvEy+WlDbVTwNZc/pRv9jg/eVD3b8QJ36ZRkV18YxhlzJZSsZtEMGlDJxeoOz/4mRelyInQI2hj3rv+Y2PKzYBu6tQiRgRiu62DBPFvRRyIFCOleP6X07hZUMGkg4Edq2GY/P9iXBaVJ/aKRmtI4AQEQRNdl0oJQpIaiy3VTSFViYF9ZlyElf57RDDpid2hKJeS5M6lcJBOHDVzHb4xhLWsAfKfnKX9WFBmviePpF4g3apDMh69/dG89DhGSt+PD9xaelLyyPZhF8OATh9e8H2wmX01Pb7s0e4YzPT3lC0z1/L2hgKIaNo7THvy5Cgs7Oi4dhMIebNtldze+dtxPzR8hYyfWaOaTr2efOSIn+ZBn1aTIIUQ1WTp74hH82hHC9SAbKrvOGNrxGkncofTuuj1UPz/332DhwxwCRldxdeydIQH/DLh/D+/AQTTH6hBz4MSt0w+yZz+CfxKlLHs3IeI0bcp8OWTA8Krwwv9uawEv/ZgxBFfr+VpSbGMseG1usCTsjJ1Vmi+JmE2mypUac3MdkCc902O3MB2m8W8OFzrhLDbCJIbWVUKTFHOdiEJJM7xy5MG3BAdZEqQjfovCdc=,iv:smOukXPWdcJDYX3Awm0k6gv82tIntVjO0bBVvlX+Azg=,tag:sYYSYoSbxTLUq5sJ5mCg0g==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzYVFwdVB4bXNtUHRlVUtK
+            aVgxODBVSElpL2JkcmE2d0gxcGhJa1V1dlNzCnF0R2ozbHBUNkI1WmZmSVNhR1Q3
+            cW5KamtkZG50TVk4MEdRM0dManE3NWMKLS0tIHRGZUYrVklwMXAwS2o4N0dQVGJV
+            T2E2OE5hcDM5c3BNeWIrM2pqMGdad2sKQBmzzSK0Zx+PkWFf4jST3ZXEK6SjZ+xI
+            x1Qw5lubmNE6Csc/eMA4m0q5EwIBk0LZy6WhwTdqM7zvE4OVGwiwQw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2024-05-31T17:59:30Z"
+    mac: ENC[AES256_GCM,data:c1LQRAdWUug0CuiR9IB/b2nTv6wkZxaEViI/QamUToSgxWJTvz/Z0Zg3Bl7rrdnruIhpz13SaKPUIRit75sGPPweIqxwYS0fxTQiLfD+vWWKkMyzdLfWANCOmTfIKrcV3CUgqRQLrkHh53RfuzxylH/NyxaqLW1snMcxZCHkUTE=,iv:hsYK/2+SuU+fnPi3PxIO6BAd5uwLrQOgVzdwTmQTiig=,tag:y4T18Z6RaQXU97qSCEynaQ==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3
