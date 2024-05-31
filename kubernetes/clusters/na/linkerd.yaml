@@ -16,3 +16,11 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/infrastructure/linkerd
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
