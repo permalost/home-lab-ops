@@ -4,7 +4,7 @@ metadata:
   name: letsencrypt-staging
 spec:
   acme:
-    email: ${certCloudflareEmail}
+    email: ${cert-cloudflare-email}
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt
@@ -14,4 +14,4 @@ spec:
             apiTokenSecretRef:
               key: api-token
               name: cloudflare-secret
-            email: ${certCloudflareEmail}
+            email: ${cert-cloudflare-email}
