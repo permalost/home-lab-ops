@@ -33,6 +33,7 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager
+    - name: cluster-settings
   interval: 10m
   retryInterval: 30s
   timeout: 1m30s
