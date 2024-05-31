@@ -10,3 +10,4 @@ resources:
   - linkerd-certs.yaml
   - repositories.yaml
   - namespaces.yaml
+  - secret.yaml
