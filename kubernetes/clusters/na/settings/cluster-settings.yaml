@@ -5,3 +5,4 @@ metadata:
   namespace: flux-system
 data:
   domain: norseamerican.com
+  metallbAddressPool: 192.168.2.240-192.168.2.249
