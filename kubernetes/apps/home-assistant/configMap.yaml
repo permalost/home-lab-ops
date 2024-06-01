@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: home-assistant-helm-chart-values
+    namespace: home-assistant
+data:
+    values.yaml: ENC[AES256_GCM,data:NIYEYvgZyh4wrwbIBkOsLSJeJSm5aJrc+7vzNfDZPtdGJ2It/k6/yzCxr3uHrpPRPvxFjFzhzGmBLjbkDE+Je3Q01euCeEtqyM+Gj9nrLBmPCFhELvp7FZ1WUCMHco8itcvQLg1yw3FEY2Shyyat0LuoyKojZ2thQyJdzVV+oAup0H9rLEn+/bOP54pmqL3vk45euUp58Mtd6iuH3fvlHTX/SlqxHfgMK7cm2K3P4SMVAzQmHa0vVQx84NAMmbqqiIRMkLtlcnkEQBJEDzPaxSKYlhumTaHtcbYXelXJNvzaVGv16q2PSWjDtn6hHVy0A9GYvqHQQk0suTPPod80wPFUGWext4Q4TjHVBTzOo0HZI8U4TROFolBwAKJHO/RT3zK13tiib3Or0FQhqXe8IkztW336P3DWzKT0hYjmt8axOp9hi0eo/jqyS+q1qEYu8QnjDwYzhZhaeMgidV5uHu8LExYV11S1f7IRnM4KB8J+z80Xpw/+piRYD6XeLHoth1OdNJSL8VTzXRLZZnGnmk44EuSFflmyaq0oVib4A5F+o4Salr/g5B6hHZfX+NBAEB69B9d4I/R63qkwIgg8nc4BtFp2CLYUAbmshVCpUr23ZZD2OYgxPGBPttmuDmpW2Zqx7/FKqjWdOFuWY7BFrpvVHRnwh9J1Oyyl2LsDyBD0zQvOvKya+GEVu7O4SXRDyIItrS8RrfUoORDlM/670AfpRjhXI+nDs0MVsMbGZJrA4S34kq3ZYV0xx5bubLuoeKr776XEHRD8eoI6mkj87Y9M1IGupWdpHwovPmIfABWcuQLn6TsCX2gQgXtthm2ADVDEsh4zedxPiU+xAbM7KzdxtPZJVrf6no72dmCF3NXZ1Y/JGUrejJcqOTbkAURbizfYQ2ZgMEs6KimonTc1,iv:nWiET5iZmzkNqKLDyBOe0dlKLkRbk5XVWiM6ItqAchE=,tag:05RI9cFxh2e8+2UPn8VctQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvaC9CbE1XOW1mbCsreDNG
+            aHpZK2VTdzhVTkNraDh1ZFNyMStNMkN4VFdJCmJ1dzVBYTNnbzJMcnM1ZzF4SXVs
+            ZGs3RzBNYmNOQ2kwRDBxNHhnZUNUdlEKLS0tIDdKVHZjN0JCMTd3QjQ5MjRaU2Fo
+            ZWFHS0FqTVB3SXpYc21DOFY0WU5DUGsKxcqCxFnKOlNft1Ws1e7PuC9RHPNLvzzB
+            EkE5YbSB/r/9sPyNGnVQALXccEmZtajHOYEwJRFEmw8nWhrA++QfYg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2024-06-01T06:43:42Z"
+    mac: ENC[AES256_GCM,data:ERLHCK6Qkqu477lI4W9p1WkCM+ImHoqxOPTOJpHnzHvniW52ZMkt7wj4TR6lleSpJKDhm6uYB5CrSzeDf1kzl4UKeM4C5DxOyg86UtQIogzsVu155rIUDU2SbMTipvsomZf+CN2OxgrcDTQEWP5SD6vgDMPA09ebJ3uE8yB80wU=,iv:FmcQCIotJ+wmiJfBbxyZFfehAmOVd8UbhbeRJUA1qrc=,tag:ATkdvqk0nDZ5vvm8/ae+Gg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

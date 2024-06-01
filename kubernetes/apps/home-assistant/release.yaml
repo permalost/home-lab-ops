@@ -10,10 +10,9 @@ spec:
     spec:
       interval: 30m
       chart: home-assistant
-      version: 13.4.2
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: pajikos
   interval: 15m
   maxHistory: 3
   install:
