@@ -33,6 +33,18 @@ spec:
       username: admin
       # Change password by generating a new hash on https://bcrypt.online
       passwordHash: "$2y$10$ddsmrj9MhVAOJitrdkrCkuvnRj5CZ3qZdnFZuA7CbKyEHQpFIh.qW"
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - host: weave.${domain}
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: tls-weave
+          hosts:
+            - weave.${domain}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
