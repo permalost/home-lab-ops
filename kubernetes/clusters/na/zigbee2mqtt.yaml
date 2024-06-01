@@ -1,0 +1,29 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: zigbee2mqtt
+  namespace: flux-system
+spec:
+  suspend: false
+  dependsOn:
+    - name: flagger
+    - name: nginx
+    - name: democratic-csi
+  interval: 10m
+  retryInterval: 30s
+  timeout: 15m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/zigbee2mqtt
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
