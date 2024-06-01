@@ -8,6 +8,10 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - linkerd.${domain}
+      secretName: tls-linkerd
   rules:
     - host: linkerd.${domain}
       http:
@@ -19,7 +23,3 @@ spec:
                 name: web
                 port:
                   number: 8084
-  tls:
-    - hosts:
-        - dns.${domain}
-      secretName: na-dns
