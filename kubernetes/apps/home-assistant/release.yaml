@@ -13,13 +13,13 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: pajikos
-  interval: 15m
+  interval: 5m
   maxHistory: 3
   install:
     createNamespace: true
     remediation:
-      retries: 3
-    timeout: 10m
+      retries: 10
+    timeout: 5m
   upgrade:
     cleanupOnFail: true
     remediation:
