@@ -25,3 +25,4 @@ spec:
       enabled: true
     prometheus:
       enabled: true
+    enforcedHostRegexp: linkerd.${domain}
