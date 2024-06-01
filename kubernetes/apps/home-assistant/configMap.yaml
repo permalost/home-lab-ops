@@ -4,7 +4,7 @@ metadata:
     name: home-assistant-helm-chart-values
     namespace: home-assistant
 data:
-    values.yaml: ENC[AES256_GCM,data:xjxzjfDELAzEC0hXNtlQr0433ae+dQTiHjYJgGNeVr/nFexrNO8fh5hmvvOKuo8mDoU4g1+dbVg8889TzD5rJ4QE6nQjQAloy18qkoXyCnqNqeJ9Wp8WYcv9nZQ1IfqtFBfj4b0KR0G51oQ92RMP1CANgp3y4YUTSd5o4zIYTB+1as/9Z70i7Z3m3afWNcNc2zqvfKxA7wqsoJ78BAy33eAPrYq+9ZLzrGjU+Gd+JR4CO8j1hMPGfl/U0WINhQjdhLD1L/EyjXc5fdOkL16T+W8bugZ6wXC3q1Rou83kyR5BaV6wXNtrXHg7aCHqo2kyJEbdtf96tdCV+tPaY+YfvVd4ysCo1jnqj18d2Yac4BHD7H4S0vOoeBRf3fmrEAWSDe+MhFi9eR25HtQECHAuo8QltyBFO67DV0UylIntMHoCWdR15cLYmW5gDYcLTyC6UPG+hCkF+RCrpkSIXqCDhFtzf4RfHJggUgnY1BBh3LiIBj3D3fCTUy6zrA6pM+w5ALUtWabWQgryZiJkr4Elm6xUxfi6SRLlFaEPePU0YG4rOVnZ23wA0RyURSvxNEDrfwUcXyfxD+UkfWkgnFxlhv45Fx9CGUsLEHyFef0B2dgwLZ161JA64bujAtFfza83Q3mj6pFat6IT/glKXScN0N2VJHnhSqLHVwDQQkX8+mjPu+A9B4vmQt7fXD5U0jz+YJAvEqA0VR0aOzWWgePDBjNiyOK2BCKC7rBqDkmrt+VnCQovMjGXkWAt+E4CSPZyFdJl5rilVvGU+GRB1QW7Uepu2UD14BuiNyDiqYtCyGlgd627OhNKb01VOHB3HknRhdNuH8lOd/hkfFitftQsDdk1LyOd/r7qce8WOiaejOa210wErjEozOliDP2AxcSi9/bjkJJfXXCFJ8MrmlrE9Y+QCamOuH8=,iv:dE3/HEBcomnb46fYQqqnE5wVK3Us88OjQZee7YIKqiM=,tag:p3v88TdAvytWaSxvwoMkYw==,type:str]
+    values.yaml: ENC[AES256_GCM,data:5d00+Tp1i6vs5xtgAqjlFIswyKUdyN2Th1ZGmdMFhktbWmGptCZ29zob9zIZbGRmoLeXDfdeW0Jq6phLpRKCYNXbkMxOQ/Cy8vTJl8M8qHQPWntR80yWOwy6TWxd8L3Oh2NtthMErXeu88PNAzryrb9ZnEMe5sRvOrjShWkUOtbtsrJO8e446Ebprs9i8zItJCDXWxHF1NPto6v0cTrShvipHHxjFx2KoiqWl0NIZuNW/8WiYI55cytEpv2iybNOURY9L4cb/pfkFYnVucPxJH4D7vUgsvChXZS16aa5yffzvroZZ+57CJpsMYicKpMFwdpnWzig6QOY/BW/RGe4xvgdBDyOuJQt9qrZ8M2yIigQy3m3ixg0YgRSQon5mRBG3t8wkSE+ORsTnRiYLYzJPCwoI7hkrW+DWq/sBQVZcaYXTtp4hCiGi5vNwrLeHvwEnCuv7egtmfqccyONQETohA9obbxv9hpF1PsHvJyZC839PSnqtOS8GwwoTBjlIZJZC+H5SzZ42DkLFLjbXU3L66mMyDa4viJ21NGOI+WLwmWZpalOmeWLLn/lSvFw+Ty+JoS+onPvbTP8PwWr3she2IVpvqZHV9DEAbiomtgtiTMoJO51lbK2IZmrP+1v05dYLxd05M+5ryWVXFF5YQoNgTfd2KyO9lbKyBOily1+VOn19XNiwLpiJO93dndbnAeII5G2BQ3g7HZ1DJY2UUbXdrQsor2Qb+AyACGX/6AHZFZ1fcaZfaTRUsCbGiSIq9+odvwKJLiJI29dG53eGfk+JtsSzaxTYWMuxPcKzZDYHGwY7jYEixKeJuG2glGoLlc5Ik0qCeahyCsrquoRiftPGyoOLZeexD9hefwBI9U5KLpb9bykguXpbr3pkbQu29jkHybu5kuPijW9v+nY2B7aANhaj2/G1fHQcATETEWZBN9DzmbRJOMKdIzcWUETzsuQtUKpb9kxKgQWlPo8aR+2huG0q7JRmYkK956ZFSXLyRJmnQGsmqZ+u9+YimCAndGLX2jXc2qtdMavQtGdg2QP8ozdrIdyn40hhKCkEffejagWqu6UoOcxzzrM5R3qDmztI1CnY9ruCxA+zEG1VT6bvVKPjw31hAM1f+QVJoHeKhy1u/1h/K4P0RcZhvtiknM=,iv:eBE4UFnrH+LwAnmOP6nIyPgH1HaIvDQ7ZJe9b4QlkVY=,tag:KrwcaC8bOiPLyzZtR/kXUw==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -20,8 +20,8 @@ sops:
             ZWFHS0FqTVB3SXpYc21DOFY0WU5DUGsKxcqCxFnKOlNft1Ws1e7PuC9RHPNLvzzB
             EkE5YbSB/r/9sPyNGnVQALXccEmZtajHOYEwJRFEmw8nWhrA++QfYg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-01T07:04:25Z"
-    mac: ENC[AES256_GCM,data:dFOZTffKldea10p/cgnIMdWjAejV+z6ELfAooV7hGfUyOB8hWuKIgKfOTwtFDMLX+ZNQkZLmcPz8WhV9k0lrP4fWm+jlRWg0CwwONDZQdFQhyXB0mSP5cwun+n+B9LXsqnKOKSasP6hFBmI/egPRCoMZ95QMLfWyz6NtIE9Kqew=,iv:BaT7YwexAdULVvGmngdK+HMBVttExgsW23sNiFU3AZk=,tag:BAGdbzg6ywoFi6PhAq3z2g==,type:str]
+    lastmodified: "2024-06-01T07:12:25Z"
+    mac: ENC[AES256_GCM,data:CllY128SY70C8bDmY+aesGZ6don6r2VqOdNPYRcmJKcmDS7Zjb+6/CkguSkJsgBJedrTHatA+jXaX5TpipzQC6hp2cf1y0Oq/5U8Ekxkzdz8rjCbehEVedVGOA/kv6zcQKu+UMgmEzG2GCp3MThDH6EdKhlzxBEQm/Few5Rz0wA=,iv:mGoNheTFLRJMI/gMG5xcrfD2DFSq8xdLtJQXMxmi+JU=,tag:Wi5U5xxNcr3iTjA3Z+nGUA==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
