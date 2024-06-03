@@ -37,7 +37,7 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: zigbee2mqtt-settings
-              mountPath: /app/configuration.yaml
+              mountPath: /data/configuration.yaml
               subPath: configuration.yaml
           livenessProbe:
             tcpSocket:
