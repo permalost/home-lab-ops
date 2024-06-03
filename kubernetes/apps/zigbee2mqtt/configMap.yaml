@@ -6,7 +6,7 @@ metadata:
     labels:
         app.kubernetes.io/name: zigbee2mqtt
 data:
-    configuration.yaml: ENC[AES256_GCM,data:Wxf5hMXbZlbC4VYPyDMnPxxTodnomPAjgF3xZvfyYF0uUU+KD96YHUCgCkRElSqKccggz8LKXoXpalUGRQGebHuIjXUz34RTms0HLBmPg82wF5Q80pzvyXCeKJv3fYa+1pUOPvHhBKHO5ewDDM5iDCaJl30tEQgmet7kJ5Cznz89WzfqvY+cL+WOYgLC8AbLJmneK3foPKzLI+cKSVTc6uo3589b1nFrH9vthkFqGwRyWqRJ3Aq6rmQUpMuP4R79IU++472D1gj9pvkAzpRpCjfmQJ43adKFCzEJ+PXUUUfkEMR9kZSUu4O3kl9IpbdGoUcnpPiBeX5KJtaJFwxOPf1WLNutQlsoSb26/BfPzwxH+H6ePFayBl6yRDMCFyjlpaAfV3oXOy1ar4inlvD2qFaOrebf2KFpefVFCr0qK/T4n+JZ4/wODX9SYx74kfjn0qaWOPkzW8/zO48vUn+Pd4H49idOPcrn92e1DtOUZ8Nm04IKPHOi4iQZMdnME32Lio2BPLnhQQyS0oOryataXr5bjNuF61LcgPAwSOqZUOPEmA1YGQMUyIo8IvF4DZwpjuZi3rcsmxwlprv1ObBZk1v+YBfR,iv:NjShYpfZrhA1sUWEWXXo15zpuik8B1+lP0/+4F3y2nA=,tag:TeL/W0GKVASFz56ecLdcTw==,type:str]
+    configuration.yaml: ENC[AES256_GCM,data:AieId/MrP6mhcH1sjCin4IQkeftSThdJJpzOODtVJLQTBpn0W3+zJqzi0KJ6CCL91atFAGTQJ0/58d784/cUJqdu0rFsX+7mDQ3y6jwLknWqG6SRx0cfFTMQ6SR3OjJlgvIy252kz/Jhr866Sd8mIDKB3PLftN+ZmIY2zNgLpssqOXR/ChZ0D3CtMFpT01mutNv58weCicXCY5DyNQdcBexsvkNU6mTBxMaPwixZlDUtZza6z1RFFtI3p8R/bxJXNrnnc/WN6iSPhayOf2BQmU210DnMbZ8B54JdRx5+eM165OU00f1FYNfMSgwG01C6jIuS3ox8v8DQdHiiBDfau5QFHJwQGzh4CFBr5fgBxxBe/uT9MCJUm3AciyPWJUgO4b0nf98232ZKnlHTzYYsurldoU2VgAx2/nsGXM5BiGgE8srfoipnxwyB+hlwxZn5Pc9y5YBo3HXyenoejykutItqg97eJ5AZeNnwUnkL3qaP1Wrtx+CSX0pwmdOyyybo36ztdp8NT/MAZaDX1jvwzhJ7Oq6EBPWo6RdjjqcfBxnZuBqautztA59/K9nG/npYu+2pllR+9uVNt5i7YQ==,iv:VJfFjFBQ+rU06f05fO7J94vCE5IGVWFHQfeHXsZT9ok=,tag:iBZ5KYPBDspnH7+hcMVJkw==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -22,8 +22,8 @@ sops:
             dUx3SXhpYUxOSEZ4TWVFSlV2YXpYQ1UK02Al1Yqhv8VzHeToFgN6hE7EG9gRL/M8
             uRnT5lFVVuMF/qP4fSLIhkZsW4SiMVaJ6h+7SuUfATydRrk4FeeJkg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-03T01:07:37Z"
-    mac: ENC[AES256_GCM,data:agrLJtvfhupfdZqjO6HY+ZIkSkBHkkEX9rA6kI4EhA/VJ6tEvVmMnJ6fNc1a11C1Bnt//28yq5f9RIY7XdsJR3s5qrP2WpzXw7MgeCM2DIHxLS6UuSE4QhyyrJFN/50zyOGvl2ahQI1E9/DbZlylXtaZIBItO3FjGmAcwSJ/uuo=,iv:GbzzVttah163Dn2O0iIakfgNRwxfLIZjfbuoFGrBcL8=,tag:FdIM5If+yW9r06Mj+2gDxA==,type:str]
+    lastmodified: "2024-06-03T01:17:21Z"
+    mac: ENC[AES256_GCM,data:RIQdvVLqSSkgS8iXO2TLtReEDxCBn73EowVVIUpJrzEEUY4EHRVZiB+FwwLfaPla7xX2wur+G/fIshiXIDErjnkgIYkY+wDgJkfiykw1rjGbWDaQLYPA+mLRBfAfxP5lQ0mDUhT2KEFMkRSbZ/q1h6Ey2I9yzqYm7T9/QaoOe8I=,iv:qzbMi6+MWSqd1VVvtkl0i/7dW40E2CZgRH1Iwl15n80=,tag:D26DiILPdRSTp6dxMpnuhQ==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
