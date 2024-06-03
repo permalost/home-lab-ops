@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: zigbee2mqtt
+      annotations:
+        linkerd.io/inject: enabled
     spec:
       serviceAccountName: default
       automountServiceAccountToken: true
