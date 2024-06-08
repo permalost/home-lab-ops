@@ -7,6 +7,8 @@ metadata:
         app.kubernetes.io/name: zigbee2mqtt
 data:
     configuration.yaml: ENC[AES256_GCM,data:olVlgxE0EtDHHLQdASmGA8k5uFUaUwwbNfvsHCd6JsnvAsLMaRagL5GqdLtNN37RUGg7bxrHheEhzhWsZyfK6CSnXceWVEWjz4dQSFdsiDy887p0MJMlokSi7nd6eADMzQ72h0Ez/+cL9QVp/BFrlkXQyRJ9rSLSWLc41vhQJIvSsvDwtmox4eU0Rdedy0ynB+6iMe7pSw4CmxU/F6+ENjOdbHcVDyNTSbXYFUWYWX5PfBS+K4fG+W6pnUz2tT7Wze1GOW5s0ksr1yIVhxMyzrOSNRgqvt3kKFMpl43XD5zZL3nOpGgn5OsuDq7rrLrZfGOeQ+mUwqS38oeu4+ZJ2jpRRdf+ZJ2CEEVA2rPfyi9KcR5hNMSObnTnt3i9/aQ+dOhsNXGhm3EL1/Un8gRXUJuFwYD8tmGiu8jTXvILF20ay1QhdJJ4fC8jQYEmtA5PYGeZhSFgd/mBOlXFTEWfDv828u00HlQjzKq4mZj7RpBaBuZUV+pobQHOXRk50VTYe+X6tWRPQ9TiWoFr5pGK5p5rQkkaZNmHSH+DAmEFJcTSXXqrmkTwljpPRGLrOM4epf1qFGTOMS6nuF2FXg==,iv:FtlS0dJ11TPEWyZtDJvtYFem5498lfiaI3YGvNQkAYI=,tag:yTtMNzrZu5AK+Z9MmCPswg==,type:str]
+    devices.yaml: ""
+    groups.yaml: ""
 sops:
     kms: []
     gcp_kms: []
@@ -22,8 +24,8 @@ sops:
             dUx3SXhpYUxOSEZ4TWVFSlV2YXpYQ1UK02Al1Yqhv8VzHeToFgN6hE7EG9gRL/M8
             uRnT5lFVVuMF/qP4fSLIhkZsW4SiMVaJ6h+7SuUfATydRrk4FeeJkg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-03T02:45:29Z"
-    mac: ENC[AES256_GCM,data:9jlx7opUaC5wNXRdnCMESkPzvlZre8xlOkh2S0YYKHIvyzRWYSnVczhyaEmRJw2lXlYQlnwp26C0Qb7ZNix83FOp2amI53m6RhLtyGDk5pNjb2BbIUoWe6lOB+UFts37mYzQ/zFRUbg6zFupQ3DAomvJFTNuwnp97X3NMrOnSOU=,iv:00gPKKI0ACUXwWAkOYp1fgODN2CRBwgs5ZjwEHj03zs=,tag:ui5pPGAnLSCVs12xbSw89g==,type:str]
+    lastmodified: "2024-06-08T21:15:20Z"
+    mac: ENC[AES256_GCM,data:pPqcqW64mjneZhZfS9HFNbzgjZLTzpcOPISYUAi4lfscUKIDOVR/AtEWwDlMvXdYyJNrhRtVpj1NZS+/HswOQ9FamGA8ktkWMTRoPKvn6Z2mKo97M03hAaOdP8I/gs8BSjo3AqOQUQTDL1WM+p94qQWna+dhdtp69A2dTCCeiJo=,iv:B0CgVRtg67IuMaP/5f9VqIc+FwPMAsxhSu+bX5ZXBmI=,tag:27jsUJXxedyyvdiCP4WCrA==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3

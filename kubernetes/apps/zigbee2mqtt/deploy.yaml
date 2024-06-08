@@ -39,7 +39,7 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: writable-config
-              mountPath: /data/configuration.yaml
+              mountPath: /data
           livenessProbe:
             tcpSocket:
               port: 8080
