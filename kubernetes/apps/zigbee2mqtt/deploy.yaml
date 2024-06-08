@@ -78,6 +78,6 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: my-config
+            name: zigbee2mqtt-settings
         - name: writable-config
           emptyDir: {}
