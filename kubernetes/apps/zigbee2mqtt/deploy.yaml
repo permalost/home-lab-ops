@@ -68,7 +68,7 @@ spec:
             [
               "sh",
               "-c",
-              'if [ ! -d /writable-config ] || [ -z "$(ls -A /writable-config)" ]; then cp -r /config/* /writable-config/ && chmod -R +rw /writable-config/; fi',
+              'if [ -z "$(ls -A /writable-config)" ]; then cp -r /config/* /writable-config/ && chmod -R +w /writable-config/; fi',
             ]
           volumeMounts:
             - name: config-volume
