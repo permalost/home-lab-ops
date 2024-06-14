@@ -68,7 +68,7 @@ spec:
             [
               "sh",
               "-c",
-              'if [ -z "$(ls -A /dest)" ]; then cp -r /src/* /dest/ && chmod -R +w /dest/; fi',
+              'if [ -z "$(ls -A /dest)" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/; fi',
             ]
           volumeMounts:
             - name: temp-dir
