@@ -61,6 +61,10 @@ spec:
             failureThreshold: 30
             timeoutSeconds: 1
             periodSeconds: 5
+          resources:
+            limits:
+              cpu: 10i
+              memory: 3Gi
       initContainers:
         - name: init-config
           image: busybox
