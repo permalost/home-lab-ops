@@ -6,7 +6,7 @@ metadata:
     labels:
         app.kubernetes.io/name: mosquitto
 data:
-    mosquitto-conf: ENC[AES256_GCM,data:hEFitwM0fv9fNfKuARkg7FzVEVQs9wyn4AaXYHxQh3AB7p3vFb6JXQ/w1klEDKtWWuuyHF2jHwf+DZ21ROsronlYJH8LeKgrZW3aGKTbTAjq9gPdRPQ+hWz3Zr03PIpO61JVmoSouYZJEufdnGfXeC1kEf6ck3yhidYx6irLG+rsN8o9pLG/S14=,iv:Xh/4T0bO59tCvYxRQQxUxneUiYrsAMWurzGoYhlH4I8=,tag:GLZi3A60hVr9+CQPP2xerg==,type:str]
+    mosquitto.conf: ENC[AES256_GCM,data:+JWKguiSE6z054ryvVDn/UkbVUPGRYxWQMpi4VaTQ69z1H1hrfIWIHeTe7bw6E/ct0rl/ekQj3T0CgoKmjJ74GajUN66YzEcxKbzcLhTfs28dq/CA89LEmuE/JLNM4TwHNuwC5fUmSD+obHkAToIOXGUhzcNGalLESyWea2rIFxKdOHfP5DrRak=,iv:By5xw16jK1W3v0M2fAACwMUSBcsDjsv42X9qjPFL23Y=,tag:aclJ/41CW//80JIdiDWRjQ==,type:str]
     password_file: ENC[AES256_GCM,data:ZLT/S+2MSGCxhhsg8TQ4E3iL2PxR4Ds1,iv:+UO8xATn4AayffvVrmQweNQQhK1D6Bfv+f19Tz0dUzw=,tag:HdhcerQn4A3eqGcx8fVQgA==,type:str]
 sops:
     kms: []
@@ -23,8 +23,8 @@ sops:
             ZlNQUnFlWGtwOFBCNUFKZ0JUWUljTGsKLUtt9+Phibjd+HI6PvtChnc2qHssqYtM
             n7kk1isgv/8yL12GAkkwDwxkNNoLkP2T+95N274GFI9sLriHtmciDA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-15T04:34:08Z"
-    mac: ENC[AES256_GCM,data:a9ZztBCvtCwt098M5gGY9pW10LdHpyX+0eNt21VVHK2SPMtvrrucPUtfOnqik4tBJbj6nYF/vZPYUuAZzJywbFey5TS52mhZ3MBY7vpvE2IzmsvhvhjXT1+3oBAZSDKw/h3NVq9EercjaBHDsoDWA1QyFwyIrQ38bv38Id6S7dg=,iv:pB2pwPsP5b1Xp6yyKPIxj9yoFnrGuQIKqL+CLAOvK3o=,tag:5lwHpZ7kMn+rf42NW9JAng==,type:str]
+    lastmodified: "2024-06-15T17:26:52Z"
+    mac: ENC[AES256_GCM,data:rAqyV6RySE3Dayq++nFAYWWOGUG6ghJhFjQcTvdatGmji6Sp9S/slxkQTO0XBG/ykHObNo9L2S8gBCFRRZ1oQNu/OF+wgHuGs4TYMAipdnqNDtkme5l6KDJkPmVsZPr7ck+1acojT3hA1MYkFaWV3+wqu/2ifSVyZne8tW5dqdk=,iv:dappI5ew8Lul7Gzr8OqvJ4KZPAuyAGKpwj+7TzICFNA=,tag:a6OIOw4DQ0heMQPVrKCymA==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3

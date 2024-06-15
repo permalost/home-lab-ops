@@ -21,12 +21,12 @@ spec:
     spec:
       initContainers:
         - name: create-config
-          image: busybox
+          image: eclipse-mosquitto:2.0.18
           command:
             [
               "sh",
               "-c",
-              "cp -Lr /src/* /dest/ && chown -R 1883:1883 /dest/ && chmod -R a+rw /dest/",
+              "cp -Lr /src/* /dest/ && chmod -R a+rw /dest/ && ls -al /dest",
             ]
           volumeMounts:
             - name: final-dir
