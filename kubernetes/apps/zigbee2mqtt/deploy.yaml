@@ -63,7 +63,7 @@ spec:
             periodSeconds: 5
           resources:
             limits:
-              cpu: 10i
+              cpu: 10m
               memory: 3Gi
       initContainers:
         - name: init-config
