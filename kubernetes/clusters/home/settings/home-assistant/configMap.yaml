@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: home-assistant-helm-chart-values
-    namespace: home-assistant
+    namespace: home-automation
 data:
     values.yaml: ENC[AES256_GCM,data:oTMbOFZZG2G6+tO+UcxPPTAOn8L5lsHFrZN7HHv7de8H0dWwfbmz/04v5y8HUMsIZs6a2oMQIdA15WNpn4pH0lirRVfy5f45+Y2jItH0EqTLIDuiKJnNeP9VQ+AgQ3bUpLMJ0YO9J72Ch4x2orLpPi2dr66gCem+VwmleSDL1gXYLd3huVzq2qGQNPu5q4SHXJmEyfuURJT0M8yzcc3RIoU1xtQs3EWcfoLEIEz074l60PbrDA510ZCA9wKA0wJ2T0hrXLSOGA8hWg5hzHeD8mnmotLHhUHsz/xwCcqhIWyHaRMG3VaEn6I0SqpS3W/SV0S4Wivcu/6kyhMgruZtNMifHeE6D092BFM6G3tBEAvR76QqnzClguo7WI6Nw5rFVDFJkzG10AWtZC+oZBsjfD9nDWccALPRkBV5benVLgR0uThFR1S2vE84O7Xk6JJWN10qaiRicNagFbowl1Ijc/mXO9nI/me0y6dY76LF+ZJJWDpzlOQkm3eN5gbiUCTbW7igypKrFwvEikZEvR0Oh1p4Z/uZGvxrhQP+IsXqkhj8jmSCq9CtpMo1/9PsMBx685HY9hvLKZolNjvHSTArCLX/9NO27Wur6aUs6oC3lQXA6P7XhbbkEZC0MZzKfheBx+fZti0tRvvHte89ONFLTA6sxrkPn9CpKj0LR1aui60h6pAGHKirv068tTQ2dDQYV6OGOLO3gPdJ2eDW70R8DiGAInKNLNnQYuc9YJUanxIzbRtrqa7eW2RvGwpZGjgXJTwgGwbJKsYan07VI0JLRicgbDKn044mxzLdXKx7iS/wbtsA96KzmB2ddSp9rBy6F1TFQud72ki35S050nZTIPa/bS2elDx3C3o5dePIBcly1sFIpriBnwVbWQavPoisD0qK0kIJ6/3rhKCaYKDSvEYmdBHYf9y05OpUvwiP0QVJIBTh+3OdiGe2aNV8uI2MRbpKdQtspuKL/KLBwFm7V4xMEIS16UJ8CHIJCg5QVJXnG2MpFRbIG8bggWtpA8TuLiACn33AZFc3kqNSmtEohj3tg/ul0G3OGKTyYaCsa8lOeeeWLk/3787Or5kIY4a+3Ku9JxhohV1HC/h68NoCBh7RrKJ4CFJGNcPDGA3oTCmQTtrgzVEJvVWBf2wnSz7FwzqFcb/p5kHToSGOIIcMAjJxZ25L+TYeRTa9EJz3He3F/Fnd+nUTuSJN1R7WeR5sSGKLdlUCfB9G2WpAD8yIgx8tak+y4RSuYVmAvBTEXw6pjWs62NWzdALfvFgy0MZ+j67KutElwKJLh8kqhS8wIgP47lQL64i/pEdvgixkB0rp6U8iyrZlEGEapRGV1vMb9no+ZLBIYyCrY3plSWlyfNoywkr/zGhZM3Ime3bO1Smg07SSSu0wQLrIQg6QpcmVeyrsFwNcubCW9but6edZ8mnp7IfyP+RGjXXlK9jVnv4A8kwRoi9akWodw4c=,iv:OOhjq2BKZlXQ8zGfS2H7jAQ1wSF0rlFqXpRV44lf6pU=,tag:yLOBZEItzp/e0+FgleQjog==,type:str]
 sops:
@@ -20,8 +20,8 @@ sops:
             ZWFHS0FqTVB3SXpYc21DOFY0WU5DUGsKxcqCxFnKOlNft1Ws1e7PuC9RHPNLvzzB
             EkE5YbSB/r/9sPyNGnVQALXccEmZtajHOYEwJRFEmw8nWhrA++QfYg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2023-05-02T01:10:11Z"
-    mac: ENC[AES256_GCM,data:fmBkY3m56jkg3bchk1X2oNeHwjH1+DGjL6rtC7TlkGrVSCAQ1GoPF/AFa8z+sg0UJUPN91gLVi04UVcwm8K6WjWZbJ2nJXi4kjC8NAJ2iYXeR6ZEfmBrsRW/PeJUt6XtCLbopcraqQOQaZlnwk9yaa/jKhbL5NaG4F7qK9YUMo0=,iv:DRURSIgTdRl74lOUd56WmibDfTFTM90Q7+7dMxT3Go4=,tag:CMTJA8yV666EqN69e14q6A==,type:str]
+    lastmodified: "2024-06-15T18:15:24Z"
+    mac: ENC[AES256_GCM,data:2npRg235B4KtopjWq9JMB6nTuOQTUSKm3/qmu5izWCZ+dcRQHDCwgrczpIpNHGk3FXo0ZBceiISxOuyJYxetkxa5U9sCV1nGEJshqLG9Wkgak8ADM3+eEykon0tOKMCY/Eq6ydcj36303CTO7nNlgHWlFCIVOrp+cmyevRrZQq4=,iv:s9LxzkVZdUAc1E/woq5phYv2KAHHBvvvKAj6dtf8u88=,tag:R5S2WwKRum+fu93hUdgDpQ==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
