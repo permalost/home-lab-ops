@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: zigbee2mqtt-settings
-    namespace: home-assistant
+    namespace: home-automation
     labels:
         app.kubernetes.io/name: zigbee2mqtt
 data:
-    configuration.yaml: ENC[AES256_GCM,data:rEQxORxfjBBi0lwhMtTndNaAgVvtG6P2FDVhWNel1b1IaUfhqidzZtYNpIrlF+q4OoxRbY/Y0iN0O1wGPS7Ugf+IB6U3wK41bMmPNX5jEL7Mc7wfg3cexNI/jZZa0xGD6s1VtSz9bcYAZf40oTlXGrMqpk/AzZJMT/LIsVMMFOT5cmkcy6oNOf6SbVykOH2cgynIbhVM7HqvbgWMieIYSyn0TTKSWKG0TcvMCjfROUdHJ0FcQbjdTI31LznXJ2sskSVgLmA3xV69GgdVpjIpMER4Zd84cFx/BnDU266TqE1idg77XL0kkamXlUIs4fKUkschPWZnTX5YvtxO3wFzGq/ms4n+zx4saYnX3qGFHBNZmY8H5itP5VcKoK0cNth5Ae6Gd3lV9/UK5L3NdUMz046D+inwC/QP5Nkngy7XmVUa05NiwhMDVKKX4CUpb7bbO9jiOMzirhVhM2sLVHqP2xCN2hhCZCyhkE1AMozVZ2YClpdxPJSpr7OwjPLZBGODRwc30LTTBiCsBQOzIShB+NzDAN6Fq2tGCs9Bu9UgjC3sOwZVks7kVQLIUnykyM9ktVynYs8rq5hTbQ/caN88T+uuptVzK3EIm8CPXve4zSvy0QsHPEPqmbPg5pSKdvBmrA==,iv:Y810KNljwseDCKbXwl+/jHnzerL8tKWW6IY/6C8LAYQ=,tag:ZNOp4SHH8xGH/MTmJZSPdg==,type:str]
+    configuration.yaml: ENC[AES256_GCM,data:Nuc/bARzm7t1c6gyHYiwKtmn1x/TAlGUwrXjSPV1eIZXdy4a9jNyEM2rD/p5gXQYvW00j5G3rGY+nQXDxUzebJK4r6pxrvNql5a7FLW/9+u8rzGOqUADu3tAW6hbfsUiLjqoFsTnDNCjL+EuaSONTyz0OPFZoSv9613JRBG9iocaYR+KiEIqEDIA3593tNM3vjPAUM5jVn7KQuoxMJGFFnB3KK2272pYADXmEIn0FHZJLjIkRkqc1lFRrs++/g6JtRyCdJqKvQs1C3kl8xvOCNwCSXkl5VrJ32sciZ1PqtIZ3uCEKBhnSN8LeIizdbPK7J//2n693Q5C+S9mdsUqgPxQ5hbA3j2o45qUwieNz2UTeW95GNvJjBK7gaQg1b3tzC2XrTQ3Bbw1rNblRy2nx+KfeWSuq2CVdpZE6bgqdQCKhN6h8558ImxVf2tR7X+H2NI2JLShLLpRmnPIl5XOyfCeVquAvf97XffWzKaSAzKe6y8UdaQlJZQD3qxeS+hHE2qhfLKOUD70hVTpMHoMO0DZVOVoRdpV/gihbG/zr/zbDrudENxRe/ozchLE3J6FpTAGmiow7ErW3TVhBkBA9UPhn28J9dawmsStDILczTVbHlEjumvC8sb1UjJJBIQORA==,iv:5wPsPWyDiAVtx4i6UB4ElMFNtf6PLGQvjq6u26trMdU=,tag:8ebQjwhJXzuUPM4eiFV47A==,type:str]
     devices.yaml: ""
     groups.yaml: ""
 sops:
@@ -24,8 +24,8 @@ sops:
             dUx3SXhpYUxOSEZ4TWVFSlV2YXpYQ1UK02Al1Yqhv8VzHeToFgN6hE7EG9gRL/M8
             uRnT5lFVVuMF/qP4fSLIhkZsW4SiMVaJ6h+7SuUfATydRrk4FeeJkg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-14T22:30:25Z"
-    mac: ENC[AES256_GCM,data:2XhHZBnKcFi3gzLdNJ4432FnkUMRBSL1jBnwZJKFvah/B2RNj6ShwnBUnFpQ/VYavjwCYQcF8vJWIyUysMgJQ6mChndXsZ5YwMPNguRChmSuLZkn7TFxCm/H3qioitNaowK8WU34EfnNORRCqcqSMJSNsIoOqbbyl6kp3Sdh6T0=,iv:PlVVO8oiSFkMLy2x81kofkaIiYvQJipj7YaLxJcvo2c=,tag:hnGVcMrgGO6c3SYSBK2tug==,type:str]
+    lastmodified: "2024-06-15T04:38:28Z"
+    mac: ENC[AES256_GCM,data:uYuV68PBTSrSOuJAQ8kczfYN1kh63MgUpB12VVFYu+HpmTnKRL92doA8yYT0K1iGcxK28sB0kWR0cO1NjFLdDe1Vw3yl0Jq64JtQ7nRpfR55XgUMG1rtMHwVoLhjUYKxhGu4+QMQhfOFBzqLi1L2xdrMdXEij1pZRfm+0DByL1w=,iv:i1V0C020zYzIbOEuGhVWqGRG/mMCnPlgwXO5LCfHZyg=,tag:bP4amqdSa2S0xyamJ0Pa8w==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3
