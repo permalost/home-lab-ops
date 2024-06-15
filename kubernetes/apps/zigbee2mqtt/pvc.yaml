@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: zigbee2mqtt-conf
+  name: zigbee2mqtt-config
   namespace: home-automation
 spec:
   accessModes:
