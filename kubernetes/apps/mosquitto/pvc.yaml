@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: mosquitto-data
+  namespace: home-automation
 spec:
   accessModes:
     - ReadWriteOnce
@@ -14,6 +15,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: mosquitto-conf
+  namespace: home-automation
 spec:
   accessModes:
     - ReadWriteOnce
