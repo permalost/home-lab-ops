@@ -26,17 +26,13 @@ spec:
             [
               "sh",
               "-c",
-              "cd /mosquitto/config/ && cp -v /tmp/mosquitto.conf mosquitto.conf && cp -v /tmp/password_file password_file",
+              "cd /mosquitto/config/ && cp -v /src/mosquitto.conf mosquitto.conf && cp -v /src/password_file password_file",
             ]
           volumeMounts:
             - name: mosquitto-conf
               mountPath: /mosquitto/config
             - name: mosquitto-base-config
-              mountPath: /tmp/mosquitto.conf
-              subPath: mosquitto.conf
-            - name: mosquitto-base-config
-              mountPath: /tmp/password_file
-              subPath: password_file
+              mountPath: /src
       containers:
         - name: mosquitto
           image: "eclipse-mosquitto:2.0.18"
@@ -67,7 +63,7 @@ spec:
           startupProbe:
             tcpSocket:
               port: 1883
-            initialDelaySeconds: 0
+            initialDelaySeconds: 30
             failureThreshold: 30
             timeoutSeconds: 1
             periodSeconds: 5
