@@ -22,15 +22,10 @@ spec:
       initContainers:
         - name: create-config
           image: "eclipse-mosquitto:2.0.18"
-          command:
-            [
-              "sh",
-              "-c",
-              "cd /mosquitto/config/ && cp -v /src/mosquitto.conf mosquitto.conf && cp -v /src/password_file password_file",
-            ]
+          command: ["sh", "-c", "cp -Lr /src/* /dest/ && chmod -R +w /dest/"]
           volumeMounts:
             - name: mosquitto-conf
-              mountPath: /mosquitto/config
+              mountPath: /dest
             - name: mosquitto-base-config
               mountPath: /src
       containers:
