@@ -84,5 +84,5 @@ spec:
           configMap:
             name: zigbee2mqtt-settings
         - name: final-dir
-          configMap:
-            name: zigbee2mqtt-config
+          persistentVolumeClaim:
+            claimName: zigbee2mqtt-config
