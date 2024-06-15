@@ -84,4 +84,5 @@ spec:
           configMap:
             name: zigbee2mqtt-settings
         - name: final-dir
-          emptyDir: {}
+          configMap:
+            name: zigbee2mqtt-config
