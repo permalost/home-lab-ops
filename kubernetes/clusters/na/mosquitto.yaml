@@ -6,6 +6,8 @@ metadata:
   namespace: flux-system
 spec:
   suspend: false
+  dependsOn:
+    - name: democratic-csi
   interval: 10m
   retryInterval: 30s
   timeout: 15m
