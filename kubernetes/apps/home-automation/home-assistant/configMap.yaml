@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: home-assistant-helm-chart-values
-    namespace: home-automation
 data:
     values.yaml: ENC[AES256_GCM,data:SsmTvDhatSx+QvetHj1Ecb9bFXUKZ44ki2KYFmmv57j+GeOt0eNNIRCwcuoCcrDINdRTUlIXZGT7LVXvCM4U9Nx0Ye//tsKzEkTrfaim8j2aNGcLTW0ci8FtX6tlXYG4F34ntjbmcWqbHxNQm8wka5zdGrjFyt7GqQldGaFk2PxwSEflFgiWngE3j5lXtAbjomOSFjizw3XrkPBdHZgPOobgrMkdUG0EJ/osatnMKG/B07R8I21Uzp1FwqBVldV9X6ubEcR5DGjNOXt2caQK8XW/9qOjgUcJeEq6RdgLHuRAh4suqCEGh5n+2oN+oQJmsMO12i826eKim4OUXSKUozzWcF/SUAFIOuQw9nB/A/lvZ/YIvRZd3G61oASWtbKDXPPkUSs1LnYdcDFoW0+9SXaHTVu4w4tmNisEVX20gSHBgS/YU7nA+njs9TXCvNZw8paEfmQmoPoCFeGyt0Hk9GGjIliG6h+1YroJ5cDT9hKHSjkBnF2k/bv8g8WSWBOqyTh5YX6WGssHnsH7uCWny9tWxGAll2RmZhYnPQOZF+bxpdq041ln6tAjLyYKl0SC8pfPtMUQmQ0PK275ObSaU/TTjlA8NUdDYV4hXxO9jw8/Fdie+3RnNYZSpzb4XPieitvRwvGM+ua9VPKQRVqIo0iid0RS1R+qwAddCf+Mj4v1fyfhSlyeUNHIOqGFCGVcy6mXXiXP3vFeFXba/1R3ma1PxZB236vwwk6XpzzePHZb8bAFbSSeI5gbw2TVSYQBZmAM70G6FkLobriRoYM45X/igIPitvEuWA3ttPpDL1+yT7WR8W0kdJydVnvlabe1QYMGdXsoYldR1l0JsylSu7cfuSl4sxhubXF52SRyrLc3FNiXScClspM/avynK3g+TUuyZT4NNsea1mAzJOkJLxLBhTGjg+Vr/W0Fqxyj42eZ9R84yHQ04R3EDPTDMdlTXt2vbcnUJYF4Wo7TUufyVqReuJhnPQ==,iv:kTxWEtchNsFTadxXH1OH+pZr4cGBCgdIzqRnMmXO/zk=,tag:vyfxFMc52/XTEOMV86FI9A==,type:str]
 sops:
@@ -20,8 +19,8 @@ sops:
             ZWFHS0FqTVB3SXpYc21DOFY0WU5DUGsKxcqCxFnKOlNft1Ws1e7PuC9RHPNLvzzB
             EkE5YbSB/r/9sPyNGnVQALXccEmZtajHOYEwJRFEmw8nWhrA++QfYg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-06-15T18:03:02Z"
-    mac: ENC[AES256_GCM,data:mNgHSK1iIFCDra8cvlezWKNc7CbTZWGfMaeHVv3Y8FTV+M917qu7uF6S7YVHvy/nj+wXIA7LL3UXr+NViTNQhrt3Mq6VZq1NgT44+SAWFdL6uSPKLuP/PneX7ZLYwqxawbNLmivM0jvAiCNATO3RXjNh6NJJsBSaNc2QvjUwjzs=,iv:57nJZiJePnpcver3NhDWzVGgC0w0oU9r+hvGJrBre+c=,tag:EUNZTQdMkDasGfVT9haT9A==,type:str]
+    lastmodified: "2024-06-17T22:34:21Z"
+    mac: ENC[AES256_GCM,data:1VFiH+31vroGNJRKrwRg2SxC14Z1fPMtFX58hljeSUOY+D+a7NoAjUuZIoE5vKQpTyKtCcLPjofXDuqVTCJGCLmpDUa6rApwfAeuFF2VhQ6oAOqmR3Kp/jMB7WMXG9QJ64UJWbsHygDUWtiJd4tHpmqU1v9tqo9cK8Tw5OeqmE0=,iv:P84+fU8SfDRiRigYlvtlE4uPGhULVzdaYaUi1DJ0sq8=,tag:JME5prxk9Hr9clJkvIYMDg==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.3

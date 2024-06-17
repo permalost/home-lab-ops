@@ -19,7 +19,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/apps/zigbee2mqtt
+  path: ./kubernetes/apps/home-automation/zigbee2mqtt
   decryption:
     provider: sops
     secretRef:

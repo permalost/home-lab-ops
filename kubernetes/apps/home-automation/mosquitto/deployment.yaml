@@ -3,21 +3,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mosquitto
-  namespace: home-automation
-  labels:
-    app.kubernetes.io/name: mosquitto
 spec:
   revisionHistoryLimit: 3
   replicas: 1
   strategy:
     type: Recreate
   selector:
-    matchLabels:
-      app.kubernetes.io/name: mosquitto
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: mosquitto
     spec:
       initContainers:
         - name: create-config

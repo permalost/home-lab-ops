@@ -2,9 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: zigbee2mqtt
-  namespace: home-automation
-  labels:
-    app.kubernetes.io/name: zigbee2mqtt
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
