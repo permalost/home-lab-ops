@@ -11,7 +11,7 @@ spec:
   tls:
     - hosts:
         - dns.${domain}
-      secretName: na-dns
+      secretName: tls-dns
   rules:
     - host: dns.${domain}
       http:
