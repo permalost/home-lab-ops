@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoria-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victoria-metrics
+  template:
+    metadata:
+      labels:
+        app: victoria--metrics
+    spec:
+      containers:
+        - name: victoriametrics
+          image: victoriametrics/victoria-metrics:v1.76.0
+          ports:
+            - containerPort: 8428
+          args:
+            - "-retentionPeriod=1"
