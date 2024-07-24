@@ -17,5 +17,7 @@ spec:
           image: victoriametrics/victoria-metrics:v1.76.0
           ports:
             - containerPort: 8428
+              protocol: TCP
+              name: http
           args:
             - "-retentionPeriod=1"
