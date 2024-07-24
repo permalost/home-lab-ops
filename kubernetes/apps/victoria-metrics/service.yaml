@@ -9,3 +9,4 @@ spec:
     - protocol: TCP
       port: 8428
       targetPort: 8428
+      name: http

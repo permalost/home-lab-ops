@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: victoria-metrics
+  labels:
+    app: victoria-metrics
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - metrics.${domain}
+      secretName: tls-metrics
+  rules:
+    - host: metrics.${domain}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: victoria-metrics
+                port:
+                  name: http
