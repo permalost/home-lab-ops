@@ -11,3 +11,7 @@ spec:
     kind: GitRepository
     name: flux-system
   targetNamespace: flux-system
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
