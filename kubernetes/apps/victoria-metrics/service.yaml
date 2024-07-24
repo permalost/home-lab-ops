@@ -5,8 +5,7 @@ metadata:
 spec:
   selector:
     app: victoria-metrics
+  internalTrafficPolicy: Local
   ports:
-    - protocol: TCP
+    - name: http
       port: 8428
-      targetPort: 8428
-      name: http
