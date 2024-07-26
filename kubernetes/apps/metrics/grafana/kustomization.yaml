@@ -14,7 +14,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - configMap.yaml
 
 configMapGenerator:
   - name: grafana-config
