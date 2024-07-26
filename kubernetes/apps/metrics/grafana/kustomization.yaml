@@ -16,7 +16,7 @@ resources:
   - ingress.yaml
 
 configMapGenerator:
-  - name: grafana-config
+  - name: grafana-datasources
     files:
       - datasources/datasource.yml
       # - dashboards/adventureland.json
