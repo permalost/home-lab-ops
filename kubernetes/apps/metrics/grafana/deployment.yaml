@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+  template:
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:v9.1.5
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+              name: http
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: gf-admin
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: gf-password123
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/grafana/provisioning
+      volumes:
+        - name: config
+          configMap:
+            name: grafana-config

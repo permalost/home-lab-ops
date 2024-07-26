@@ -16,3 +16,13 @@ spec:
               name: http
           args:
             - "-retentionPeriod=1y"
+            - "-promscrape.config=/etc/victoriametrics/prometheus.yml"
+            - "-promscrape.config.strictParse=false"
+            - "-dedupe.minScrapeInterval=60s"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/victoriametrics
+      volumes:
+        - name: config
+          configMap:
+            name: victoria-config

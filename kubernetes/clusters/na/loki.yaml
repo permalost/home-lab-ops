@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: victoria-metrics
+  name: loki
   namespace: flux-system
 spec:
   dependsOn:
@@ -9,7 +9,7 @@ spec:
     - name: cert-manager
   interval: 5m
   retryInterval: 30s
-  path: ./kubernetes/apps/metrics/victoria-metrics
+  path: ./kubernetes/apps/metrics/loki
   prune: true
   wait: true
   sourceRef:
