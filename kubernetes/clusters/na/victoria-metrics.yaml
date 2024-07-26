@@ -8,8 +8,10 @@ spec:
     - name: nginx
     - name: cert-manager
   interval: 5m
+  retryInterval: 30s
   path: ./kubernetes/apps/victoria-metrics
   prune: true
+  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
