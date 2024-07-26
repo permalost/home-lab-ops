@@ -8,3 +8,4 @@ data:
   externalIp: 192.168.2.240
   metallbAddressPool: 192.168.2.240-192.168.2.249
   democraticCsiHost: 192.168.2.58
+  certCloudflareEmail: permalost.commercial+cloudflare@gmail.com
