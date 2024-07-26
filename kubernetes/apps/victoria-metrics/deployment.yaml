@@ -9,8 +9,6 @@ spec:
       app: victoria-metrics
   template:
     metadata:
-      labels:
-        app: victoria-metrics
     spec:
       containers:
         - name: victoriametrics
@@ -20,4 +18,4 @@ spec:
               protocol: TCP
               name: http
           args:
-            - "-retentionPeriod=1"
+            - "-retentionPeriod=1y"
