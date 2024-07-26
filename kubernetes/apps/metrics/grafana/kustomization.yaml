@@ -17,7 +17,7 @@ resources:
 
 configMapGenerator:
   - name: grafana-config
-    envs:
+    files:
       - datasources/datasource.yml
       - dashboards/adventureland.json
 
