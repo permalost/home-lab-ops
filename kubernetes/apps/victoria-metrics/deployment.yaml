@@ -5,12 +5,7 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: victoria-metrics
   template:
-    metadata:
-      labels:
-        app: victoria-metrics
     spec:
       containers:
         - name: victoriametrics
