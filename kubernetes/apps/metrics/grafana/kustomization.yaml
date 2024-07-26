@@ -16,6 +16,12 @@ resources:
   - ingress.yaml
   - configMap.yaml
 
+configMapGenerator:
+  - name: grafana-config
+    envs:
+      - datasources/datasource.yml
+      - dashboards/adventureland.json
+
 patches:
   - target:
       kind: Namespace
