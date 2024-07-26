@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana:v9.1.5
+          image: grafana/grafana:9.1.5
           ports:
             - containerPort: 3000
               protocol: TCP

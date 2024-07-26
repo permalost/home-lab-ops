@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: loki
-          image: loki/loki:v9.1.5
+          image: loki/loki:2.6.0
           ports:
             - containerPort: 3100
               protocol: TCP
