@@ -4,13 +4,15 @@ metadata:
   name: victoria-metrics
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: nginx
+    - name: cert-manager
   interval: 5m
   path: ./kubernetes/apps/victoria-metrics
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: flux-system
   postBuild:
     substituteFrom:
       - kind: ConfigMap
