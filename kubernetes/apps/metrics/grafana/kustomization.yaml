@@ -29,10 +29,3 @@ patches:
       - op: replace
         path: /metadata/name
         value: metrics
-  - target:
-      kind: ConfigMap
-      name: grafana-config
-    patch: |-
-      - op: add
-        path: annotations
-        value: kustomize.toolkit.fluxcd.io/substitute: disabled
