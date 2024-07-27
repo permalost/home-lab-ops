@@ -1,16 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: metrics
 
 commonLabels:
   app: grafana
   app.kubernetes.io/name: grafana
-labels:
-  - pairs:
-      toolkit.fluxcd.io/tenant: ops-team
 
 resources:
-  - namespace.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
@@ -19,13 +14,6 @@ configMapGenerator:
   - name: grafana-datasources
     files:
       - datasources/datasource.yml
-      # - dashboards/adventureland.json
-
-patches:
-  - target:
-      kind: Namespace
-      name: default
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: metrics
+  - name: grafana-dashboards
+    files:
+      - dashboards/adventureland.json

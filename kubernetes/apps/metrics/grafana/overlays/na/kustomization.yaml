@@ -2,25 +2,23 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: metrics
 
-commonLabels:
-  app: loki
-  app.kubernetes.io/name: loki
 labels:
   - pairs:
       toolkit.fluxcd.io/tenant: ops-team
 
 resources:
   - namespace.yaml
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
-  - configMap.yaml
+  - ../../base
+  - ../../../loki/base
+  - ../../../victoria-metrics/base
 
 patches:
   - target:
       kind: Namespace
-      name: default
     patch: |-
-      - op: replace
-        path: /metadata/name
-        value: metrics
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: default
+        annotations:
+          linkerd.io/inject: enabled
