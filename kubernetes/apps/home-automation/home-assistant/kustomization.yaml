@@ -19,8 +19,10 @@ resources:
 patches:
   - target:
       kind: Namespace
-      name: default
     patch: |-
-      - op: replace
-        path: /metadata/name
-        value: smart-home
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: default
+        annotations:
+          linkerd.io/inject: enabled
