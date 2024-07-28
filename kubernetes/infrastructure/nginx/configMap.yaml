@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nginx-ingress-nginx-controller
+data:
+    hsts: ENC[AES256_GCM,data:A/9vtSM=,iv:Z8ix3kd0Kw+By7iVKQfP2GwfqcB7+0rLRH0B0AxiPjs=,tag:0VKV24k52bygMQXuSj31Hg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBiMWdkTG51RlRZVDFZSzlC
+            SzQ5N01HM01PSTZ4YmdId1BvTHZqQTFwNEdBCjRleWhGc1A1TEhxR05vQmpBWHB0
+            dXhIaGpMVXZwZm13MU5PTkZjYi96SUUKLS0tIFNUTUx1MGU4RUxlUGZNTG9ON1BV
+            WVk4bGFEbnF4SElrWnlEVVVWc1pCUjgKcUiwPjPGyxJ6DoD+6ZXxMFbPIcyVr8Y8
+            8pgbGhYOZjP+okgk0hWAVvSlmK2uKgBBZ690VDD+x3vi63egXDPgpA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2024-07-28T14:43:51Z"
+    mac: ENC[AES256_GCM,data:KR5waM7txnlaf1LF1L3DJDMnJ6u8ZxIBX8h99IUX+bqOxaveOavwYQo7ac2MuFnj88Ljmg2//2VScwdfiZ/S2RSSZzjSUXinbPCMv0fkB9+E0KNpatOX7gb2skfkENaobrDlkGaIfW+FWO0KULWZHflcc15rH1aGK3afBNc5QS0=,iv:IQgsLQE1Syfhh1xgWRh5aPM8E5HuArMCI7t/shtIpHw=,tag:Gj0q2opaEA/SbCxYTtpRVg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

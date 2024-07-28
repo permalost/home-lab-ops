@@ -17,3 +17,7 @@ spec:
   path: ./kubernetes/infrastructure/nginx
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
