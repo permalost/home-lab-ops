@@ -4,6 +4,7 @@ metadata:
   name: victoria-metrics
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-rediret: "false"
 spec:
   ingressClassName: nginx
   tls:
