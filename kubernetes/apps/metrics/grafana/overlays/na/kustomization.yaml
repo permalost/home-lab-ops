@@ -11,14 +11,13 @@ resources:
   - ../../base
   - ../../../loki/base
   - ../../../victoria-metrics/base
-
-patches:
-  - target:
-      kind: Namespace
-    patch: |-
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: default
-        annotations:
-          linkerd.io/inject: enabled
+# patches:
+#   - target:
+#       kind: Namespace
+#     patch: |-
+#       apiVersion: v1
+#       kind: Namespace
+#       metadata:
+#         name: default
+#         annotations:
+#           linkerd.io/inject: enabled

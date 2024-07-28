@@ -4,3 +4,5 @@ metadata:
   name: democratic-csi
   labels:
     toolkit.fluxcd.io/tenant: sre-team
+  annotations:
+    linkerd.io/inject: enabled
