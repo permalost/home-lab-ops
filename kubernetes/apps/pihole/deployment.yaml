@@ -31,13 +31,17 @@ spec:
             - name: FTLCONF_LOCAL_IPV4
               value: ${externalIp}
             - name: PIHOLE_DNS_
-              value: 127.0.0.1;8.8.8.8;1.1.1.1
+              value: 8.8.8.8;1.1.1.1
             - name: VIRTUAL_HOST
               value: dns.${domain}
+            - name: IPv6
+              value: "false"
             - name: TEMPERATUREUNIT
               value: f
             - name: WEBTHEME
               value: default-dark
+            - name: DNSMASQ_LISTENING
+              value: all
             - name: WEBPASSWORD
               valueFrom:
                 secretKeyRef:
