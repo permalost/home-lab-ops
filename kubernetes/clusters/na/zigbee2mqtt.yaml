@@ -5,7 +5,7 @@ metadata:
   name: zigbee2mqtt
   namespace: flux-system
 spec:
-  suspend: true
+  suspend: false
   dependsOn:
     - name: flagger
     - name: nginx

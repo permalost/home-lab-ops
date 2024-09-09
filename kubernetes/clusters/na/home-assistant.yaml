@@ -5,11 +5,12 @@ metadata:
   name: home-assistant
   namespace: flux-system
 spec:
-  suspend: true
+  suspend: false
   dependsOn:
     - name: flagger
     - name: nginx
     - name: democratic-csi
+    - name: zigbee2mqtt
   interval: 10m
   retryInterval: 30s
   timeout: 5m
