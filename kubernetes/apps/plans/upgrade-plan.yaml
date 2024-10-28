@@ -1,0 +1,28 @@
+---
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: custom-os-upgrade
+  namespace: system-upgrade
+spec:
+  concurrency: 1
+  # This is the version (tag) of the image.
+  version: "leap-15.6-standard-amd64-generic-v3.2.1-k3sv1.31.1-k3s1"
+  nodeSelector:
+    matchExpressions:
+      - { key: kubernetes.io/hostname, operator: Exists }
+  serviceAccountName: system-upgrade
+  cordon: false
+  drain:
+    force: false
+    disableEviction: true
+  upgrade:
+    image: quay.io/kairos/opensuse
+    command:
+      - "/bin/bash"
+      - "-c"
+    args:
+      - bash /host/run/system-upgrade/secrets/custom-script/upgrade.sh
+  secrets:
+    - name: custom-script
+      path: /host/run/system-upgrade/secrets/custom-script
