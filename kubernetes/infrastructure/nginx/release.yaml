@@ -17,14 +17,11 @@ spec:
     controller:
       podAnnotations:
         linkerd.io/inject: enabled
-        app.kubernetes.io/managed-by: Helm
-        meta.helm.sh/release-name: nginx
-        meta.helm.sh/release-namespace: nginx
+      ingressClassByName: true
       setAsDefaultIngress: true
-    metrics:
-      port: 10254
-      enabled: true
-      service:
-        annotations:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "10254"
+      metrics:
+        enabled: true
+        service:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "10254"
