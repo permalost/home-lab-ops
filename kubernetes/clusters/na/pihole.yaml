@@ -8,7 +8,7 @@ spec:
   dependsOn:
     # - name: flagger
     - name: nginx
-    - name: democratic-csi
+    # - name: democratic-csi
   interval: 1h
   retryInterval: 1m
   timeout: 5m
