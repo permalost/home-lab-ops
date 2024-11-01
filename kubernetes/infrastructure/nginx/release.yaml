@@ -15,6 +15,7 @@ spec:
       interval: 12h
   values:
     controller:
+      hsts: false
       podAnnotations:
         linkerd.io/inject: enabled
       ingressClassByName: true
