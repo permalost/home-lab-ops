@@ -69,7 +69,7 @@ spec:
               mountPath: /dest
         - name: init-config2
           image: busybox
-          command: ["sh", "ls"]
+          command: ["ls", "/dest"]
           volumeMounts:
             - name: final-dir
               mountPath: /dest
