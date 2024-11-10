@@ -60,7 +60,7 @@ spec:
             [
               "sh",
               "-c",
-              'if [ -z "$(ls -A /dest)" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && ls -al /dest; fi',
+              'if [ -z "$(ls "/dest/configuration.yaml")" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && ls -al /dest; fi',
             ]
           volumeMounts:
             - name: temp-dir
@@ -69,7 +69,7 @@ spec:
               mountPath: /dest
         - name: init-config2
           image: busybox
-          command: ["ls", "/dest"]
+          command: ["cat", "/dest/configuration.yaml"]
           volumeMounts:
             - name: final-dir
               mountPath: /dest
