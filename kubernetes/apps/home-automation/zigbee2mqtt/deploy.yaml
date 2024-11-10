@@ -67,6 +67,12 @@ spec:
               mountPath: /src
             - name: final-dir
               mountPath: /dest
+        - name: init-config2
+          image: busybox
+          command: ["sh", "ls -A /dest"]
+          volumeMounts:
+            - name: final-dir
+              mountPath: /dest
       volumes:
         - name: temp-dir
           configMap:
