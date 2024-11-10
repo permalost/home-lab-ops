@@ -73,6 +73,12 @@ spec:
           volumeMounts:
             - name: final-dir
               mountPath: /dest
+        - name: init-config3
+          image: busybox
+          command: ["cat", "/src/configuration.yaml"]
+          volumeMounts:
+            - name: temp-dir
+              mountPath: /src
       volumes:
         - name: temp-dir
           configMap:
