@@ -56,29 +56,16 @@ spec:
       initContainers:
         - name: init-config
           image: busybox
-          command:
+          command: ["sh", "-c"]
+          args:
             [
-              "sh",
-              "-c",
-              'if [ -z "$(ls "/dest/configuration.yaml")" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && ls -al /dest; fi',
+              "if [ ! -f '/dest/configuration.yaml' ] ; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && ls -al /dest ; fi",
             ]
           volumeMounts:
             - name: temp-dir
               mountPath: /src
             - name: final-dir
               mountPath: /dest
-        - name: init-config2
-          image: busybox
-          command: ["cat", "/dest/configuration.yaml"]
-          volumeMounts:
-            - name: final-dir
-              mountPath: /dest
-        - name: init-config3
-          image: busybox
-          command: ["cat", "/src/configuration.yaml"]
-          volumeMounts:
-            - name: temp-dir
-              mountPath: /src
       volumes:
         - name: temp-dir
           configMap:
