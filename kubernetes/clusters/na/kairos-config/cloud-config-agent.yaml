@@ -1,74 +1,74 @@
-#cloud-config
+# #cloud-config
 
-hostname: na-{{ trunc 4 .MachineID }}
-users:
-  - name: permalost
-    groups:
-      - admin
-    ssh_authorized_keys:
-      - github:permalost
+# hostname: na-{{ trunc 4 .MachineID }}
+# users:
+#   - name: permalost
+#     groups:
+#       - admin
+#     ssh_authorized_keys:
+#       - github:permalost
 
-debug: true
+# debug: true
 
-install:
-  auto: true
-  device: auto
-  poweroff: false
-  reboot: true
-  image: "docker:quay.io/kairos/opensuse:leap-15.6-standard-amd64-generic-v3.2.1-k3sv1.31.1-k3s1"
-  grub-entry-name: Kairos
-  partitions:
-    oem:
-      size: 60
-      fs: ext4
-    recovery:
-      size: 4096
-      fs: ext4
-    peristent:
-      size: 40960
-      fs: ext4
-  extra-dirs-rootfs:
-    - /mnt/longhorn
-    - /data
-    - /src
-  # bind mounts, can be read and modified, changes persist reboots
-  bind_mounts:
-    - /mnt/longhorn
+# install:
+#   auto: true
+#   device: auto
+#   poweroff: false
+#   reboot: true
+#   image: "docker:quay.io/kairos/opensuse:leap-15.6-standard-amd64-generic-v3.2.1-k3sv1.31.1-k3s1"
+#   grub-entry-name: Kairos
+#   partitions:
+#     oem:
+#       size: 60
+#       fs: ext4
+#     recovery:
+#       size: 4096
+#       fs: ext4
+#     peristent:
+#       size: 40960
+#       fs: ext4
+#   extra-dirs-rootfs:
+#     - /mnt/longhorn
+#     - /data
+#     - /src
+#   # bind mounts, can be read and modified, changes persist reboots
+#   bind_mounts:
+#     - /mnt/longhorn
 
-upgrade:
-  extra-dirs-rootfs:
-    - /mnt/longhorn
-  reboot: true
-  poweroff: false
+# upgrade:
+#   extra-dirs-rootfs:
+#     - /mnt/longhorn
+#   reboot: true
+#   poweroff: false
 
-reset:
-  extra-dirs-rootfs:
-    - /mnt/longhorn
-  reboot: true
-  poweroff: false
-  # Override the grub entry name
-  grub-entry-name: Kairos
-  # if set to true it will format persistent partitions ('oem 'and 'persistent')
-  reset-persistent: true
-  reset-oem: false
+# reset:
+#   extra-dirs-rootfs:
+#     - /mnt/longhorn
+#   reboot: true
+#   poweroff: false
+#   # Override the grub entry name
+#   grub-entry-name: Kairos
+#   # if set to true it will format persistent partitions ('oem 'and 'persistent')
+#   reset-persistent: true
+#   reset-oem: false
 
-k3s-agent:
-  enabled: true
-  args:
-    - --with-node-id
-  env:
-    K3S_TOKEN: <REDACTED>
-    K3S_URL: https://192.168.2.101:6443
+# k3s-agent:
+#   enabled: true
+#   args:
+#     - --with-node-id
+#   env:
+#     K3S_TOKEN: <REDACTED>
+#     K3S_URL: https://192.168.2.101:6443
 
-stages:
-  network:
-    - name: "Setup users"
-      authorized_keys:
-        kairos:
-          - github:permalost
-  boot:
-    - name: "Set up various kube environment variables"
-      environment:
-        CONTAINERD_ADDRESS: /run/k3s/containerd/containerd.sock
-        CONTAINERD_NAMESPACE: k8s.io
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+# stages:
+#   network:
+#     - name: "Setup users"
+#       authorized_keys:
+#         kairos:
+#           - github:permalost
+#   boot:
+#     - name: "Set up various kube environment variables"
+#       environment:
+#         CONTAINERD_ADDRESS: /run/k3s/containerd/containerd.sock
+#         CONTAINERD_NAMESPACE: k8s.io
+#         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
