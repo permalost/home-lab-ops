@@ -4,9 +4,14 @@ metadata:
   name: kube-prometheus-stack
 spec:
   interval: 1h
-  chartRef:
-    kind: OCIRepository
-    name: kube-prometheus-stack
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "*"
+      sourceRef:
+        kind: OCIRepository
+        name: kube-prometheus-stack
+      interval: 12h
   install:
     crds: Create
   upgrade:
