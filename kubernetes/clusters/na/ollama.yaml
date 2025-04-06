@@ -7,7 +7,7 @@ metadata:
 spec:
   suspend: false
   dependsOn:
-    - name: flagger
+    # - name: flagger
     - name: nginx
   interval: 10m
   retryInterval: 30s
