@@ -11,3 +11,4 @@ labels:
 
 resources:
   - overall.yaml
+  - ingress.yaml
