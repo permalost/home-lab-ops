@@ -1,23 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ollama
+  name: litellm
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "ollama.${domain}"
-      secretName: "tls-ollama"
+        - "litellm.${domain}"
+      secretName: "tls-litellm"
   rules:
-    - host: "ollama.${domain}"
+    - host: "litellm.${domain}"
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: ollama
+                name: litellm
                 port:
-                  number: 11434
+                  number: 4000
