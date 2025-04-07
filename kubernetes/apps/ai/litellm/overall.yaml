@@ -22,7 +22,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: litellm-deployment
+  name: litellm
   labels:
     app: litellm
 spec:
