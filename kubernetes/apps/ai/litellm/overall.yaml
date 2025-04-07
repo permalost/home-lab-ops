@@ -38,7 +38,8 @@ spec:
         - name: litellm
           image: ghcr.io/berriai/litellm:main-latest # it is recommended to fix a version generally
           ports:
-            - containerPort: 4000
+            - name: http
+              containerPort: 4000
           volumeMounts:
             - name: config-volume
               mountPath: /app/proxy_server_config.yaml
