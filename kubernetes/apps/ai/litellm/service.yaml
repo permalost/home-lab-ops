@@ -6,7 +6,6 @@ spec:
   type: ClusterIP
   selector:
     app: litellm
-  externalTrafficPolicy: Local
   ports:
     - port: 4000
       targetPort: http
