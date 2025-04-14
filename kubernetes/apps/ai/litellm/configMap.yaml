@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: litellm-config-file
+data:
+    config.yaml: ENC[AES256_GCM,data:f+EU7gWL//hILPtB6AyAiV8smdT1HhT7XtdSbOPzcHOEAjlTjJp4ZekpizEbncZuNAc9FgbOAjVjwMRZVGaTD9bTzDnXxyj1MhrjG40HwNcEprZquMiaDKbe9o+cums3VCRah6jC/W4FcftmmztGFcHlPKqdhXI8cxYAMQXSSArdixRTwYvDDWQ0s0ecb+a1YtUu8vYn63pxzG6J8KRhgK1CvJAZ5uaCjBQJpMGYfOLcH4fVhz6diijRyRZX5rZciIvy2KaN/Rda2KUWz4059orgz+4LEdsnosyblPaDPHl4K1T3LbxwVhoEeVrs7M0ssdOIkppfeKovqqiiVn/Weli4h77TjpXm97cvsMZqiL9bww+PkSNia6TIpZhAK9JUIPfLYLVCrf0cLBmz4Rhc5T2AMw0TPmk20+l92li6hLa+jTKhhemQex+SIMAr,iv:PhVtpxlLFwQcOFX/cMg30XcWaSTlu5qRpGipiyePqWw=,tag:9LPT4GaHtMI0pg/+UiaA7g==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBMQ21UQlozbnNZYWRPT2hO
+            QkhFUTBhcmszNmZ4VmRGV2JyUVpoQkxReHlJCmJZMHR5RnJTdi9QU05ReExSdldm
+            cnRESEQ5VHdZZlRBZWMxYktwTWVvT00KLS0tIDcxQjlWZnlWbnR1aEVGQVIvYk1r
+            TFkwRUxGSjd5TlBHNmtnWGViVDRHTjAKH2kaCZWFpU7L8djDbkN+st/ZrYNXQBHy
+            EvYX8dFBAZDuyDDwopVLVamm6MrHUSqkL0PPmXMIlLo0+CE1igyKPQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-04-14T03:54:07Z"
+    mac: ENC[AES256_GCM,data:r9Whz4VwvRAXeco5+ECuXKL0fcm8/MlrsrDmpZlg0v20JCXXMp7Tq+1TIVvUxaz+KUu6qu1YZ/TAjzUmKU0jvL+hWKPKkAVcOaNc3AIvB+RRRxqt42u96uUgudbt6w1OCgAkSYw6rnxlIq2qGUj6eMb/QvyiBVZTsJqzsO9hF8U=,iv:/0udSHSeDMVJry1C2QKipPxipgiw+yM+AffMw2nW70Y=,tag:bcgkxHkJIwxjnywJ/3vNNA==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

@@ -10,6 +10,8 @@ labels:
       toolkit.fluxcd.io/tenant: dev-team
 
 resources:
-  - overall.yaml
+  - secret.yaml
+  - configMap.yaml
+  - deploy.yaml
   - ingress.yaml
   - service.yaml
