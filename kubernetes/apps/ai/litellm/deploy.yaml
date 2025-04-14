@@ -41,8 +41,8 @@ spec:
                 name: litellm-secrets
           resources:
             limits:
-              cpu: 10m
-              memory: 2Gi
+              cpu: 100m
+              memory: 4Gi
       volumes:
         - name: config-volume
           configMap:
