@@ -5,7 +5,7 @@ metadata:
   name: litellm
   namespace: flux-system
 spec:
-  suspend: false
+  suspend: true
   dependsOn:
     - name: nginx
   interval: 10m
