@@ -4,6 +4,7 @@ metadata:
   name: metrics
   namespace: flux-system
 spec:
+  suspend: true
   dependsOn:
     - name: nginx
     - name: cert-manager
