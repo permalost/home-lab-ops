@@ -32,10 +32,10 @@ spec:
           args:
             - "--config"
             - "/app/proxy_config.yaml" # Update the path to mount the config file
-          # volumeMounts:
-          #   - name: config-volume
-          #     mountPath: /app/proxy_server_config.yaml
-          #     subPath: config.yaml
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/proxy_config.yaml
+              subPath: config.yaml
           envFrom:
             - secretRef:
                 name: litellm-secrets
@@ -43,7 +43,7 @@ spec:
             limits:
               cpu: 10m
               memory: 2Gi
-      # volumes:
-      #   - name: config-volume
-      #     configMap:
-      #       name: litellm-config-file
+      volumes:
+        - name: config-volume
+          configMap:
+            name: litellm-config-file
