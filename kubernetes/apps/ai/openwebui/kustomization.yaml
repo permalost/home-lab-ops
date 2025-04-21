@@ -1,15 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: template-ns
+namespace: ai
 
 commonLabels:
-  app: template
-  app.kubernetes.io/name: template
+  app: openwebui
+  app.kubernetes.io/name: openwebui
 labels:
   - pairs:
       toolkit.fluxcd.io/tenant: dev-team
 
 resources:
-  - ../template/deploy.yaml
-  - ../template/ingress.yaml
-  - ../template/service.yaml
+  - ../deploy.yaml
+  - ../ingress.yaml
+  - ../service.yaml
