@@ -18,7 +18,7 @@ spec:
       enableServiceLinks: true
       containers:
         - name: open-webui
-          image: "open-webui"
+          image: ghcr.io/open-webui/open-webui
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
