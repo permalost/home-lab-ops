@@ -3,13 +3,13 @@ kind: Kustomization
 namespace: ai
 
 commonLabels:
-  app: openwebui
-  app.kubernetes.io/name: openwebui
+  app: open-webui
+  app.kubernetes.io/name: open-webui
 labels:
   - pairs:
       toolkit.fluxcd.io/tenant: dev-team
 
 resources:
-  - ./deploy.yaml
-  - ./ingress.yaml
-  - ./service.yaml
+  - deploy.yaml
+  - ingress.yaml
+  - service.yaml
