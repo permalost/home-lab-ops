@@ -44,4 +44,4 @@ spec:
         ngressClassName: nginx
         annotations: { ingressClassName: nginx }
         hosts:
-          - "vmalert.${domain}"
+          - "vmsingle.${domain}"
