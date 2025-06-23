@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: linkerd
+    # - name: linkerd
     - name: metallb
   interval: 1h
   retryInterval: 1m
