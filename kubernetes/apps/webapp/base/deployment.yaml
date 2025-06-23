@@ -1,15 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: template
+  name: deploy
 spec:
   revisionHistoryLimit: 3
   replicas: 1
   strategy:
     type: Recreate
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: template
   template:
     spec:
       serviceAccountName: default
@@ -17,8 +14,8 @@ spec:
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       containers:
-        - name: template
-          image: "template"
+        - name: webapp
+          image: my-app
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

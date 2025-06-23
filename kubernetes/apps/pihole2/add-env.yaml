@@ -1,0 +1,15 @@
+- op: add
+  path: /spec/template/spec/containers/0/envFrom
+  value:
+    - configMapRef:
+        name: env
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: VIRTUAL_HOST
+      value: pihole.${domain}
+    - name: WEBPASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: webpassword
+          name: pihole-admin

@@ -1,23 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: template
+  name: ingress
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "template.${domain}"
-      secretName: "tls-template"
+        - "$(SUBDOMAIN_PLACEHOLDER).${domain}"
+      secretName: "$(SUBDOMAIN_PLACEHOLDER)-tls"
   rules:
-    - host: "template.${domain}"
+    - host: "$(SUBDOMAIN_PLACEHOLDER).${domain}"
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: template
+                name: svc
                 port:
-                  number: 8080
+                  name: http

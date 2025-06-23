@@ -1,0 +1,12 @@
+- op: add
+  path: /spec/template/spec/containers/0/ports/-
+  value:
+    containerPort: 53
+    name: dns1
+    protocol: TCP
+- op: add
+  path: /spec/template/spec/containers/0/ports/-
+  value:
+    containerPort: 53
+    name: dns2
+    protocol: UDP
