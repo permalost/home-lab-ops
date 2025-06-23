@@ -1,0 +1,31 @@
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+    - mountPath: /etc/dnsmasq.d/05-custom.conf
+      name: config
+      subPath: 05-custom.conf
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /etc/pihole/whitelist.txt
+    name: config
+    subPath: whitelist.txt
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /etc/pihole/adlists.list
+    name: config
+    subPath: adlists.list
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /etc/pihole/custom.list
+    name: config
+    subPath: custom.list
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    name: config
+    configMap:
+      defaultMode: 420
+      name: pihole-config

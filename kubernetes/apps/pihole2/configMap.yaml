@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: pihole-config
+    labels:
+        app: pihole
+data:
+    05-custom.conf: ENC[AES256_GCM,data:eHS0OUIMGTc6c8T6kvxLlcZZg65uotP/uWPFKlHeYEY=,iv:ihUjgOlPzbiVV8u1uQTv9HjwRF3k0qzRTfpcfRbhHU4=,tag:EB9smfn0SUmYehnGq+o4wA==,type:str]
+    adlists.list: ENC[AES256_GCM,data:zortJsCoc528DqqIQc7VdP3LPbe6xvbAwFlIqXNgkwLcFZH3j12zwcSngw8Eami+JvMfkACdDXIEkGVDB9kCnR4mGqjGoeWdbj+/H35qaRkKN2ay,iv:gjmmSHrsYzerQGAAS6idrbiUretFmd7FdaDrcd2+x+M=,tag:PTSi6EArwM+EMpe5aZPyow==,type:str]
+    custom.list: ENC[AES256_GCM,data:UEb1uzYXJES0SSAClZZWIrsyqoyXiHs=,iv:nzQZdGFcpZOcxMbRifUAquXVhWKSzZbYLAc7fcH0644=,tag:NPhmXS4OfgYK31Y3WxnhIw==,type:str]
+    whitelist.txt: ENC[AES256_GCM,data:6CW5p6XEI3o54Q==,iv:dFxvce1loqyTY1qS/F2mg/NDWeN8gGQhc2TO7xGMdU0=,tag:HOTEUSQeh0qViJLXA0h/VQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwWE04TDF5NHRrNWx2VW41
+            MXlGd3czc2kxSU5mSWQ3bFpBeXluVUE3TnprCmdVVDZEYWtvYXgwTS9aV0FwTEpI
+            S0hoWE5UT1ZFSHllb2hCR2U3WFowd3cKLS0tIGZEWms5N3BvcE9zQTdocEhTSXh0
+            MW1PY1hteXhBUUh5R3gxcWZjS1drZHcKPJM1S07LJ7Ymzt3BSPuIAIuYs5N8wZI1
+            CunhosvA611HcpwJhq0j+10/bxdIG+NBxMQfl5cnw6N/+aRKn4iHFA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2024-05-31T21:41:51Z"
+    mac: ENC[AES256_GCM,data:PrG+GChfiDCNIzvEZ/8ZlspI/diRVbWHw2JZ20DMRq7B+pBwBTEn0OG1pogW64E4TdQMaeVcEK/Bn5U3ihJQDwZtgvAema0ULwHSg/5cmhMu2ycWvAMM4MGHEBPhw1BPqA5ZcC/FqNFLHjbiiciXNTfAJAdPdN5+cxh+OUN6UBI=,iv:5oeNv0vjfCaGzJbrgnlmKucq/hntmBFdFlmHyuotyu0=,tag:tqhmRfFQn/UFEseOmJcpIA==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3
