@@ -16,8 +16,8 @@ spec:
   values:
     controller:
       hsts: false
-      podAnnotations:
-        linkerd.io/inject: enabled
+      # podAnnotations:
+      #   linkerd.io/inject: enabled
       ingressClassByName: true
       setAsDefaultIngress: true
       metrics:
