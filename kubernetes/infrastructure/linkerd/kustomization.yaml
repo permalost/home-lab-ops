@@ -11,4 +11,4 @@ resources:
   - repositories.yaml
   - namespaces.yaml
   - secret.yaml
-  - ingress.yaml
+  # - ingress.yaml
