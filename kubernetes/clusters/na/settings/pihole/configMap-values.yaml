@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: pihole-helm-chart-values
+    namespace: pihole
+data:
+    values.yaml: ENC[AES256_GCM,data:i/gRdkakfvBb2z0qqnWnr/5ZorduNEn2SPlBWF0jzsSRnM5I2mQ8p/LEmdFFCfJF6o0SiygbANYLGrUETAz8gzp8Z+rTWTL3DiJi+56GBc2XxPVqhfpOWk4B5mNLwGSnJj+lIJAfX5dsBn7wHKKfY68vfGRYha4UeQywwM/mKia+q7BDYgUl2/9MCqvXyoz0ix7jrqRuqrs22ABSwRSm7E+YqUIpMxOuo/NSRpEfTmOdurJRnQhujv90LAU6aEYJtgcg+epcFl4m0SYWmigPQmuprriH3KyHYt1oJUx34XWuzcRZbuXT94pvwgiwOKUEZcW6srcvEmMcep7H2H84F1v8eddfIkf3WpQscF9ZYeZV+N5ynKsGt2Rrg/I291rgCG5EN9XzkIsXmDsw8foZpg7L+uYBmPRqerkKrttlavAJS+ovzDuBc1fAoLv28HfeR+zxCmYyq2kkusnybE8Rff64Dl9ab+7z3J665J0uPy8p+w5oIA282UH/tLYBzbiVppvQBrd706iB7dwZcbR5wbEmPx4EdxmNJh1zU1mcztOPLu22cdrNDKbxQWb0UoUcYwGgrYU2RsRKFdc0h7JOTqoWY4T1I+ltC7PdRZ+3o1T+xu9k1AMzbhU6JIXDgkXqRnVWH1iYyIUzHsYrx2KDdMvTbbSlpB7sVvsIMVLy7NPJ8YqGykTbZH1RSFb7F7kSDgd7tNJy286ajJaogcFOYtIlp6/OHnAI65J1OkZEpL2ISSgU6fhDQV/4ZsOTkmLnM6HpJGB+mspHF993ZLUtzgpY6m/2UDbITWYQFO90XHp4QikZf5pR6Ri/wvdnId9fJh77kA+ozyViwUW9+8h1wlEImQoB+CDVjk+oMuySu1AZEmctkeXXrvbsTjdMnkC1I+Rt28CTdCVZn9BSxaE8HQkQZxBuXqmwC7RHjXC9Ec8rBc+fjWOiTsNLKikhvu3RpsrLlQzccVNkj+lUXGUAwr1uMmL6upzFEnp8zn8sYCCn336pVFEsCjqaj651aQ84+ttM12Y1/RhpOV2rHnWSK0oBtUlJoG7QBR1WGeIzw2Qs3yCDhnEQNoSbB4dTyj4sGfL8OLETX0Wb9VORUGnU,iv:VbjjxwKFbBeOv0wkETQZkShSCeKWIZOjcb5WSxXPcig=,tag:Flkz9xy4zfMPoARUGl2bZg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzYVFwdVB4bXNtUHRlVUtK
+            aVgxODBVSElpL2JkcmE2d0gxcGhJa1V1dlNzCnF0R2ozbHBUNkI1WmZmSVNhR1Q3
+            cW5KamtkZG50TVk4MEdRM0dManE3NWMKLS0tIHRGZUYrVklwMXAwS2o4N0dQVGJV
+            T2E2OE5hcDM5c3BNeWIrM2pqMGdad2sKQBmzzSK0Zx+PkWFf4jST3ZXEK6SjZ+xI
+            x1Qw5lubmNE6Csc/eMA4m0q5EwIBk0LZy6WhwTdqM7zvE4OVGwiwQw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2024-05-13T10:27:34Z"
+    mac: ENC[AES256_GCM,data:Vsl3uni0hYXA9cegWuM2WXoKBCTmPBHdUwGZysi7TLaaJEjLw2DO5WL9L1fHb33+uBzd3RY83XlpWfPINmaTthvUUqvfVyjdV2r/PfE97v3y4TdLFVkIKrqz/hS7cwaS04PzJ4JCDjgmpNlnho9V7+sfwSUmcDWdWCe1tlmd8JA=,iv:A04MaWDgfIQn+2c6c/pQbHy0mW6UVQYf0Frh/LlIF+A=,tag:UJF2fBEAa+MDnHeIiugKhw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

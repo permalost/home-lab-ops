@@ -6,9 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    # - name: flagger
     - name: nginx
-    # - name: democratic-csi
   interval: 1h
   retryInterval: 1m
   timeout: 5m
@@ -17,7 +15,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/clusters/home/settings/pihole
+  path: ./kubernetes/clusters/na/settings/pihole
   decryption:
     provider: sops
     secretRef:
