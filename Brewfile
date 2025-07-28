@@ -24,3 +24,6 @@ brew "direnv"
 # Linkerd
 brew "linkerd"
 brew "step"
+
+# Taskfile
+brew "go-task/tap/go-task"
