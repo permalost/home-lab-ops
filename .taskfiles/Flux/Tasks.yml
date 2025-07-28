@@ -28,7 +28,7 @@ tasks:
       SOPS_AGE_KEY_FILE: ~/.config/sops/age/keys.txt
 
   sops-create:
-    desc: Creates sops for use in your cluster
+    desc: Creates sops for use in your cluster (Add export SOPS_AGE_KEY_FILE to zshrc)
     cmds:
       - age-keygen -o age.agekey
       - mv age.agekey ~/.config/sops/age/keys.txt
