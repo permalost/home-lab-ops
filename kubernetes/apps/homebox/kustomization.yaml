@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../webapp/base
+
+components:
+- ../webapp/components/ingress
+
+namespace: homebox
+namePrefix: homebox-
+
+labels:
+- includeSelectors: true
+  pairs:
+    app: homebox
+    app.kubernetes.io/name: homebox
+
+images:
+- name: my-app
+  newName: ghcr.io/systemadminsmedia/homebox
+  newTag: v0.20.2
+
+configMapGenerator:
+  - name: env
+    files:
+      - environment
+
+patches:
+- path: name-replacement.yaml
+  target:
+    kind: Deployment
+    name: deploy
+- target: 
+    kind: Deployment
+    name: deploy
+  patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/ports/0/containerPort
+      value: 7745
+- target: 
+    kind: Service
+    name: svc
+  patch: |
+    - op: replace
+      path: /spec/ports/0/port
+      value: 7745
