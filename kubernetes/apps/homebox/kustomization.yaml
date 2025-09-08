@@ -46,7 +46,7 @@ patches:
         persistentVolumeClaim:
           claimName: homebox-pvc
     - op: add
-      path: /spec/template/spec/containers/0/volumeMounts/-
+      path: /spec/template/spec/containers/0/volumeMounts
       value:
         name: homebox-volume
         mountPath: /data
