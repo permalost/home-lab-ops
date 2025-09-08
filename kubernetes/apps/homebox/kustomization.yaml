@@ -40,7 +40,7 @@ patches:
       path: /spec/template/spec/containers/0/ports/0/containerPort
       value: 7745
     - op: add
-      path: /spec/template/spec/volumes/-
+      path: /spec/template/spec/volumes
       value:
         name: homebox-volume
         persistentVolumeClaim:
