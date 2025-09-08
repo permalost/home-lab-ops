@@ -1,0 +1,11 @@
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    name: homelab-volume
+    persistentVolumeClaim:
+      claimName: homelab-pvc
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+    - mountPath: /data
+      name: homelab-volume

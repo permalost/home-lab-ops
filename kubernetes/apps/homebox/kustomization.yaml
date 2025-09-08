@@ -32,6 +32,10 @@ patches:
   target:
     kind: Deployment
     name: deploy
+- path: add-volumes.yaml
+  target: 
+    kind: Deployment
+    name: deploy
 - target: 
     kind: Deployment
     name: deploy
@@ -39,17 +43,6 @@ patches:
     - op: replace
       path: /spec/template/spec/containers/0/ports/0/containerPort
       value: 7745
-    - op: add
-      path: /spec/template/spec/volumes
-      value:
-        name: homebox-volume
-        persistentVolumeClaim:
-          claimName: homebox-pvc
-    - op: add
-      path: /spec/template/spec/containers/0/volumeMounts
-      value:
-        name: homebox-volume
-        mountPath: /data
 - target: 
     kind: Service
     name: svc
