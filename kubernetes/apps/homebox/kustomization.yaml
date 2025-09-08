@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - ../webapp/base
+- pvc.yaml
 
 components:
 - ../webapp/components/ingress
