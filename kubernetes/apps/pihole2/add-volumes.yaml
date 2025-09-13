@@ -25,7 +25,7 @@
 - op: add
   path: /spec/template/spec/volumes
   value:
-    name: config
+  - name: config
     configMap:
       defaultMode: 420
       name: pihole-config
