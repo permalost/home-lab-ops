@@ -25,32 +25,24 @@ images:
   newTag: 2025.08.0
 
 patches:
-- path: name-replacement.yaml
-  target:
+- target:
     kind: Deployment
     name: deploy
-- path: add-env.yaml
-  target: 
+  path: patches/deploy-add-env.yaml
+- target:
     kind: Deployment
     name: deploy
-- path: add-ports.yaml
-  target: 
+  path: patches/deploy-add-volumes.yaml
+- target:
     kind: Deployment
     name: deploy
-- path: add-volumes.yaml
-  target: 
-    kind: Deployment
-    name: deploy
-- path: update-http-ports.yaml
-  target:
-    kind: Deployment
-    name: deploy
-- path: update-service-ports.yaml
-  target:
+  path: patches/deploy-update-ports.yaml
+- target:
     kind: Service
     name: svc
+  path: patches/svc-update-ports.yaml
 
 configMapGenerator:
   - name: env
     envs:
-      - environment
+      - env

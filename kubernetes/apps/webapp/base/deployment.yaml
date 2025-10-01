@@ -14,7 +14,7 @@ spec:
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       containers:
-        - name: webapp
+        - name: ${appName}
           image: my-app
           imagePullPolicy: IfNotPresent
           ports:
