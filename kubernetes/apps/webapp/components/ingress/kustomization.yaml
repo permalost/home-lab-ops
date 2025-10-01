@@ -6,15 +6,3 @@ resources:
 
 configurations:
   - nameReference.yaml
-
-replacements:
-  - source:
-      kind: Service
-      name: svc
-      fieldPath: name
-    targets:
-    - select:
-        kind: Ingress
-        name: ingress
-      fieldPaths:
-        - spec.rules.[host=DOMAIN].host
