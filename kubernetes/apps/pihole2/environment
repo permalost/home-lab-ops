@@ -1,7 +1,9 @@
 TZ=America/Boise
 FTLCONF_LOCAL_IPV4=${externalIp}
-PIHOLE_DNS_=8.8.8.8;1.1.1.1
+FTLCONF_dns_listeningMode=all
+FTLCONF_dns_upstreams=8.8.8.8;1.1.1.1
+FTLCONF_webserver_port=80,443s
+FTLCONF_debug_api=true
 IPv6=false
 TEMPERATUREUNIT=f
 WEBTHEME=default-dark
-DNSMASQ_LISTENING=all
