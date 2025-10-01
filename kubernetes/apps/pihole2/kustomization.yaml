@@ -5,6 +5,7 @@ resources:
 - ../webapp/base
 - secret.yaml
 - configMap.yaml
+- loadbalancer.yaml
 
 components:
 - ../webapp/components/ingress
@@ -40,6 +41,14 @@ patches:
   target: 
     kind: Deployment
     name: deploy
+- path: update-http-ports.yaml
+  target:
+    kind: Deployment
+    name: deploy
+- path: update-service-ports.yaml
+  target:
+    kind: Service
+    name: svc
 
 configMapGenerator:
   - name: env
