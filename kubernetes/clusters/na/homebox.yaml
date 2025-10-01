@@ -23,6 +23,7 @@ spec:
       name: sops-age
   postBuild:
     substitute:
+      appName: homebox
       subdomain: homebox
     substituteFrom:
       - kind: ConfigMap

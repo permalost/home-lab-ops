@@ -28,10 +28,6 @@ configMapGenerator:
       - environment
 
 patches:
-- path: name-replacement.yaml
-  target:
-    kind: Deployment
-    name: deploy
 - path: add-volumes.yaml
   target: 
     kind: Deployment
