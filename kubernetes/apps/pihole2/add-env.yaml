@@ -8,7 +8,7 @@
   value:
     - name: VIRTUAL_HOST
       value: pihole.${domain}
-    - name: WEBPASSWORD
+    - name: FTLCONF_webserver_api_password
       valueFrom:
         secretKeyRef:
           key: webpassword

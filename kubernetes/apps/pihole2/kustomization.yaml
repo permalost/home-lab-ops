@@ -22,7 +22,7 @@ labels:
 images:
 - name: my-app
   newName: pihole/pihole
-  newTag: 2024.07.0
+  newTag: 2025.08.0
 
 patches:
 - path: name-replacement.yaml
