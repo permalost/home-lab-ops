@@ -21,6 +21,8 @@ spec:
     secretRef:
       name: sops-age
   postBuild:
+    substitute:
+      subdomain: pihole
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings

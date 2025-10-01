@@ -8,10 +8,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - DOMAIN
-      secretName: DOMAIN
+        - ${subdomain}.${domain}
+      secretName: ${subdomain}-${domain}-tls
   rules:
-    - host: DOMAIN
+    - host: ${subdomain}.${domain}
       http:
         paths:
           - path: "/"
