@@ -5,7 +5,7 @@ resources:
 - ../webapp/base
 - secret.yaml
 - configMap.yaml
-- loadBalancer.yaml
+- loadbalancer.yaml
 
 components:
 - ../webapp/components/ingress
