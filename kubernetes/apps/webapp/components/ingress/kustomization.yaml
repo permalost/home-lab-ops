@@ -7,11 +7,14 @@ resources:
 configurations:
   - nameReference.yaml
 
-vars:
-  - name: SUBDOMAIN_PLACEHOLDER
-    objref:
+replacements:
+  - source:
       kind: Service
       name: svc
-      apiVersion: v1
-    fieldRef:
-      fieldpath: metadata.labels.app
+      fieldPath: name
+    targets:
+    - select:
+        kind: Ingress
+        name: ingress
+      fieldPaths:
+        - spec.rules.[host=DOMAIN].host
