@@ -52,5 +52,5 @@ patches:
 
 configMapGenerator:
   - name: env
-    files:
+    envs:
       - environment
