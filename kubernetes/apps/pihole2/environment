@@ -1,7 +1,7 @@
 TZ=America/Boise
 FTLCONF_LOCAL_IPV4=${externalIp}
 PIHOLE_DNS_=8.8.8.8;1.1.1.1
-IPv6="false"
+IPv6=false
 TEMPERATUREUNIT=f
 WEBTHEME=default-dark
 DNSMASQ_LISTENING=all
