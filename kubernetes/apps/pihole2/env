@@ -1,9 +1,11 @@
 TZ=America/Boise
-FTLCONF_LOCAL_IPV4=${externalIp}
+FTLCONF_debug_api=true
+FTLCONF_dns_hosts=["${externalIp} ${domain}"]
+FTLCONF_dns_domain=${domain}
 FTLCONF_dns_listeningMode=all
+FTLCONF_dns_reply_host=${externalDnsIp}
 FTLCONF_dns_upstreams=8.8.8.8;1.1.1.1
 FTLCONF_webserver_port=80,443s
-FTLCONF_debug_api=true
-IPv6=false
-TEMPERATUREUNIT=f
-WEBTHEME=default-dark
+FTLCONF_webserver_domain=${subdomain}.${domain}
+FTLCONF_webserver_interface_theme=default-dark
+FTLCONF_webserver_api_temp_unit=F

@@ -8,7 +8,7 @@ metadata:
     metallb.io/allow-shared-ip: "pihole-dns"
 spec:
   type: LoadBalancer
-  loadBalancerIP: "192.168.2.241"
+  loadBalancerIP: ${externalDnsIp}
   selector:
     app: pihole
   externalTrafficPolicy: Local
@@ -28,7 +28,7 @@ metadata:
     metallb.io/allow-shared-ip: "pihole-dns"
 spec:
   type: LoadBalancer
-  loadBalancerIP: "192.168.2.241"
+  loadBalancerIP: ${externalDnsIp}
   selector:
     app: pihole
   externalTrafficPolicy: Local
