@@ -25,6 +25,7 @@ spec:
     substitute:
       appName: pihole
       subdomain: pihole
+      externalDnsIp: "192.168.2.241"
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
