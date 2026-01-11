@@ -3,5 +3,6 @@ kind: HelmRepository
 metadata:
   name: vkms
 spec:
-  interval: 24h
-  url: https://victoriametrics.github.io/helm-charts/
+  type: oci
+  url: oci://ghcr.io/victoriametrics/helm-charts
+  interval: 30m
