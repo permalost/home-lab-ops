@@ -1,10 +1,13 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: vkms
+  name: victoria-metrics
 spec:
   interval: 30m
+  upgrade:
+    remediation:
+      remediateLastHelmReleaseRevision: true
   chart:
     spec:
       chart: victoria-metrics-k8s-stack
@@ -17,31 +20,30 @@ spec:
     alertmanager:
       ingress:
         enabled: true
-        annotations: { ingressClassName: nginx }
+        ingressClassName: cilium
         hosts:
           - "alertmanager.${domain}"
     grafana:
       ingress:
         enabled: true
-        annotations: { ingressClassName: nginx }
+        ingressClassName: cilium
         hosts:
           - "grafana.${domain}"
     vmagent:
       ingress:
         enabled: true
-        annotations: { ingressClassName: nginx }
+        ingressClassName: cilium
         hosts:
           - "vmagent.${domain}"
     vmalert:
       ingress:
         enabled: true
-        annotations: { ingressClassName: nginx }
+        ingressClassName: cilium
         hosts:
           - "vmalert.${domain}"
     vmsingle:
       ingress:
         enabled: true
-        ngressClassName: nginx
-        annotations: { ingressClassName: nginx }
+        ingressClassName: cilium
         hosts:
           - "vmsingle.${domain}"
