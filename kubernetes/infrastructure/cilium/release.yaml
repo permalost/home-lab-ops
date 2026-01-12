@@ -2,7 +2,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cilium
-  namespace: monitoring
+  namespace: cilium
 spec:
   interval: 10m
   chart:
