@@ -62,7 +62,6 @@ spec:
         - NET_RAW
         - IPC_LOCK
         - SYS_ADMIN
-        - SYS_MODULE
         - SYS_RESOURCE
         - DAC_OVERRIDE
         - FOWNER
@@ -71,5 +70,4 @@ spec:
         cleanCiliumState:
         - NET_ADMIN
         - SYS_ADMIN
-        - SYS_MODULE
         - SYS_RESOURCE
