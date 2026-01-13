@@ -4,7 +4,7 @@ metadata:
   name: cilium
   namespace: cilium
 spec:
-  interval: 10m
+  interval: 15m
   chart:
     spec:
       chart: cilium
@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: cilium
-      interval: 5m
+      interval: 15m
   releaseName: cilium
   install:
     remediation:
