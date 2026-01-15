@@ -5,3 +5,8 @@ resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
+
+configMapGenerator:
+- name: cilium-helm-chart-values
+  files:
+  - values.yaml

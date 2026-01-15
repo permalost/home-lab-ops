@@ -28,48 +28,7 @@ spec:
     - paths: ["/spec/replicas"]
       target:
         kind: Deployment
-  values:
-    ipam:
-      mode: kubernetes
-    gatewayAPI:
-      enabled: true
-    hostFirewall:
-      enabled: true
-    hubble:
-      enabled: true
-      relay:
-        enabled: true
-      ui:
-        enabled: true
-        ingress:
-          enabled: true
-          ingressClassName: cilium
-    ingressController:
-      enabled: true
-    cgroup:
-      autoMount:
-        enabled: false
-      hostRoot: /sys/fs/cgroup
-    k8sServiceHost: localhost
-    k8sServicePort: 7445
-    kubeProxyReplacement: true
-    operator:
-      replicas: 1
-    securityContext:
-      capabilities:
-        ciliumAgent:
-        - CHOWN
-        - KILL
-        - NET_ADMIN
-        - NET_RAW
-        - IPC_LOCK
-        - SYS_ADMIN
-        - SYS_RESOURCE
-        - DAC_OVERRIDE
-        - FOWNER
-        - SETGID
-        - SETUID
-        cleanCiliumState:
-        - NET_ADMIN
-        - SYS_ADMIN
-        - SYS_RESOURCE
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-helm-chart-values
+      valuesKey: values.yaml
