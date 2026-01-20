@@ -29,6 +29,8 @@ gatewayAPI:
   enabled: true
   enableAlpn: true
   enableAppProtocol: true
+  hostNetwork:
+    enabled: true
 # for clusters with a single node
 operator:
   replicas: 1
@@ -45,3 +47,20 @@ hubble:
 #   enabled: true
 # ingressController:
 #   enabled: true
+
+# L2 Announcements
+# enableL2Announcements: true
+l2announcements:
+  enabled: true
+  leaseDuration: 3s 
+  leaseRenewDeadline: 1s 
+  leaseRetryPeriod: 200ms
+k8sClientQps: {QPS}
+k8sClientBurst: {BURST}
+tls:
+  secretsNamespace:
+    name: "cilium"
+externalIPs:
+  enable: true
+
+

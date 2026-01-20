@@ -5,6 +5,9 @@ resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
+  - policies/l2-policy.yaml
+  - policies/ipPool.yaml
+  - policies/network-policy.yaml
 
 configMapGenerator:
 - name: cilium-helm-chart-values
