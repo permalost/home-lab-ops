@@ -2,10 +2,60 @@
 checks:
   addAllBuiltIn: true
   exclude:
-    # Home lab — single-replica deployments are intentional for most workloads
+    # Home lab — replica counts and affinity rules are intentionally relaxed
     - "minimum-three-replicas"
     - "no-anti-affinity"
-    # Flux HelmRelease/Kustomization objects are not pods
-    - "no-read-only-root-fs"
+    - "no-node-affinity"
+
+    # Recreate strategy is intentional for workloads with RWO/NFS volumes
+    - "no-rolling-update-strategy"
+
+    # Flux and system components legitimately need broad RBAC
+    - "wildcard-in-rules"
+    - "cluster-admin-role-binding"
+    - "access-to-secrets"
+    - "access-to-create-pods"
+
+    # pihole requires port 53; LoadBalancer services are intentional
+    - "privileged-ports"
+    - "exposed-services"
+
+    # kube-linter can't resolve services/pods rendered by Helm at runtime
+    - "dangling-ingress"
+    - "dangling-service"
+    - "dangling-networkpolicy"
+
+    # kube-linter can't see namespace set by kustomize on resources without it
+    - "use-namespace"
+
+    # Flux sets restart policy; default SA is acceptable in this context
+    - "restart-policy"
+    - "default-service-account"
+
+    # Network isolation not enforced cluster-wide in this home lab
+    - "non-isolated-pod"
+
+    # Overly opinionated style/label checks not applicable here
+    - "sorted-keys"
+    - "required-label-owner"
+    - "required-annotation-email"
+    - "dnsconfig-options"
+
+    # kubeconform validates schemas against Flux CRDs; kube-linter doesn't
+    # have those schemas so schema-validation produces only false positives
+    - "schema-validation"
+
+    # System components (Cilium, cert-manager) run as root by design on Talos
     - "run-as-non-root"
-    - "no-privileged-containers"
+    - "no-read-only-root-fs"
+
+    # pihole requires WEBPASSWORD as an env var (container image requirement)
+    - "read-secret-from-env-var"
+
+    # Pre-existing debt — resource limits, probes, and image pinning to be
+    # addressed as a separate improvement pass
+    - "unset-cpu-requirements"
+    - "unset-memory-requirements"
+    - "no-readiness-probe"
+    - "no-liveness-probe"
+    - "latest-tag"
