@@ -27,3 +27,11 @@ repos:
     rev: v0.1.21
     hooks:
       - id: terraform-fmt
+  - repo: local
+    hooks:
+      - id: taskfile-lint
+        name: Taskfile lint
+        language: system
+        entry: task --list-all --silent
+        pass_filenames: false
+        files: Taskfile.*\.yml
