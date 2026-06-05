@@ -1,0 +1,14 @@
+---
+# kind cluster config for local Flux testing.
+# Wires containerd to trust the local OCI registry on localhost:5001
+# so flux push artifact / OCIRepository sources work without TLS.
+#
+# Usage: kind create cluster --config clusters/kind-config.yaml --name flux-test
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = ""
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+    endpoint = ["http://localhost:5001"]
