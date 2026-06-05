@@ -1,0 +1,123 @@
+---
+version: "3"
+
+tasks:
+  build:
+    desc: "Offline-render all Kustomizations for a cluster via flux build --dry-run (no cluster needed)"
+    summary: |
+      Renders every Flux Kustomization in the cluster directory using
+      flux build kustomization --dry-run, with variable substitution from
+      cluster-settings.yaml (and SOPS secrets if SOPS_AGE_KEY_FILE is set).
+
+      Usage:
+        task test:build               # defaults to orion
+        task test:build CLUSTER=na
+    vars:
+      CLUSTER: '{{.CLUSTER | default "orion"}}'
+    cmds:
+      - sh scripts/flux-build.sh {{.CLUSTER}}
+
+  build-all:
+    desc: "Offline-render Kustomizations for both clusters"
+    cmds:
+      - task: build
+        vars: {CLUSTER: orion}
+      - task: build
+        vars: {CLUSTER: na}
+
+  # ── Tier 2: Full Flux reconciliation in kind ─────────────────────────────
+
+  kind-up:
+    desc: "Create kind cluster + local OCI registry + Flux install + SOPS secret"
+    summary: |
+      Spins up a full local test environment:
+        - Docker registry on localhost:5001
+        - kind cluster configured to pull from that registry
+        - Flux controllers installed
+        - SOPS age key loaded as a Kubernetes secret (if SOPS_AGE_KEY_FILE is set)
+
+      Run test:kind-push then test:kind-reconcile after this.
+    cmds:
+      # 1. Start local OCI registry if not already running
+      - |
+        if ! docker inspect kind-registry >/dev/null 2>&1; then
+          echo "Starting local OCI registry on localhost:5001..."
+          docker run -d -p 5001:5000 --name kind-registry registry:2
+        else
+          echo "Registry already running."
+        fi
+      # 2. Create kind cluster wired to the local registry
+      - kind create cluster --config clusters/kind-config.yaml --name flux-test
+      # 3. Connect registry container to kind's Docker network
+      - docker network connect kind kind-registry 2>/dev/null || true
+      # 4. Install Flux controllers (no GitRepository source yet)
+      - flux install
+      # 5. Load SOPS age key as a Kubernetes secret for decryption
+      - |
+        if [ -n "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "$SOPS_AGE_KEY_FILE" ]; then
+          echo "Creating sops-age secret in flux-system..."
+          kubectl -n flux-system create secret generic sops-age \
+            --from-file=age.agekey="$SOPS_AGE_KEY_FILE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+        else
+          echo "WARN: SOPS_AGE_KEY_FILE not set — skipping sops-age secret"
+        fi
+      - |
+        echo "kind cluster ready -- run: task test:kind-push then task test:kind-reconcile"
+
+  kind-push:
+    desc: "Push local kubernetes/ manifests to the kind-local OCI registry"
+    summary: |
+      Packages the kubernetes/ directory as a Flux OCI artifact and pushes it
+      to localhost:5001. Run this after every local change before reconciling.
+    cmds:
+      - |
+        flux push artifact oci://localhost:5001/home-lab-ops:latest \
+          --path ./kubernetes/ \
+          --source="$(git remote get-url origin)" \
+          --revision="$(git rev-parse --short HEAD)"
+
+  kind-reconcile:
+    desc: "Create Flux source + apply cluster settings + watch Kustomizations reconcile"
+    summary: |
+      Wires up Flux to the local OCI registry and applies all Kustomizations
+      for the given cluster. Watches until all reach Ready=True.
+
+      Usage:
+        task test:kind-reconcile               # defaults to orion
+        task test:kind-reconcile CLUSTER=na
+    vars:
+      CLUSTER: '{{.CLUSTER | default "orion"}}'
+    cmds:
+      # 1. Point Flux at the local OCI registry
+      - |
+        flux create source oci home-lab-ops \
+          --url=oci://localhost:5001/home-lab-ops:latest \
+          --insecure \
+          --interval=1m
+      # 2. Apply cluster-settings ConfigMap so substituteFrom can resolve
+      - |
+        case "{{.CLUSTER}}" in
+          na)    kubectl apply -f kubernetes/clusters/na/settings/cluster-settings.yaml ;;
+          orion) kubectl apply -f kubernetes/clusters/orion/cluster-settings.yaml ;;
+          *)     kubectl apply -f kubernetes/clusters/{{.CLUSTER}}/cluster-settings.yaml ;;
+        esac
+      # 3. Apply all Flux Kustomization YAMLs for the cluster (skip bootstrap files)
+      - |
+        for f in kubernetes/clusters/{{.CLUSTER}}/*.yaml; do
+          case "$f" in
+            */cluster-settings*) continue ;;
+            */flux-system*)      continue ;;
+          esac
+          echo "Applying $f"
+          kubectl apply -f "$f"
+        done
+      # 4. Watch until all Kustomizations are Ready
+      - flux get kustomizations --watch
+
+  kind-down:
+    desc: "Tear down the flux-test kind cluster and local OCI registry"
+    cmds:
+      - kind delete cluster --name flux-test || true
+      - docker rm -f kind-registry 2>/dev/null || true
+      - echo "kind cluster and registry removed."

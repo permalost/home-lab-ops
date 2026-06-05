@@ -53,5 +53,18 @@ jobs:
           gh release download --repo go-task/task --pattern 'task_linux_amd64.tar.gz' \
             --output /tmp/task.tar.gz && tar -xzf /tmp/task.tar.gz -C /usr/local/bin task
 
+      - name: Install flux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download --repo fluxcd/flux2 --pattern 'flux_*_linux_amd64.tar.gz' \
+            --output /tmp/flux.tar.gz && tar -xzf /tmp/flux.tar.gz -C /usr/local/bin flux
+
       - name: Run validate script
         run: bash scripts/validate.sh
+
+      - name: Offline render — orion
+        run: bash scripts/flux-build.sh orion
+
+      - name: Offline render — na
+        run: bash scripts/flux-build.sh na
