@@ -52,8 +52,8 @@ hubble:
 # enableL2Announcements: true
 l2announcements:
   enabled: true
-  leaseDuration: 3s 
-  leaseRenewDeadline: 1s 
+  leaseDuration: 3s
+  leaseRenewDeadline: 1s
   leaseRetryPeriod: 200ms
 k8sClientQps: {QPS}
 k8sClientBurst: {BURST}
@@ -62,5 +62,3 @@ tls:
     name: "cilium"
 externalIPs:
   enable: true
-
-

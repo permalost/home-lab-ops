@@ -29,17 +29,17 @@ configMapGenerator:
 
 patches:
 - path: add-volumes.yaml
-  target: 
+  target:
     kind: Deployment
     name: deploy
-- target: 
+- target:
     kind: Deployment
     name: deploy
   patch: |
     - op: replace
       path: /spec/template/spec/containers/0/ports/0/containerPort
       value: 7745
-- target: 
+- target:
     kind: Service
     name: svc
   patch: |
