@@ -41,7 +41,7 @@ jobs:
             --output /tmp/kustomize.tar.gz && tar -xzf /tmp/kustomize.tar.gz -C /usr/local/bin kustomize
           gh release download --repo mikefarah/yq --pattern 'yq_linux_amd64' \
             --output /usr/local/bin/yq && chmod +x /usr/local/bin/yq
-          gh release download --repo stackrox/kube-linter --pattern 'kube-linter_linux_amd64.tar.gz' \
+          gh release download --repo stackrox/kube-linter --pattern 'kube-linter-linux.tar.gz' \
             --output /tmp/kube-linter.tar.gz && tar -xzf /tmp/kube-linter.tar.gz -C /usr/local/bin kube-linter
           gh release download --repo go-task/task --pattern 'task_linux_amd64.tar.gz' \
             --output /tmp/task.tar.gz && tar -xzf /tmp/task.tar.gz -C /usr/local/bin task
