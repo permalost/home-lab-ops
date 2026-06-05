@@ -8,7 +8,14 @@ Web UI for Flux CD — browse Kustomizations, HelmReleases, GitRepositories, and
 - **Namespace:** `flux-system`
 - **Values source:** HelmRelease inline
 
-Admin credentials: username `admin`, bcrypt-hashed password stored inline in the HelmRelease `values`. To change the password, generate a new bcrypt hash (e.g., at [bcrypt.online](https://bcrypt.online)) and update `passwordHash`.
+Admin credentials: username `admin`, bcrypt-hashed password stored inline in the HelmRelease `values`. To change the password, generate a new bcrypt hash locally and update `passwordHash`:
+
+```sh
+htpasswd -nbBC 10 "" "your-password" | tr -d ':\n' | sed 's/$2y/$2a/'
+# or: python3 -c "import bcrypt; print(bcrypt.hashpw(b'your-password', bcrypt.gensalt(rounds=10)).decode())"
+```
+
+Do not use online bcrypt tools — they receive your plaintext password.
 
 Ingress uses `ingressClassName: nginx` with cert-manager TLS (`letsencrypt-prod`).
 

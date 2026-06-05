@@ -4,7 +4,7 @@ Issues and renews TLS certificates via Let's Encrypt using Cloudflare DNS-01 cha
 
 ## Configuration
 
-- **Chart:** `cert-manager/cert-manager` (latest)
+- **Chart:** `cert-manager/cert-manager` (see `release.yaml` for pinned version)
 - **Namespace:** `cert-manager`
 - **Values source:** HelmRelease inline (`installCRDs: true`)
 
@@ -26,4 +26,4 @@ No direct ingress. Other components reference these issuers via `cert-manager.io
 
 - **Certificate stuck in `Pending`:** Check `kubectl describe certificaterequest -n <ns>` and look at the challenge object for DNS-01 propagation errors.
 - **Cloudflare auth error:** Verify the API token in `secret.yaml` has `Zone:Read` and `DNS:Edit` permissions.
-- **Rate limit hit:** Switch to the `letsencrypt-staging` issuer temporarily; staging has no rate limit.
+- **Rate limit hit:** Switch to the `letsencrypt-staging` issuer temporarily; staging has much higher limits than production but is still rate-limited.
