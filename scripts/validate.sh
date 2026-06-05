@@ -40,7 +40,7 @@ find . -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
     yq e 'true' "$file" > /dev/null
 done
 
-kubeconform_config=("-strict" "-ignore-missing-schemas" "-skip=Secret,ConfigMap" "-schema-location" "/tmp/flux-crd-schemas" "-schema-location" "default" "-verbose")
+kubeconform_config=("-strict" "-ignore-missing-schemas" "-skip=Secret,ConfigMap" "-kubernetes-version" "1.31" "-schema-location" "/tmp/flux-crd-schemas" "-schema-location" "default" "-verbose")
 
 echo "INFO - Validating clusters"
 find ./kubernetes/clusters -maxdepth 4 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
