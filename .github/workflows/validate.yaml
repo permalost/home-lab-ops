@@ -26,10 +26,14 @@ jobs:
 
       - name: Install tools
         run: |
-          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz -C /usr/local/bin
-          curl -sL https://github.com/kubernetes-sigs/kustomize/releases/latest/download/kustomize_v5.4.3_linux_amd64.tar.gz | tar xz -C /usr/local/bin
-          curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
-          curl -sL https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux.tar.gz | tar xz -C /usr/local/bin
+          curl -fsSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            -o /tmp/kubeconform.tar.gz && tar -xzf /tmp/kubeconform.tar.gz -C /usr/local/bin kubeconform
+          curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz \
+            -o /tmp/kustomize.tar.gz && tar -xzf /tmp/kustomize.tar.gz -C /usr/local/bin kustomize
+          curl -fsSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -fsSL https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter_linux_amd64.tar.gz \
+            -o /tmp/kube-linter.tar.gz && tar -xzf /tmp/kube-linter.tar.gz -C /usr/local/bin kube-linter
 
       - name: Run validate script
         run: bash scripts/validate.sh

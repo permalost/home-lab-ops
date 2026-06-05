@@ -24,8 +24,8 @@ spec:
             - name: http
               containerPort: 11434
           resources:
-          limits:
-            cpu: 100m
-            memory: 8Gi
+            limits:
+              cpu: 100m
+              memory: 8Gi
       nodeSelector:
         specialty: ai

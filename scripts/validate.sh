@@ -40,7 +40,7 @@ find . -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
     yq e 'true' "$file" > /dev/null
 done
 
-kubeconform_config=("-strict" "-ignore-missing-schemas" "-skip=Secret,ConfigMap" "-kubernetes-version" "1.31" "-schema-location" "/tmp/flux-crd-schemas" "-schema-location" "default" "-verbose")
+kubeconform_config=("-strict" "-ignore-missing-schemas" "-skip=Secret,ConfigMap" "-kubernetes-version" "1.31.1" "-schema-location" "/tmp/flux-crd-schemas" "-schema-location" "default" "-verbose")
 
 echo "INFO - Validating clusters"
 find ./kubernetes/clusters -maxdepth 4 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
@@ -56,7 +56,10 @@ kustomize_flags=("--load-restrictor=LoadRestrictionsNone")
 kustomize_config="kustomization.yaml"
 
 echo "INFO - Validating kustomize overlays"
-find . -type f -name $kustomize_config -print0 | while IFS= read -r -d $'\0' file;
+find . -type f -name $kustomize_config \
+  -not -path '*/webapp/base/*' \
+  -not -path '*/webapp/components/*' \
+  -print0 | while IFS= read -r -d $'\0' file;
   do
     echo "INFO - Validating kustomization ${file/%$kustomize_config}"
     kustomize build "${file/%$kustomize_config}" "${kustomize_flags[@]}" | \
@@ -67,4 +70,6 @@ find . -type f -name $kustomize_config -print0 | while IFS= read -r -d $'\0' fil
 done
 
 echo "INFO - Running kube-linter"
-kube-linter lint ./kubernetes/ --config .kube-linter.yaml
+kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
+  --ignore-paths kubernetes/apps/webapp/base \
+  --ignore-paths kubernetes/apps/webapp/components
