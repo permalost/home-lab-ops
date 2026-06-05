@@ -6,7 +6,7 @@ GitOps repository managing two home-lab Kubernetes clusters using [Flux CD](http
 
 | Name | Platform | Status | Hardware |
 |------|----------|--------|----------|
-| **orion** | Talos Linux | Active (in progress) | 3x Beelink GK Mini, VIP `10.50.0.10` |
+| **orion** | Talos Linux | Active (in progress) | 3x Beelink GK Mini (see `clusters/orion/README.md`) |
 | **na** | k3s (k3sup) | Active (being replaced by orion) | — |
 
 ## Repository Structure
