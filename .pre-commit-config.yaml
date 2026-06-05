@@ -19,10 +19,19 @@ repos:
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
-      - args:
+      - id: yamllint
+        args:
           - --config-file
           - .yamllint.yaml
-        id: yamllint
+        exclude: |
+          (?x)^(
+            kubernetes/clusters/.*/flux-system/gotk-components\.yaml|
+            kubernetes/bootstrap/.*|
+            kubernetes/clusters/na/settings/.*|
+            .*/secret\.ya?ml|
+            .*/configMap.*\.ya?ml|
+            .*\.sops\.ya?ml
+          )$
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.30
     hooks:
