@@ -11,7 +11,7 @@ GitOps repository managing two home-lab Kubernetes clusters using [Flux CD](http
 
 ## Repository Structure
 
-```
+```text
 .
 ├── clusters/orion/          # Talos bare-metal provisioning (pre-Kubernetes layer)
 │   ├── config/patches/      # Per-hardware machineconfig patches

@@ -4,7 +4,7 @@ Flux-managed in-cluster state for all clusters. Flux is bootstrapped once per cl
 
 ## Structure
 
-```
+```text
 kubernetes/
 ├── bootstrap/        # One-time Flux install kustomization (run once per cluster)
 ├── clusters/         # Per-cluster Flux entry points

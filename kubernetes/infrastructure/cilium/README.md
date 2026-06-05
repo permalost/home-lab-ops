@@ -5,7 +5,7 @@ CNI for both clusters, providing pod networking, L2 load balancer announcements 
 ## Configuration
 
 - **Chart:** `cilium/cilium` (>=1.16.0)
-- **Namespace:** `kube-system` (deployed to `cilium` namespace by HelmRelease, but manages kube-system)
+- **Namespace:** `cilium` (HelmRelease targets the `cilium` namespace; Cilium then manages pod networking cluster-wide including `kube-system`)
 - **Values source:** ConfigMap (`values.yaml` via kustomize `configMapGenerator`)
 
 Key non-default choices:

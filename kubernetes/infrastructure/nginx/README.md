@@ -11,7 +11,7 @@ Ingress controller (ingress-nginx) for HTTP/HTTPS routing. Set as the default in
 Key overrides:
 - `controller.setAsDefaultIngress: true` — nginx is the default ingress class
 - `controller.metrics.enabled: true` — Prometheus metrics exposed on port 10254
-- HSTS disabled (`hsts: false`)
+- HSTS disabled (`hsts: false`) — intentional; TLS termination and HSTS headers are handled upstream (router/firewall), not at the ingress layer
 
 A cluster-wide ConfigMap (`configMap.yaml`) provides nginx configuration overrides.
 

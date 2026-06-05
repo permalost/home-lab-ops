@@ -4,7 +4,7 @@ Shared Kustomize base for simple web applications. Provides a reusable `Deployme
 
 ## Structure
 
-```
+```text
 webapp/
 ├── base/            # Deployment and Service templates
 ├── components/

@@ -21,7 +21,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 
 Cilium must be ready before any other component (pods can't schedule without CNI). Cert-manager should be ready before any component that needs TLS certificates. Everything else is independent.
 
-```
+```text
 cilium → cert-manager → (everything else in parallel)
 ```
 
