@@ -2,6 +2,11 @@
 .vscode/
 # k8s
 kubeconfig
+talosconfig
+# certificates and keys
+*.pem
+*.key
+*.crt
 # vscode-sops
 .decrypted~*.yaml
 .config.env
