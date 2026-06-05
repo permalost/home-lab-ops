@@ -1,0 +1,11 @@
+---
+checks:
+  addAllBuiltIn: true
+  exclude:
+    # Home lab — single-replica deployments are intentional for most workloads
+    - "minimum-three-replicas"
+    - "no-anti-affinity"
+    # Flux HelmRelease/Kustomization objects are not pods
+    - "no-read-only-root-fs"
+    - "run-as-non-root"
+    - "no-privileged-containers"

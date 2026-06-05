@@ -17,6 +17,7 @@ brew "yq"
 brew "jq"
 brew "kustomize"
 brew "kubeconform"
+brew "kube-linter"
 
 # Dev tools
 brew "direnv"
