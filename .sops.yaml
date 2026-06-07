@@ -1,4 +1,10 @@
 creation_rules:
+  # Talos cluster secrets — encrypt entire document (flat schema, not k8s Secret shape)
+  - path_regex: clusters/.*/talsecret\.sops\.ya?ml$
+    age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+  - path_regex: clusters/.*/talenv\.sops\.ya?ml$
+    age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+  # Kubernetes Secret / ConfigMap manifests — encrypt data fields only
   - path_regex: .*/.*\.sops\.ya?ml
     encrypted_regex: ^(data|stringData)$
     age: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z

@@ -1,0 +1,25 @@
+# talhelper genconfig output — contains decrypted PKI; never commit
+clusterconfig/
+
+# Legacy rendered machineconfigs — contain plaintext PKI; never commit
+# These stay on disk for reference until talsecret.sops.yaml migration is verified
+rendered/
+
+# Test generation output — contains plaintext PKI from scratch runs
+config/test-output/
+
+# Client credentials
+talosconfig
+kubeconfig
+
+# Key material
+*.key
+*.crt
+*.pem
+*.agekey
+
+# Snapshots
+*.snapshot
+db.snapshot
+*.backup
+*.bak

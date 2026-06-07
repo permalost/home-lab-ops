@@ -3,6 +3,8 @@
 # k8s
 kubeconfig
 talosconfig
+# Talos — talhelper rendered output (contains decrypted PKI)
+clusters/*/clusterconfig/
 # certificates and keys
 *.pem
 *.key
