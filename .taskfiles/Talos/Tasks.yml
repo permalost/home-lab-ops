@@ -1,0 +1,140 @@
+---
+version: "3"
+
+vars:
+  TALOS_DIR: "{{.ROOT_DIR}}/clusters/orion"
+  TALOSCONFIG: "{{.TALOS_DIR}}/clusterconfig/talosconfig"
+  TALCONFIG: "{{.TALOS_DIR}}/talconfig.yaml"
+  TALSECRET: "{{.TALOS_DIR}}/talsecret.sops.yaml"
+  CLUSTERCONFIG_DIR: "{{.TALOS_DIR}}/clusterconfig"
+
+env:
+  TALOSCONFIG: "{{.TALOSCONFIG}}"
+  SOPS_AGE_KEY_FILE: ~/.config/sops/age/keys.txt
+
+tasks:
+  gen-secret:
+    desc: Generate cluster secrets from an existing rendered machineconfig (preserves live cluster PKI)
+    summary: |
+      Migrates existing plaintext secrets/secrets.yaml into a SOPS-encrypted talsecret.sops.yaml.
+      Run once; the live cluster identity is preserved so existing nodes trust the new config.
+
+      Usage: task talos:gen-secret FROM=clusters/orion/rendered/orion-cp-01-complete.yaml
+    requires:
+      vars: [FROM]
+    status:
+      - test -f {{.TALSECRET}}
+    cmds:
+      - talhelper gensecret --from-configfile {{.FROM}} > {{.TALSECRET}}
+      - sops --encrypt --in-place {{.TALSECRET}}
+      - |
+        echo "talsecret.sops.yaml written and encrypted."
+        echo "Verify round-trip with: sops -d {{.TALSECRET}}"
+
+  gen-config:
+    desc: Render machineconfigs into clusterconfig/ (requires talsecret.sops.yaml)
+    cmds:
+      - talhelper genconfig
+          --config-file {{.TALCONFIG}}
+          --secret-file {{.TALSECRET}}
+          --out-dir {{.CLUSTERCONFIG_DIR}}
+
+  validate:
+    desc: Validate talconfig schema and each rendered node machineconfig
+    cmds:
+      - talhelper validate talconfig --config-file {{.TALCONFIG}}
+      - |
+        for f in {{.CLUSTERCONFIG_DIR}}/orion-*.yaml; do
+          echo "Validating $f"
+          talosctl validate --config "$f" --mode metal || exit 1
+        done
+
+  apply:
+    desc: Apply rendered config to a single node (NODE=orion-cp-01 IP=10.50.0.11 [INSECURE=true])
+    summary: |
+      Apply the rendered machineconfig for NODE to the node at IP.
+      Use INSECURE=true for first-time bootstrap (before the cluster certificate is trusted).
+
+      Example: task talos:apply NODE=orion-cp-01 IP=10.50.0.11
+      Example: task talos:apply NODE=orion-cp-01 IP=10.50.0.11 INSECURE=true
+    requires:
+      vars: [NODE, IP]
+    vars:
+      FLAGS: '{{if eq .INSECURE "true"}}--insecure{{end}}'
+    cmds:
+      - talosctl apply-config {{.FLAGS}} --nodes {{.IP}} --endpoints {{.IP}}
+          --file {{.CLUSTERCONFIG_DIR}}/orion-{{.NODE}}.yaml
+
+  apply-all:
+    desc: Apply rendered configs to all cluster nodes (INSECURE=true for first-time bootstrap)
+    cmds:
+      - task: apply
+        vars: {NODE: orion-cp-01, IP: 10.50.0.11, INSECURE: "{{.INSECURE}}"}
+      - task: apply
+        vars: {NODE: orion-cp-02, IP: 10.50.0.12, INSECURE: "{{.INSECURE}}"}
+      - task: apply
+        vars: {NODE: orion-cp-03, IP: 10.50.0.13, INSECURE: "{{.INSECURE}}"}
+      - task: apply
+        vars: {NODE: orion-w-01, IP: 10.50.0.21, INSECURE: "{{.INSECURE}}"}
+      - task: apply
+        vars: {NODE: orion-w-02, IP: 10.50.0.22, INSECURE: "{{.INSECURE}}"}
+
+  bootstrap:
+    desc: One-time etcd bootstrap — run only on initial cluster bring-up, against the first CP
+    cmds:
+      - talosctl bootstrap --nodes 10.50.0.11 --endpoints 10.50.0.11
+
+  kubeconfig:
+    desc: Fetch kubeconfig from the cluster VIP
+    cmds:
+      - talosctl kubeconfig --nodes 10.50.0.10 --endpoints 10.50.0.10 --force ./kubeconfig
+      - chmod go-r ./kubeconfig
+
+  health:
+    desc: Check cluster health via the VIP
+    cmds:
+      - talosctl health --nodes 10.50.0.10 --endpoints 10.50.0.10
+
+  dashboard:
+    desc: Open interactive node dashboard (NODE=orion-cp-01 IP=10.50.0.11)
+    requires:
+      vars: [NODE, IP]
+    cmds:
+      - talosctl dashboard --nodes {{.IP}} --endpoints {{.IP}}
+
+  upgrade-talos:
+    desc: Upgrade Talos on one node (NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:vX.Y.Z)
+    summary: |
+      Upgrades the Talos version on a single node. Run one node at a time.
+      Wait for the node to rejoin the cluster before proceeding to the next.
+
+      Example: task talos:upgrade-talos NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:v1.12.1
+    requires:
+      vars: [NODE, IP, IMAGE]
+    cmds:
+      - talosctl upgrade --nodes {{.IP}} --endpoints {{.IP}}
+          --image {{.IMAGE}}
+          --preserve
+          --timeout 10m
+
+  upgrade-k8s:
+    desc: Upgrade Kubernetes version (TO=v1.33.0)
+    requires:
+      vars: [TO]
+    cmds:
+      - talosctl upgrade-k8s --nodes 10.50.0.10 --endpoints 10.50.0.10 --to {{.TO}}
+
+  reset:
+    desc: "DESTRUCTIVE: Wipe a node back to maintenance mode (NODE=orion-cp-01 IP=10.50.0.11)"
+    summary: |
+      Resets STATE and EPHEMERAL partitions on the node, rebooting it into maintenance mode.
+      The node must be drained and removed from etcd before running this on a control plane node.
+    prompt: "This will WIPE node {{.NODE}} ({{.IP}}). Are you sure?"
+    requires:
+      vars: [NODE, IP]
+    cmds:
+      - talosctl reset --nodes {{.IP}} --endpoints {{.IP}}
+          --graceful=false
+          --reboot
+          --system-labels-to-wipe STATE
+          --system-labels-to-wipe EPHEMERAL

@@ -22,6 +22,7 @@ includes:
   flux: .taskfiles/Flux/Tasks.yml
   k3sup: .taskfiles/K3sup/Tasks.yml
   link: .taskfiles/Linkerd/Tasks.yml
+  talos: .taskfiles/Talos/Tasks.yml
   test: .taskfiles/LocalTest/Tasks.yml
 
 tasks:
