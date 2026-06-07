@@ -2,5 +2,3 @@ cluster:
   etcd:
     advertisedSubnets:
       - 10.50.0.0/24
-    listenSubnets:
-      - 10.50.0.0/24
