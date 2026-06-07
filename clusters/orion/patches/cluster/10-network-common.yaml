@@ -1,0 +1,22 @@
+machine:
+  network:
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+    extraHostEntries:
+      - ip: 10.50.0.10
+        aliases:
+          - orion-api.norseamerican.com
+          - api.orion.norseamerican.com
+      - ip: 10.50.0.11
+        aliases:
+          - orion-cp-01.norseamerican.com
+      - ip: 10.50.0.12
+        aliases:
+          - orion-cp-02.norseamerican.com
+      - ip: 10.50.0.13
+        aliases:
+          - orion-cp-03.norseamerican.com
+  time:
+    servers:
+      - time.cloudflare.com

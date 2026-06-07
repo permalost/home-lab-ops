@@ -1,0 +1,5 @@
+machine:
+  certSANs:
+    - 10.50.0.22
+    - 10.10.0.22
+    - orion-w-02.norseamerican.com
