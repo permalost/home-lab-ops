@@ -28,5 +28,7 @@ cilium → cert-manager → (everything else in parallel)
 ## Adding a Component
 
 1. Create a new directory here with at minimum a `kustomization.yaml` and a `release.yaml` (HelmRelease) or raw manifests.
-2. Add a README using the [standard template](../../docs/component-readme-template.md).
+2. Add a README documenting purpose, dependencies, and any required `postBuild.substitute` variables.
 3. Wire it into a cluster by adding a Kustomization in `kubernetes/clusters/<name>/<component>.yaml`.
+
+**Canonical pattern for Helm components with a values file:** follow `cilium/` — use a `configMapGenerator` in `kustomization.yaml` to generate a ConfigMap from `values.yaml`, add `valuesFrom` in the HelmRelease pointing to that ConfigMap, and include a `kustomizeconfig.yaml` with a `nameReference` so that changing `values.yaml` automatically triggers a HelmRelease re-reconciliation.

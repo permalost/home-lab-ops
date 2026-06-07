@@ -1,25 +1,29 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cilium
+  name: __NAME__
   namespace: flux-system
 spec:
-  interval: 20m
+  interval: 10m
   retryInterval: 30s
   timeout: 15m
   prune: true
   wait: true
   dependsOn:
     - name: cluster-settings
+    # - name: __DEPENDS_ON__  # uncomment and set if this service needs another to be ready first
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/infrastructure/cilium
+  path: ./kubernetes/apps/__NAME__
   decryption:
     provider: sops
     secretRef:
       name: sops-age
   postBuild:
+    substitute:
+      appName: __NAME__
+      subdomain: __SUBDOMAIN__
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings

@@ -15,3 +15,11 @@ tasks:
     desc: Run all pre-commit hooks against every tracked file
     cmds:
       - pre-commit run --all-files
+  new-app:
+    desc: "Scaffold a new app. Required: NAME, SUBDOMAIN, IMAGE. Optional: CLUSTER (default: orion), DEPENDS_ON."
+    cmds:
+      - sh scripts/new-app.sh NAME={{.NAME}} SUBDOMAIN={{.SUBDOMAIN}} IMAGE={{.IMAGE}} CLUSTER={{.CLUSTER}} {{if .DEPENDS_ON}}DEPENDS_ON={{.DEPENDS_ON}}{{end}}
+    vars:
+      CLUSTER: '{{default "orion" .CLUSTER}}'
+    requires:
+      vars: [NAME, SUBDOMAIN, IMAGE]
