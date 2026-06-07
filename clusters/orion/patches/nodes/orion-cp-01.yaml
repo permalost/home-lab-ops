@@ -1,0 +1,5 @@
+machine:
+  certSANs:
+    - 10.50.0.11
+    - 10.10.0.11
+    - orion-cp-01.norseamerican.com

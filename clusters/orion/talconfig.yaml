@@ -1,0 +1,179 @@
+# talhelper configuration for the orion cluster
+# Generate machineconfigs: task talos:gen-config
+# Reference: https://budimanjojo.github.io/talhelper/latest/reference/configuration/
+
+clusterName: orion
+talosVersion: v1.12.1
+kubernetesVersion: v1.33.0
+endpoint: https://10.50.0.10:6443
+
+# CNI is managed by Cilium; disable built-in CNI and kube-proxy
+cniConfig:
+  name: none
+
+# Additional SANs added to the API server certificate
+additionalApiServerCertSans:
+  - 10.50.0.10
+  - orion-api.norseamerican.com
+
+clusterPodNets:
+  - 10.241.0.0/16
+clusterSvcNets:
+  - 10.141.0.0/16
+
+# Cluster-wide patches applied to every node
+patches:
+  - "@./patches/cluster/00-features.yaml"
+  - "@./patches/cluster/10-network-common.yaml"
+  - "@./patches/cluster/20-kubelet-common.yaml"
+  - "@./patches/cluster/30-cilium-prep.yaml"
+
+# Control-plane role patches applied in addition to cluster patches
+controlPlane:
+  patches:
+    - "@./patches/controlplane/00-etcd.yaml"
+    - "@./patches/controlplane/10-apiserver.yaml"
+    - "@./patches/controlplane/20-allow-scheduling.yaml"
+
+nodes:
+  # ── Control Plane ─────────────────────────────────────────────────────────
+  # Hardware: Beelink GK Mini (3× identical units)
+  # Boot disk: SATA SSD at pci-0000:00:12.0-ata-1 (/dev/disk/by-path/…)
+  # NIC: currently identified by interface name (eth0).
+  # TODO: Replace 'interface: eth0' with 'deviceSelector: {hardwareAddr: <MAC>}'
+  #       after running: talosctl -n <ip> get links -o yaml
+  #       Record MAC values in NODES.md.
+
+  - hostname: orion-cp-01
+    ipAddress: 10.50.0.11
+    controlPlane: true
+    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    networkInterfaces:
+      - interface: eth0
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.11/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+            vip:
+              ip: 10.50.0.10
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.11/24
+    patches:
+      - "@./patches/nodes/orion-cp-01.yaml"
+
+  - hostname: orion-cp-02
+    ipAddress: 10.50.0.12
+    controlPlane: true
+    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    networkInterfaces:
+      - interface: eth0
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.12/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+            vip:
+              ip: 10.50.0.10
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.12/24
+    patches:
+      - "@./patches/nodes/orion-cp-02.yaml"
+
+  - hostname: orion-cp-03
+    ipAddress: 10.50.0.13
+    controlPlane: true
+    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    networkInterfaces:
+      - interface: eth0
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.13/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+            vip:
+              ip: 10.50.0.10
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.13/24
+    patches:
+      - "@./patches/nodes/orion-cp-03.yaml"
+
+  # ── Workers ────────────────────────────────────────────────────────────────
+  # Hardware: Bosgame (2× identical units)
+  # Boot disk: NVMe at pci-0000:04:00.0-nvme-1 (/dev/disk/by-path/…)
+  # NIC: currently identified by interface name (enp1s0).
+  # TODO: Replace 'interface: enp1s0' with 'deviceSelector: {hardwareAddr: <MAC>}'
+  #       after running: talosctl -n <ip> get links -o yaml
+  #       Record MAC values in NODES.md.
+
+  - hostname: orion-w-01
+    ipAddress: 10.50.0.21
+    controlPlane: false
+    installDisk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.21/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.21/24
+    patches:
+      - "@./patches/nodes/orion-w-01.yaml"
+
+  - hostname: orion-w-02
+    ipAddress: 10.50.0.22
+    controlPlane: false
+    installDisk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
+    networkInterfaces:
+      - interface: enp1s0
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.22/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.22/24
+    patches:
+      - "@./patches/nodes/orion-w-02.yaml"
