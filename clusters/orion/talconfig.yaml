@@ -37,19 +37,16 @@ controlPlane:
 
 nodes:
   # ── Control Plane ─────────────────────────────────────────────────────────
-  # Hardware: Beelink GK Mini (3× identical units)
-  # Boot disk: SATA SSD at pci-0000:00:12.0-ata-1 (/dev/disk/by-path/…)
-  # NIC: currently identified by interface name (eth0).
-  # TODO: Replace 'interface: eth0' with 'deviceSelector: {hardwareAddr: <MAC>}'
-  #       after running: talosctl -n <ip> get links -o yaml
-  #       Record MAC values in NODES.md.
+  # Hardware: Beelink GK Mini — trunk NIC is enp2s0 on all three units
+  # Boot disk: SATA SSD (128 GB), identified by serial via by-id
 
   - hostname: orion-cp-01
     ipAddress: 10.50.0.11
     controlPlane: true
-    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    installDisk: /dev/disk/by-id/ata-SSD_128GB_2021092600394
     networkInterfaces:
-      - interface: eth0
+      - deviceSelector:
+          hardwareAddr: "84:47:09:07:c6:4a"
         dhcp: false
         vlans:
           - vlanId: 50
@@ -60,8 +57,6 @@ nodes:
             routes:
               - network: 0.0.0.0/0
                 gateway: 10.50.0.1
-            vip:
-              ip: 10.50.0.10
           - vlanId: 10
             mtu: 1500
             dhcp: false
@@ -73,9 +68,10 @@ nodes:
   - hostname: orion-cp-02
     ipAddress: 10.50.0.12
     controlPlane: true
-    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    installDisk: /dev/disk/by-id/ata-SSD_128GB_2021092601145
     networkInterfaces:
-      - interface: eth0
+      - deviceSelector:
+          hardwareAddr: "84:47:09:07:c4:ff"
         dhcp: false
         vlans:
           - vlanId: 50
@@ -86,8 +82,6 @@ nodes:
             routes:
               - network: 0.0.0.0/0
                 gateway: 10.50.0.1
-            vip:
-              ip: 10.50.0.10
           - vlanId: 10
             mtu: 1500
             dhcp: false
@@ -99,9 +93,10 @@ nodes:
   - hostname: orion-cp-03
     ipAddress: 10.50.0.13
     controlPlane: true
-    installDisk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    installDisk: /dev/disk/by-id/ata-ORICO_250929CA12802668
     networkInterfaces:
-      - interface: eth0
+      - deviceSelector:
+          hardwareAddr: "5c:85:7e:4f:a2:92"
         dhcp: false
         vlans:
           - vlanId: 50
@@ -112,8 +107,6 @@ nodes:
             routes:
               - network: 0.0.0.0/0
                 gateway: 10.50.0.1
-            vip:
-              ip: 10.50.0.10
           - vlanId: 10
             mtu: 1500
             dhcp: false
@@ -123,19 +116,17 @@ nodes:
       - "@./patches/nodes/orion-cp-03.yaml"
 
   # ── Workers ────────────────────────────────────────────────────────────────
-  # Hardware: Bosgame (2× identical units)
-  # Boot disk: NVMe at pci-0000:04:00.0-nvme-1 (/dev/disk/by-path/…)
-  # NIC: currently identified by interface name (enp1s0).
-  # TODO: Replace 'interface: enp1s0' with 'deviceSelector: {hardwareAddr: <MAC>}'
-  #       after running: talosctl -n <ip> get links -o yaml
-  #       Record MAC values in NODES.md.
+  # Hardware: Bosgame — trunk NIC is enp1s0, boot disk is Kingston 1 TB NVMe
+  # (enp2s0 also exists; it carried stale VLANs from the old doubled-interface
+  # bug and will be absent from the new render)
 
   - hostname: orion-w-01
     ipAddress: 10.50.0.21
     controlPlane: false
-    installDisk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
+    installDisk: /dev/disk/by-id/nvme-KINGSTON_OM8PGP41024N-A0_50026B7383880325
     networkInterfaces:
-      - interface: enp1s0
+      - deviceSelector:
+          hardwareAddr: "84:47:09:53:24:d6"
         dhcp: false
         vlans:
           - vlanId: 50
@@ -157,9 +148,10 @@ nodes:
   - hostname: orion-w-02
     ipAddress: 10.50.0.22
     controlPlane: false
-    installDisk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
+    installDisk: /dev/disk/by-id/nvme-KINGSTON_OM8PGP41024N-A0_50026B738388057D
     networkInterfaces:
-      - interface: enp1s0
+      - deviceSelector:
+          hardwareAddr: "84:47:09:53:28:36"
         dhcp: false
         vlans:
           - vlanId: 50
