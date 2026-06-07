@@ -1,57 +1,54 @@
 # Orion Cluster — Node Hardware Inventory
 
-This file is the canonical record of per-node hardware identity. Update it whenever a node is replaced or re-imaged.
-
 ## Control Plane Nodes — Beelink GK Mini
 
-| Hostname | Role | K8s IP (VLAN 50) | Mgmt IP (VLAN 10) | Boot Disk (by-path) | NIC MAC | Chassis S/N |
-|---|---|---|---|---|---|---|
-| orion-cp-01 | controlplane | 10.50.0.11/24 | 10.10.0.11/24 | `/dev/disk/by-path/pci-0000:00:12.0-ata-1` | **TODO** | **TODO** |
-| orion-cp-02 | controlplane | 10.50.0.12/24 | 10.10.0.12/24 | `/dev/disk/by-path/pci-0000:00:12.0-ata-1` | **TODO** | **TODO** |
-| orion-cp-03 | controlplane | 10.50.0.13/24 | 10.10.0.13/24 | `/dev/disk/by-path/pci-0000:00:12.0-ata-1` | **TODO** | **TODO** |
+Trunk NIC: `enp2s0` (bus `0000:02:00.0`, Realtek r8169). Boot disk: SATA 128 GB SSD.
+
+| Hostname | K8s IP (VLAN 50) | Mgmt IP (VLAN 10) | NIC MAC (`enp2s0`) | Boot disk (by-id) |
+|---|---|---|---|---|
+| orion-cp-01 | 10.50.0.11/24 | 10.10.0.11/24 | `84:47:09:07:c6:4a` | `ata-SSD_128GB_2021092600394` |
+| orion-cp-02 | 10.50.0.12/24 | 10.10.0.12/24 | `84:47:09:07:c4:ff` | `ata-SSD_128GB_2021092601145` |
+| orion-cp-03 | 10.50.0.13/24 | 10.10.0.13/24 | `5c:85:7e:4f:a2:92` | `ata-ORICO_250929CA12802668` |
+
+Additional disks on CP nodes (Ceph OSD candidates):
+- orion-cp-02: Samsung SSD 870 QVO 2 TB (`ata-Samsung_SSD_870_QVO_2TB_S6R4NJ0W405219J`)
+- orion-cp-03: NGFF 2280 128 GB SSD (`ata-NGFF_2280_128GB_SSD_2021031902002`)
 
 ## Worker Nodes — Bosgame
 
-| Hostname | Role | K8s IP (VLAN 50) | Mgmt IP (VLAN 10) | Boot Disk (by-path) | NVMe (Ceph) | NIC MAC | Chassis S/N |
-|---|---|---|---|---|---|---|---|
-| orion-w-01 | worker | 10.50.0.21/24 | 10.10.0.21/24 | `/dev/disk/by-path/pci-0000:04:00.0-nvme-1` | TBD | **TODO** | **TODO** |
-| orion-w-02 | worker | 10.50.0.22/24 | 10.10.0.22/24 | `/dev/disk/by-path/pci-0000:04:00.0-nvme-1` | TBD | **TODO** | **TODO** |
+Trunk NIC: `enp1s0` (bus `0000:01:00.0`). Boot disk: Kingston 1 TB NVMe. A second `enp2s0` NIC is present but carries no addresses in the new config (the old doubled-interface bug configured VLANs on both).
 
-## Filling in MAC addresses
+| Hostname | K8s IP (VLAN 50) | Mgmt IP (VLAN 10) | NIC MAC (`enp1s0`) | Boot disk (by-id) |
+|---|---|---|---|---|
+| orion-w-01 | 10.50.0.21/24 | 10.10.0.21/24 | `84:47:09:53:24:d6` | `nvme-KINGSTON_OM8PGP41024N-A0_50026B7383880325` |
+| orion-w-02 | 10.50.0.22/24 | 10.10.0.22/24 | `84:47:09:53:28:36` | `nvme-KINGSTON_OM8PGP41024N-A0_50026B738388057D` |
 
-Once captured, replace the `interface: eth0` / `interface: enp1s0` entries in `talconfig.yaml` with MAC-based device selectors so the config survives firmware upgrades or kernel renames:
-
-```yaml
-# Replace this …
-- interface: eth0
-
-# … with this (one entry per node using its real MAC):
-- deviceSelector:
-    hardwareAddr: "aa:bb:cc:dd:ee:ff"
-```
-
-To retrieve the MAC for a running node:
-
-```bash
-talosctl -n <ip> get links -o yaml | grep -A2 'name: eth0\|name: enp'
-```
-
-To retrieve disk identities (for upgrading from by-path to by-id, which is more stable):
-
-```bash
-talosctl -n <ip> get disks -o yaml
-```
+Additional disks on worker nodes (Ceph OSD candidates):
+- orion-w-01: WD_BLACK SN7100 2 TB (`nvme-WD_BLACK_SN7100_2TB_...` — capture with `talosctl get disks`)
+- orion-w-02: NX-2TB 2280 (`nvme-...` — capture with `talosctl get disks`)
 
 ## Cluster VIP
 
-`10.50.0.10` — Talos VIP declared on VLAN 50 on each control-plane node. Whoever holds the VIP is the active API server endpoint.
+`10.50.0.10` — Talos VIP on VLAN 50, declared on all three control-plane nodes via `vip.ip`.
 
-## Network summary
+## Network
 
 | VLAN | Purpose | Subnet | Gateway |
 |---|---|---|---|
-| 50 | Kubernetes (pod/service traffic) | 10.50.0.0/24 | 10.50.0.1 |
+| 50 | Kubernetes | 10.50.0.0/24 | 10.50.0.1 |
 | 10 | Management | 10.10.0.0/24 | 10.10.0.1 |
 | 60 | LoadBalancer services | 10.60.0.0/24 | 10.60.0.1 |
 
 See `docs/network-topology.md` for the full switch/VLAN diagram.
+
+## Capturing hardware identity
+
+To refresh this table after hardware changes:
+
+```bash
+# NIC permanent MAC
+talosctl get links enp2s0 --talosconfig clusters/orion/clusterconfig/talosconfig --nodes <ip> -o yaml | grep "permanentAddr:"
+
+# Disk by-id symlinks
+talosctl get disks --talosconfig clusters/orion/clusterconfig/talosconfig --nodes <ip> -o yaml | grep "by-id/"
+```

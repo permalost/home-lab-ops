@@ -3,9 +3,3 @@ machine:
     hostDNS:
       enabled: true
       resolveMemberNames: true
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles:
-        - os:reader
-      allowedKubernetesNamespaces:
-        - kube-system

@@ -42,7 +42,7 @@ tasks:
   validate:
     desc: Validate talconfig schema and each rendered node machineconfig
     cmds:
-      - talhelper validate talconfig --config-file {{.TALCONFIG}}
+      - talhelper validate talconfig
       - |
         for f in {{.CLUSTERCONFIG_DIR}}/orion-*.yaml; do
           echo "Validating $f"
