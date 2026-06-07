@@ -10,7 +10,7 @@ machine:
   network:
     hostname: orion-cp-xx
     interfaces:
-      - interface: eth0
+      - interface: enp2s0
         dhcp: false
         routes:
           - gateway: 10.50.0.1

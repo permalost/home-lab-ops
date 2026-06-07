@@ -1,5 +1,5 @@
-# Common configuration for all Orion nodes
-# This patch is applied to all machine configs
+# Common configuration for all Orion nodes (both controlplane and worker)
+# Install disk and image are set by hardware-specific patches (config/patches/hardware/).
 
 cluster:
   clusterName: orion
@@ -23,8 +23,23 @@ machine:
   kubelet:
     nodeIP:
       validSubnets:
-        - 10.50.0.0/24  # Only use IPs from Kubernetes VLAN
+        - 10.50.0.0/24
 
-  install:
-    disk: /dev/sda
-    image: ghcr.io/siderolabs/installer:v1.12.1
+  network:
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+    extraHostEntries:
+      - ip: 10.50.0.10
+        aliases:
+          - orion-api.norseamerican.com
+          - api.orion.norseamerican.com
+      - ip: 10.50.0.11
+        aliases:
+          - orion-cp-01.norseamerican.com
+      - ip: 10.50.0.12
+        aliases:
+          - orion-cp-02.norseamerican.com
+      - ip: 10.50.0.13
+        aliases:
+          - orion-cp-03.norseamerican.com

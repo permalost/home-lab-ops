@@ -1,5 +1,5 @@
-# Beelink hardware configuration
-# Beelink GK Mini control plane nodes
+# Beelink GK Mini hardware configuration — control plane nodes
+# Trunk NIC is enp2s0; boot disk identified by SATA path
 
 machine:
   install:
@@ -8,10 +8,8 @@ machine:
     image: ghcr.io/siderolabs/installer:v1.12.1
   network:
     interfaces:
-      - interface: eth0
+      - interface: enp2s0
         dhcp: false
-        routes:
-          - gateway: 10.50.0.1
         vlans:
           - vlanId: 50
             mtu: 1500
@@ -19,7 +17,6 @@ machine:
             routes:
               - network: 0.0.0.0/0
                 gateway: 10.50.0.1
-          # VLAN 10 - Management network
           - vlanId: 10
             mtu: 1500
             dhcp: false

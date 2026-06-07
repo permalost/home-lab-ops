@@ -1,47 +1,6 @@
-# Control plane node common configuration
-# Applied to all control plane nodes
+# Control plane additional settings (applied on top of common.yaml)
 
 cluster:
-  clusterName: orion
-  controlPlane:
-    endpoint: https://10.50.0.10:6443
-  apiServer:
-    certSANs:
-      - 10.50.0.10
-      - orion-api.norseamerican.com
-  network:
-    dnsDomain: cluster.local
-    podSubnets:
-      - 10.241.0.0/16
-    serviceSubnets:
-      - 10.141.0.0/16
   etcd:
     advertisedSubnets:
       - 10.50.0.0/24
-
-machine:
-  kubelet:
-    nodeIP:
-      validSubnets:
-        - 10.50.0.0/24
-  network:
-    # DNS configuration
-    nameservers:
-      - 1.1.1.1     # Cloudflare fallback
-      - 8.8.8.8     # Google fallback
-    
-    # Extra hosts file entries
-    extraHostEntries:
-      - ip: 10.50.0.10
-        aliases:
-          - orion-api.norseamerican.com
-          - api.orion.norseamerican.com
-      - ip: 10.50.0.11
-        aliases:
-          - orion-cp-01.norseamerican.com
-      - ip: 10.50.0.12
-        aliases:
-          - orion-cp-02.norseamerican.com
-      - ip: 10.50.0.13
-        aliases:
-          - orion-cp-03.norseamerican.com
