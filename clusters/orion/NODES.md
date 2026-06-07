@@ -1,5 +1,9 @@
 # Orion Cluster — Node Hardware Inventory
 
+> **Sensitivity:** This file contains hardware MAC addresses and disk serials that
+> uniquely identify physical machines. Keep this repository private or remove this
+> file before making the repo public.
+
 ## Control Plane Nodes — Beelink GK Mini
 
 Trunk NIC: `enp2s0` (bus `0000:02:00.0`, Realtek r8169). Boot disk: SATA 128 GB SSD.
