@@ -60,6 +60,13 @@ jobs:
           gh release download --repo fluxcd/flux2 --pattern 'flux_*_linux_amd64.tar.gz' \
             --output /tmp/flux.tar.gz && tar -xzf /tmp/flux.tar.gz -C /usr/local/bin flux
 
+      - name: Install Talos tools
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download --repo budimanjojo/talhelper --pattern 'talhelper_linux_amd64.tar.gz' \
+            --output /tmp/talhelper.tar.gz && tar -xzf /tmp/talhelper.tar.gz -C /usr/local/bin talhelper
+
       - name: Run validate script
         run: bash scripts/validate.sh
 
