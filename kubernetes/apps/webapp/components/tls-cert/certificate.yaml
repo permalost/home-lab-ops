@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: tls-cert
+spec:
+  secretName: ${subdomain}-${domain}-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: ${subdomain}.${domain}
+  dnsNames:
+    - ${subdomain}.${domain}
