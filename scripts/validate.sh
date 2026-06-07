@@ -73,3 +73,7 @@ echo "INFO - Running kube-linter"
 kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
   --ignore-paths kubernetes/apps/webapp/base \
   --ignore-paths kubernetes/apps/webapp/components
+
+echo "INFO - Validating Talos talconfig schema"
+talhelper validate talconfig --config-file clusters/orion/talconfig.yaml
+# Full render + talosctl validate requires the age key; run locally with: task talos:validate
