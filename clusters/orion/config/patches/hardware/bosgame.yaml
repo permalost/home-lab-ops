@@ -1,0 +1,25 @@
+# Bosgame hardware configuration
+# Bosgame worker nodes
+
+machine:
+  install:
+    disk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
+    wipe: true
+    image: ghcr.io/siderolabs/installer:v1.12.1
+  network:
+    interfaces:
+      - interface: enp1s0
+        dhcp: false
+        routes:
+          - gateway: 10.50.0.1
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          # VLAN 10 - Management network
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false

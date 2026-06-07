@@ -1,0 +1,30 @@
+# Common configuration for all Orion nodes
+# This patch is applied to all machine configs
+
+cluster:
+  clusterName: orion
+
+  controlPlane:
+    endpoint: https://10.50.0.10:6443
+
+  apiServer:
+    certSANs:
+      - 10.50.0.10
+      - orion-api.norseamerican.com
+
+  network:
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.241.0.0/16
+    serviceSubnets:
+      - 10.141.0.0/16
+
+machine:
+  kubelet:
+    nodeIP:
+      validSubnets:
+        - 10.50.0.0/24  # Only use IPs from Kubernetes VLAN
+
+  install:
+    disk: /dev/sda
+    image: ghcr.io/siderolabs/installer:v1.12.1

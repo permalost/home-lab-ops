@@ -1,0 +1,41 @@
+# mise.toml
+
+[env]
+CLUSTER_NAME="orion"
+CLUSTER_ENDPOINT="https://10.50.0.11"
+TALOSCONFIG="secrets/talosconfig"
+NODE_IP="10.50.0.21"
+SECRETS_FILE="secrets/secrets.yaml"
+KUBERNETES_VERSION="v1.33.0"
+TALOS_VERSION="v1.12.1"
+OUTPUT_DIR="rendered"
+PATCHES_DIR="config/patches"
+HOSTNAME="orion-w-01"
+
+[tasks]
+gen-secrets = "talosctl gen secrets --output-file secrets/secrets.yaml"
+gen-config = "talosctl gen config --with-secrets secrets/secrets.yaml --output-types talosconfig --output secrets/talosconfig $CLUSTER_NAME $CLUSTER_ENDPOINT"
+generate = "talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT --with-secrets $SECRETS_FILE --kubernetes-version $KUBERNETES_VERSION --talos-version $TALOS_VERSION --output $OUTPUT_DIR/$HOSTNAME-complete.yaml --output-types worker --config-patch @$PATCHES_DIR/controlplane-common.yaml --config-patch @$PATCHES_DIR/cilium.yaml --config-patch @$PATCHES_DIR/network-vlan.yaml --config-patch @config/$HOSTNAME.yaml"
+generate-w = "talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT --with-secrets $SECRETS_FILE --kubernetes-version $KUBERNETES_VERSION --talos-version $TALOS_VERSION --output $OUTPUT_DIR/$HOSTNAME-complete.yaml --output-types worker --config-patch @$PATCHES_DIR/worker-common.yaml --config-patch @$PATCHES_DIR/cilium.yaml --config-patch @$PATCHES_DIR/network-vlan.yaml --config-patch @config/$HOSTNAME.yaml"
+config-apply = "talosctl --nodes $NODE_IP apply-config --file rendered/rigel.yaml --insecure"
+# add ip to talosconfig
+dashboard = "talosctl dashboard -n $NODE_IP"
+bootstrap = "talosctl --nodes $NODE_IP bootstrap --talosconfig ./$TALOSCONFIG --insecure"
+copy-kubeconfig =  "talosctl -n $NODE_IP kubeconfig ~/.kube/$CLUSTER_NAME.yaml"
+cilium = "helm repo add cilium https://helm.cilium.io/"
+# cilium-install = "helm install \
+#    cilium \
+#    cilium/cilium \
+#    --version 1.18.0 \
+#    --namespace kube-system \
+#    --set ipam.mode=kubernetes \
+#    --set kubeProxyReplacement=true \
+#    --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+#    --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+#    --set cgroup.autoMount.enabled=false \
+#    --set cgroup.hostRoot=/sys/fs/cgroup \
+#    --set k8sServiceHost=localhost \
+#    --set k8sServicePort=7445 \
+#    --set=gatewayAPI.enabled=true \
+#    --set=gatewayAPI.enableAlpn=true \
+#    --set=gatewayAPI.enableAppProtocol=true"

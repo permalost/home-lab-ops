@@ -1,0 +1,29 @@
+# Common configuration for all Orion control plane nodes
+# This patch is applied to all control plane machine configs
+
+cluster:
+  etcd:
+    advertisedSubnets:
+      - 10.50.0.0/24
+
+machine:
+  network:
+    hostname: orion-cp-xx
+    interfaces:
+      - interface: eth0
+        dhcp: false
+        routes:
+          - gateway: 10.50.0.1
+        vlans:
+          - vlanId: 50
+            addresses:
+              - 10.50.0.11/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          - vlanId: 10
+            addresses:
+              - 10.10.0.11/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.10.0.1

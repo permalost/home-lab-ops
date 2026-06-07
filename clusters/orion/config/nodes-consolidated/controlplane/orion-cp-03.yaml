@@ -1,0 +1,27 @@
+# Control plane node 03 specific configuration
+# Beelink GK Mini #3
+# This will be merged with patches and secrets by generation script
+
+version: v1alpha1
+debug: false
+persist: true
+
+machine:
+  type: controlplane
+  network:
+    hostname: orion-cp-03
+    interfaces:
+      - interface: eth0
+        vlans:
+          - vlanId: 50
+            addresses:
+              - 10.50.0.13/24
+          - vlanId: 10
+            addresses:
+              - 10.10.0.13/24
+  
+  # Certificate SANs specific to this node
+  certSANs:
+    - 10.50.0.13          # This node K8s IP
+    - 10.10.0.13          # This node management IP
+    - orion-cp-03.norseamerican.com

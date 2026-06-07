@@ -1,0 +1,14 @@
+cluster:
+  network:
+    cni:
+      name: none
+  proxy:
+    disabled: true
+
+machine:
+  kubelet:
+    extraConfig:
+      registerWithTaints:
+      - key: node.cilium.io/agent-not-ready
+        value: "true"
+        effect: NoSchedule
