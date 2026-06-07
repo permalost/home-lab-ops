@@ -86,11 +86,11 @@ API Server:
 ```
 Ceph OSDs:
   Each control plane node runs OSD on /dev/nvme0n1
-  
+
 Ceph traffic:
   OSD ←→ OSD communication on VLAN 50
   Client ←→ OSD (RBD mounts) on VLAN 50
-  
+
 Ceph monitors:
   Co-located with etcd on control plane nodes
 ```
@@ -114,12 +114,12 @@ Service → Backend Pods
 
 ### Internal DNS
 ```
-Client query for orion-api.yourdomain.local
+Client query for orion-api.norseamerican.com
   ↓
 UDM Pro DNS (10.10.0.1) forwards to Pihole (10.60.0.53)
   ↓
 Pihole resolves:
-  orion-api.yourdomain.local → 10.50.0.10
-  orion-cp-01.yourdomain.local → 10.50.0.11
-  *.orion.yourdomain.local → 10.60.0.10 (wildcard for ingress)
+  orion-api.norseamerican.com → 10.50.0.10
+  orion-cp-01.norseamerican.com → 10.50.0.11
+  *.orion.norseamerican.com → 10.60.0.10 (wildcard for ingress)
 ```

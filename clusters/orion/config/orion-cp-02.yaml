@@ -30,7 +30,7 @@ machine:
           - vlanId: 10
             addresses:
               - 10.10.0.12/24
-  
+
   # Certificate SANs specific to this node
   certSANs:
     - 10.50.0.12          # This node K8s IP

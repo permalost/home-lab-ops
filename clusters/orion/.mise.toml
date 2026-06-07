@@ -1,41 +1,96 @@
-# mise.toml
+# mise.toml — local operator tasks for the orion cluster
+#
+# Canonical workflow (preferred):
+#   task talos:gen-config    — render all machineconfigs via talhelper
+#   task talos:dry-run-all   — diff against live nodes before applying
+#   task talos:apply-all     — apply to all nodes
+#
+# The tasks below are for manual overrides, one-off testing, and
+# bootstrap operations where talhelper is not being used.
 
 [env]
-CLUSTER_NAME="orion"
-CLUSTER_ENDPOINT="https://10.50.0.11"
-TALOSCONFIG="secrets/talosconfig"
-NODE_IP="10.50.0.21"
-SECRETS_FILE="secrets/secrets.yaml"
-KUBERNETES_VERSION="v1.33.0"
-TALOS_VERSION="v1.12.1"
-OUTPUT_DIR="rendered"
-PATCHES_DIR="config/patches"
-HOSTNAME="orion-w-01"
+CLUSTER_NAME = "orion"
+CLUSTER_ENDPOINT = "https://10.50.0.10:6443"  # VIP; must include port
+TALOSCONFIG = "secrets/talosconfig"
+NODE_IP = "10.50.0.21"
+SECRETS_FILE = "secrets/secrets.yaml"
+KUBERNETES_VERSION = "v1.33.0"
+TALOS_VERSION = "v1.12.1"
+OUTPUT_DIR = "rendered"
+PATCHES_DIR = "config/patches"
+HOSTNAME = "orion-w-01"
 
-[tasks]
-gen-secrets = "talosctl gen secrets --output-file secrets/secrets.yaml"
-gen-config = "talosctl gen config --with-secrets secrets/secrets.yaml --output-types talosconfig --output secrets/talosconfig $CLUSTER_NAME $CLUSTER_ENDPOINT"
-generate = "talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT --with-secrets $SECRETS_FILE --kubernetes-version $KUBERNETES_VERSION --talos-version $TALOS_VERSION --output $OUTPUT_DIR/$HOSTNAME-complete.yaml --output-types worker --config-patch @$PATCHES_DIR/controlplane-common.yaml --config-patch @$PATCHES_DIR/cilium.yaml --config-patch @$PATCHES_DIR/network-vlan.yaml --config-patch @config/$HOSTNAME.yaml"
-generate-w = "talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT --with-secrets $SECRETS_FILE --kubernetes-version $KUBERNETES_VERSION --talos-version $TALOS_VERSION --output $OUTPUT_DIR/$HOSTNAME-complete.yaml --output-types worker --config-patch @$PATCHES_DIR/worker-common.yaml --config-patch @$PATCHES_DIR/cilium.yaml --config-patch @$PATCHES_DIR/network-vlan.yaml --config-patch @config/$HOSTNAME.yaml"
-config-apply = "talosctl --nodes $NODE_IP apply-config --file rendered/rigel.yaml --insecure"
-# add ip to talosconfig
-dashboard = "talosctl dashboard -n $NODE_IP"
-bootstrap = "talosctl --nodes $NODE_IP bootstrap --talosconfig ./$TALOSCONFIG --insecure"
-copy-kubeconfig =  "talosctl -n $NODE_IP kubeconfig ~/.kube/$CLUSTER_NAME.yaml"
-cilium = "helm repo add cilium https://helm.cilium.io/"
-# cilium-install = "helm install \
-#    cilium \
-#    cilium/cilium \
-#    --version 1.18.0 \
-#    --namespace kube-system \
-#    --set ipam.mode=kubernetes \
-#    --set kubeProxyReplacement=true \
-#    --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
-#    --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
-#    --set cgroup.autoMount.enabled=false \
-#    --set cgroup.hostRoot=/sys/fs/cgroup \
-#    --set k8sServiceHost=localhost \
-#    --set k8sServicePort=7445 \
-#    --set=gatewayAPI.enabled=true \
-#    --set=gatewayAPI.enableAlpn=true \
-#    --set=gatewayAPI.enableAppProtocol=true"
+[tasks.genconfig]
+description = "Render all machineconfigs via talhelper (canonical)"
+run = """
+talhelper genconfig \
+  --config-file talconfig.yaml \
+  --secret-file talsecret.sops.yaml \
+  --out-dir clusterconfig
+"""
+
+[tasks.gen-secrets]
+description = "Generate fresh cluster secrets — only for new clusters; preserves nothing"
+run = "talosctl gen secrets --output-file $SECRETS_FILE"
+
+[tasks.gen-talosconfig]
+description = "Extract talosconfig credential from secrets file"
+run = """
+talosctl gen config \
+  --with-secrets $SECRETS_FILE \
+  --output-types talosconfig \
+  --output secrets/talosconfig \
+  $CLUSTER_NAME $CLUSTER_ENDPOINT
+"""
+
+[tasks.generate-cp]
+description = "Manually render a controlplane machineconfig for HOSTNAME (override / testing only)"
+run = """
+talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT \
+  --with-secrets $SECRETS_FILE \
+  --kubernetes-version $KUBERNETES_VERSION \
+  --talos-version $TALOS_VERSION \
+  --output $OUTPUT_DIR/$HOSTNAME-complete.yaml \
+  --output-types controlplane \
+  --config-patch @$PATCHES_DIR/common.yaml \
+  --config-patch @$PATCHES_DIR/controlplane.yaml \
+  --config-patch @$PATCHES_DIR/cilium.yaml \
+  --config-patch @$PATCHES_DIR/hardware/beelink.yaml \
+  --config-patch @config/$HOSTNAME.yaml
+"""
+
+[tasks.generate-w]
+description = "Manually render a worker machineconfig for HOSTNAME (override / testing only)"
+run = """
+talosctl gen config $CLUSTER_NAME $CLUSTER_ENDPOINT \
+  --with-secrets $SECRETS_FILE \
+  --kubernetes-version $KUBERNETES_VERSION \
+  --talos-version $TALOS_VERSION \
+  --output $OUTPUT_DIR/$HOSTNAME-complete.yaml \
+  --output-types worker \
+  --config-patch @$PATCHES_DIR/common.yaml \
+  --config-patch @$PATCHES_DIR/worker.yaml \
+  --config-patch @$PATCHES_DIR/cilium.yaml \
+  --config-patch @$PATCHES_DIR/hardware/bosgame.yaml \
+  --config-patch @config/nodes-consolidated/worker/$HOSTNAME.yaml
+"""
+
+[tasks.config-apply]
+description = "Apply rendered config to NODE_IP (add --insecure only for first-time bootstrap)"
+run = "talosctl --nodes $NODE_IP apply-config --file $OUTPUT_DIR/$HOSTNAME-complete.yaml --talosconfig ./$TALOSCONFIG"
+
+[tasks.dashboard]
+description = "Open interactive node dashboard for NODE_IP"
+run = "talosctl dashboard -n $NODE_IP"
+
+[tasks.bootstrap]
+description = "One-time etcd bootstrap — run only on initial cluster bring-up, against the first CP"
+run = "talosctl --nodes $NODE_IP bootstrap --talosconfig ./$TALOSCONFIG --insecure"
+
+[tasks.copy-kubeconfig]
+description = "Fetch kubeconfig from NODE_IP and save to ~/.kube/CLUSTER_NAME.yaml"
+run = "talosctl -n $NODE_IP kubeconfig ~/.kube/$CLUSTER_NAME.yaml"
+
+[tasks.cilium-repo]
+description = "Add Cilium Helm repo (one-time setup before manual cilium install)"
+run = "helm repo add cilium https://helm.cilium.io/"

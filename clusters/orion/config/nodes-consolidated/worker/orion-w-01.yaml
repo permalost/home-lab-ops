@@ -1,6 +1,5 @@
 # Worker node 01 specific configuration
-# Bosgame worker node
-# This will be merged with patches and secrets by generation script
+# Bosgame — trunk NIC is enp1s0, boot disk is Kingston 1 TB NVMe
 
 version: v1alpha1
 debug: false
@@ -8,6 +7,10 @@ persist: true
 
 machine:
   type: worker
+  install:
+    disk: /dev/disk/by-id/nvme-KINGSTON_OM8PGP41024N-A0_50026B7383880325
+    wipe: true
+    image: ghcr.io/siderolabs/installer:v1.12.1
   network:
     hostname: orion-w-01
     interfaces:
@@ -19,9 +22,7 @@ machine:
           - vlanId: 10
             addresses:
               - 10.10.0.21/24
-  
-  # Certificate SANs specific to this node
   certSANs:
-    - 10.50.0.21          # This node K8s IP
-    - 10.10.0.21          # This node management IP
+    - 10.50.0.21
+    - 10.10.0.21
     - orion-w-01.norseamerican.com

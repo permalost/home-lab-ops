@@ -30,10 +30,9 @@ machine:
           - vlanId: 10
             addresses:
               - 10.10.0.11/24
-  
+
   # Certificate SANs specific to this node
   certSANs:
     - 10.50.0.11          # This node K8s IP
     - 10.10.0.11          # This node management IP
     - orion-cp-01.norseamerican.com
-          

@@ -1,7 +1,0 @@
-# Talos machine configuration template for Bosgames
-# Bosgame
-
-machine:
-  install:
-    disk: /dev/disk/by-path/pci-0000:04:00.0-nvme-1
-    wipe: true
