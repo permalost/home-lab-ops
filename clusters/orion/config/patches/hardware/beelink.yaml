@@ -1,0 +1,25 @@
+# Beelink hardware configuration
+# Beelink GK Mini control plane nodes
+
+machine:
+  install:
+    disk: /dev/disk/by-path/pci-0000:00:12.0-ata-1
+    wipe: true
+    image: ghcr.io/siderolabs/installer:v1.12.1
+  network:
+    interfaces:
+      - interface: eth0
+        dhcp: false
+        routes:
+          - gateway: 10.50.0.1
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          # VLAN 10 - Management network
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false

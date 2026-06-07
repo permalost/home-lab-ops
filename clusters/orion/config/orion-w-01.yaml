@@ -1,0 +1,38 @@
+# Talos machine configuration template for orion
+# This will be merged with patches and secrets by generation script
+
+version: v1alpha1
+debug: false
+persist: true
+
+machine:
+  type: worker
+  install:
+    disk: /dev/nvme0n1
+    wipe: true
+    image: ghcr.io/siderolabs/installer:v1.12.1
+  network:
+    hostname: orion-w-01
+    interfaces:
+      - interface: enp1s0
+        dhcp: false
+        routes:
+          - gateway: 10.50.0.1
+        vlans:
+          - vlanId: 50
+            addresses:
+              - 10.50.0.21/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+          - vlanId: 10
+            addresses:
+              - 10.10.0.21/24
+  
+  # Certificate SANs specific to this node
+  certSANs:
+    - 10.50.0.21          # This node K8s IP
+    - 10.10.0.21          # This node management IP
+    - orion-w-01.norseamerican.com
+
+# Secrets and common configuration will be merged by generation script

@@ -1,0 +1,27 @@
+# Worker node 01 specific configuration
+# Bosgame worker node
+# This will be merged with patches and secrets by generation script
+
+version: v1alpha1
+debug: false
+persist: true
+
+machine:
+  type: worker
+  network:
+    hostname: orion-w-01
+    interfaces:
+      - interface: enp1s0
+        vlans:
+          - vlanId: 50
+            addresses:
+              - 10.50.0.21/24
+          - vlanId: 10
+            addresses:
+              - 10.10.0.21/24
+  
+  # Certificate SANs specific to this node
+  certSANs:
+    - 10.50.0.21          # This node K8s IP
+    - 10.10.0.21          # This node management IP
+    - orion-w-01.norseamerican.com
