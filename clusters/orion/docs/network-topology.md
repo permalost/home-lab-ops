@@ -114,12 +114,12 @@ Service → Backend Pods
 
 ### Internal DNS
 ```
-Client query for orion-api.norseamerican.com
+Client query for orion-api.yourdomain.local
   ↓
-UDM Pro DNS (10.10.0.1) forwards to Pihole (10.60.0.53)
+UDM Pro DNS forwards to Pihole ($PIHOLE_IP)
   ↓
 Pihole resolves:
-  orion-api.norseamerican.com → 10.50.0.10
-  orion-cp-01.norseamerican.com → 10.50.0.11
-  *.orion.norseamerican.com → 10.60.0.10 (wildcard for ingress)
+  orion-api.yourdomain.local → $CLUSTER_VIP
+  orion-cp-01.yourdomain.local → $CP_01_IP
+  *.orion.yourdomain.local → $INGRESS_IP (wildcard for ingress)
 ```
