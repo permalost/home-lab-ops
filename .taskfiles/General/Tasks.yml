@@ -7,6 +7,11 @@ tasks:
     cmds:
       - sh scripts/validate.sh
   tools:
-    desc: Install tools via Homebrew
+    desc: Install tools via Homebrew and install pre-commit hooks
     cmds:
       - brew bundle
+      - pre-commit install
+  pre-commit:
+    desc: Run all pre-commit hooks against every tracked file
+    cmds:
+      - pre-commit run --all-files
