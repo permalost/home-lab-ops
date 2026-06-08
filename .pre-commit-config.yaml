@@ -8,6 +8,7 @@ repos:
         args: [--allow-multiple-documents]
       - id: check-added-large-files
       - id: detect-private-key
+        exclude: secrets\.yaml\.example$
   - repo: https://github.com/onedr0p/sops-pre-commit
     rev: v2.1.1
     hooks:
