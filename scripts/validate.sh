@@ -75,5 +75,5 @@ kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
   --ignore-paths kubernetes/apps/webapp/components
 
 echo "INFO - Validating Talos talconfig schema"
-talhelper validate talconfig
+talhelper validate talconfig clusters/orion/talconfig.yaml
 # Full render + talosctl validate requires the age key; run locally with: task talos:validate
