@@ -5,4 +5,5 @@ metadata:
   namespace: flux-system
 data:
   domain: orion.norseamerican.com
-  externalIp: 192.168.2.66
+  externalIp: 10.50.0.230
+  certCloudflareEmail: permalost.commercial+cloudflare@gmail.com

@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-orion-tls
+  # Must live in the cilium namespace to match tls.secretsNamespace in Cilium values
+  namespace: cilium
+spec:
+  secretName: wildcard-orion-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: "*.${domain}"
+  dnsNames:
+    - "*.${domain}"
+    - "${domain}"

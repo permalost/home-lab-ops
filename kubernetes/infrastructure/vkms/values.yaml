@@ -8,8 +8,14 @@ grafana:
   ingress:
     enabled: true
     ingressClassName: cilium
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
       - "grafana.${domain}"
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - "grafana.${domain}"
 vmagent:
   ingress:
     enabled: true

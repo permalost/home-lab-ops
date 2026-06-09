@@ -8,6 +8,7 @@ resources:
   - policies/l2-policy.yaml
   - policies/ipPool.yaml
   - policies/network-policy.yaml
+  - hubble-httproute.yaml
 
 configMapGenerator:
 - name: cilium-helm-chart-values
