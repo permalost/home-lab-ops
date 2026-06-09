@@ -1,0 +1,30 @@
+alertmanager:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hosts:
+      - "alertmanager.${domain}"
+grafana:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hosts:
+      - "grafana.${domain}"
+vmagent:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hosts:
+      - "vmagent.${domain}"
+vmalert:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hosts:
+      - "vmalert.${domain}"
+vmsingle:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hosts:
+      - "vmsingle.${domain}"
