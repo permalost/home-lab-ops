@@ -8,7 +8,7 @@ spec:
   releaseName: vkms
   upgrade:
     remediation:
-      remediateLastHelmReleaseRevision: true
+      retries: 3
   chart:
     spec:
       chart: victoria-metrics-k8s-stack
