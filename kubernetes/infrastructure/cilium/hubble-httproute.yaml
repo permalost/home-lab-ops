@@ -7,6 +7,7 @@ spec:
   parentRefs:
     - name: orion
       namespace: gateway
+      sectionName: https
   hostnames:
     - "hubble.${domain}"
   rules:

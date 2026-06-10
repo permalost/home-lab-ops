@@ -73,7 +73,7 @@ tasks:
     cmds:
       - |
         flux push artifact oci://localhost:5001/home-lab-ops:latest \
-          --path ./kubernetes/ \
+          --path ./ \
           --source="$(git remote get-url origin)" \
           --revision="$(git rev-parse --short HEAD)"
 
@@ -92,7 +92,8 @@ tasks:
       # 1. Point Flux at the local OCI registry
       - |
         flux create source oci home-lab-ops \
-          --url=oci://localhost:5001/home-lab-ops:latest \
+          --url=oci://kind-registry:5000/home-lab-ops \
+          --tag=latest \
           --insecure \
           --interval=1m
       # 2. Apply cluster-settings ConfigMap so substituteFrom can resolve
@@ -112,7 +113,15 @@ tasks:
           echo "Applying $f"
           kubectl apply -f "$f"
         done
-      # 4. Watch until all Kustomizations are Ready
+      # 4. Patch every Kustomization's sourceRef to use the local OCIRepository.
+      #    The cluster YAMLs reference kind: GitRepository/flux-system (real cluster
+      #    bootstrap), but in kind we use an OCIRepository instead.
+      - |
+        kubectl get kustomization -n flux-system -o name | \
+          xargs -I{} kubectl patch {} -n flux-system \
+            --type=merge \
+            -p '{"spec":{"sourceRef":{"kind":"OCIRepository","name":"home-lab-ops"}}}'
+      # 5. Watch until all Kustomizations are Ready
       - flux get kustomizations --watch
 
   kind-down:

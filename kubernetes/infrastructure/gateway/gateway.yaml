@@ -13,7 +13,10 @@ spec:
       port: 80
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.networking.k8s.io/access: "true"
     - name: https
       protocol: HTTPS
       port: 443
@@ -26,4 +29,7 @@ spec:
             namespace: cilium
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.networking.k8s.io/access: "true"
