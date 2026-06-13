@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../webapp/base
+  # - pvc.yaml            # add if you need a PVC not covered by the pvc component
+  # - secret.sops.yaml    # add after encrypting with: sops --encrypt --in-place secret.sops.yaml
+
+components:
+  - ../webapp/components/ingress
+  # - ../webapp/components/pvc           # mounts /data; set storageClass + storageSize in cluster shell postBuild.substitute
+  # - ../webapp/components/tls-cert      # cert-manager Certificate (for non-ingress TLS use cases)
+  # - ../webapp/components/linkerd-inject
+  # - ../webapp/components/linkerd-disable
+
+namespace: __NAME__
+namePrefix: __NAME__-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: __NAME__
+      app.kubernetes.io/name: __NAME__
+
+images:
+  - name: my-app
+    newName: __IMAGE__
+    newTag: "SET_TAG_HERE"  # replace with the desired image tag
+
+# configMapGenerator:
+#   - name: env
+#     files:
+#       - environment    # key=value env file
+
+# patches:
+#   - target:
+#       kind: Deployment
+#       name: deploy
+#     patch: |-
+#       - op: replace
+#         path: /spec/template/spec/containers/0/ports/0/containerPort
+#         value: 8080   # change if app doesn't listen on 8080
