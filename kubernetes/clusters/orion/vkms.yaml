@@ -4,6 +4,8 @@ metadata:
   name: vkms
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: cluster-settings
   interval: 10m
   retryInterval: 30s
   timeout: 5m
