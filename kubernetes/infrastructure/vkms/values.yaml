@@ -30,7 +30,7 @@ vmalert:
       - "vmalert.${domain}"
 vmsingle:
   spec:
-    storage: {}
+    storage: null
   ingress:
     enabled: true
     ingressClassName: cilium
