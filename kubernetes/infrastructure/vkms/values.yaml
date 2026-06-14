@@ -29,6 +29,8 @@ vmalert:
     hosts:
       - "vmalert.${domain}"
 vmsingle:
+  spec:
+    storage: {}
   ingress:
     enabled: true
     ingressClassName: cilium
