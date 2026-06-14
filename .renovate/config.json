@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "America/Denver",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["renovate"],
+  "prConcurrentLimit": 3,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Talos OS version in talconfig.yaml",
+      "fileMatch": ["clusters/orion/talconfig\\.yaml$"],
+      "matchStrings": ["talosVersion:\\s*(?<currentValue>v[\\d.]+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "siderolabs/talos",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Kubernetes version in talconfig.yaml",
+      "fileMatch": ["clusters/orion/talconfig\\.yaml$"],
+      "matchStrings": ["kubernetesVersion:\\s*v(?<currentValue>[\\d.]+)"],
+      "datasourceTemplate": "endoflife-date",
+      "depNameTemplate": "kubernetes",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Cilium chart version in HelmRelease",
+      "fileMatch": ["kubernetes/infrastructure/cilium/release\\.yaml$"],
+      "matchStrings": ["version:\\s*\"?(?<currentValue>[\\d.]+)\"?"],
+      "datasourceTemplate": "helm",
+      "registryUrlTemplate": "https://helm.cilium.io/",
+      "depNameTemplate": "cilium",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group Talos + Kubernetes — must be bumped together per compatibility matrix",
+      "matchManagers": ["custom.regex"],
+      "matchPackageNames": ["siderolabs/talos", "kubernetes"],
+      "groupName": "talos-cluster",
+      "groupSlug": "talos-cluster"
+    },
+    {
+      "description": "Cilium — separate PR; requires task talos:gen-config + apply after merge",
+      "matchPackageNames": ["cilium"],
+      "automerge": false,
+      "labels": ["renovate", "cilium"]
+    }
+  ]
+}
