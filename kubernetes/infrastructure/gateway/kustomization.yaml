@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - certificate.yaml
   - gateway.yaml
+  - hubble-httproute.yaml
