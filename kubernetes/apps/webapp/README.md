@@ -61,7 +61,7 @@ Requires: `ingressClassName: nginx` (nginx must be deployed). For Cilium-only cl
 
 ### pvc
 
-Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy` container. A `nameReference` transformer rewires the volume's `claimName` when `namePrefix` is applied.
+Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy` container. A `nameReference` transformer rewires the volume's `claimName` when `namePrefix` is applied. The volumeMount patch targets `spec.template.spec.containers/0` — the first container in the Deployment.
 
 | Substitution var | Where to set | Example |
 |---|---|---|
@@ -72,7 +72,7 @@ Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy`
 
 Adds a cert-manager `Certificate` for `${subdomain}.${domain}` using the `letsencrypt-prod` ClusterIssuer. Useful when you need a TLS secret without an nginx Ingress (e.g. Cilium Gateway, gRPC, direct TLS).
 
-Uses the same `subdomain` / `domain` substitution vars as `ingress`.
+Uses the same `subdomain` / `domain` substitution vars as `ingress`. Requires the `letsencrypt-prod` ClusterIssuer to exist; the certificate secret is written to `${subdomain}-${domain}-tls`.
 
 ### linkerd-inject / linkerd-disable
 
@@ -90,7 +90,7 @@ This writes `kubernetes/apps/my-service/kustomization.yaml` and `kubernetes/clus
 
 ## Handling secrets
 
-SOPS secrets are per-consumer, not a Component. Add a `secret.sops.yaml` file in the app directory:
+Per-app secrets live at `kubernetes/apps/<app-name>/secret.sops.yaml` (one file per app, distinct from cluster-wide secrets in `settings/cluster-secrets.sops.yaml`). Add one like this:
 
 ```bash
 # create the plaintext secret

@@ -36,6 +36,14 @@ if [[ -z "$NAME" || -z "$SUBDOMAIN" || -z "$IMAGE" ]]; then
   exit 1
 fi
 
+if [[ "$IMAGE" == *:* ]]; then
+  IMAGE_NAME="${IMAGE%:*}"
+  IMAGE_TAG="${IMAGE##*:}"
+else
+  IMAGE_NAME="$IMAGE"
+  IMAGE_TAG="latest"
+fi
+
 APP_DIR="${REPO_ROOT}/kubernetes/apps/${NAME}"
 SHELL_FILE="${REPO_ROOT}/kubernetes/clusters/${CLUSTER}/${NAME}.yaml"
 APP_TMPL="${REPO_ROOT}/kubernetes/apps/_template/kustomization.yaml.tmpl"
@@ -51,12 +59,19 @@ if [[ -f "$SHELL_FILE" ]]; then
   exit 1
 fi
 
+CLUSTER_DIR="${REPO_ROOT}/kubernetes/clusters/${CLUSTER}"
+if [[ ! -d "$CLUSTER_DIR" ]]; then
+  echo "ERROR: cluster directory ${CLUSTER_DIR} does not exist" >&2
+  exit 1
+fi
+
 mkdir -p "$APP_DIR"
 
 sed \
   -e "s|__NAME__|${NAME}|g" \
   -e "s|__SUBDOMAIN__|${SUBDOMAIN}|g" \
-  -e "s|__IMAGE__|${IMAGE}|g" \
+  -e "s|__IMAGE__|${IMAGE_NAME}|g" \
+  -e "s|__IMAGE_TAG__|${IMAGE_TAG}|g" \
   "$APP_TMPL" > "${APP_DIR}/kustomization.yaml"
 
 SHELL_CONTENT=$(sed \
