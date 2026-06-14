@@ -75,3 +75,22 @@ jobs:
 
       - name: Offline render — na
         run: bash scripts/flux-build.sh na
+
+  talos:
+    name: Validate Talos config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          persist-credentials: false
+
+      - name: Install talhelper
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download --repo budimanjojo/talhelper --pattern 'talhelper_linux_amd64.tar.gz' \
+            --output /tmp/talhelper.tar.gz && tar -xzf /tmp/talhelper.tar.gz -C /usr/local/bin talhelper
+
+      - name: Validate talconfig schema
+        working-directory: clusters/orion
+        run: talhelper validate talconfig
