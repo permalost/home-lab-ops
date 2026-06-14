@@ -25,6 +25,9 @@ cgroup:
   hostRoot: /sys/fs/cgroup
 k8sServiceHost: localhost
 k8sServicePort: 7445
+# Gateway API CRDs are NOT bundled with Cilium ≥1.16.
+# They are installed separately via kubernetes/infrastructure/gateway-api/
+# and must exist before this HelmRelease runs (gateway-api Kustomization has no deps).
 gatewayAPI:
   enabled: true
   enableAlpn: true
