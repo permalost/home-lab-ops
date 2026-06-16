@@ -7,3 +7,4 @@ data:
   domain: orion.norseamerican.com
   externalIp: 10.50.0.230
   certCloudflareEmail: permalost.commercial+cloudflare@gmail.com
+  externalDnsIp: 10.50.0.231

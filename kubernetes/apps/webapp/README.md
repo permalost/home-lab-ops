@@ -10,7 +10,8 @@ webapp/
 │   ├── deployment.yaml   # Deployment named "deploy"; container name = ${appName}, image = my-app, port 8080
 │   └── service.yaml      # Service named "svc", ClusterIP, port 8080 (name: http)
 └── components/
-    ├── ingress/          # nginx Ingress + cert-manager TLS at ${subdomain}.${domain}
+    ├── ingress/          # nginx Ingress + cert-manager TLS at ${subdomain}.${domain} (na cluster)
+    ├── httproute/        # Gateway API HTTPRoute attached to the orion Gateway (orion cluster)
     ├── pvc/              # ReadWriteOnce PVC + mounts at /data
     ├── tls-cert/         # cert-manager Certificate (for non-ingress TLS scenarios)
     ├── linkerd-inject/   # opt-in Linkerd sidecar injection on the pod template
@@ -50,14 +51,21 @@ Then add a cluster shell at `kubernetes/clusters/orion/my-service.yaml` via `tas
 
 ### ingress
 
-Adds an nginx `Ingress` with cert-manager TLS.
+Adds an nginx `Ingress` with cert-manager TLS. Use on the **na** cluster (nginx deployed).
 
 | Substitution var | Where to set | Example |
 |---|---|---|
 | `subdomain` | cluster shell `postBuild.substitute` | `homebox` |
-| `domain` | `cluster-settings` ConfigMap | `orion.norseamerican.com` |
+| `domain` | `cluster-settings` ConfigMap | `norseamerican.com` |
 
-Requires: `ingressClassName: nginx` (nginx must be deployed). For Cilium-only clusters substitute `ingressClassName: cilium` with a patch.
+### httproute
+
+Adds a Gateway API `HTTPRoute` attached to the `orion` Gateway (ns `gateway`, HTTPS listener). TLS is handled by the wildcard cert at the Gateway — no per-app Certificate needed. Also labels the app namespace with `gateway.networking.k8s.io/access: "true"` so the Gateway permits route attachment. Use on the **orion** cluster.
+
+| Substitution var | Where to set | Example |
+|---|---|---|
+| `subdomain` | cluster shell `postBuild.substitute` | `dns` |
+| `domain` | `cluster-settings` ConfigMap | `orion.norseamerican.com` |
 
 ### pvc
 
