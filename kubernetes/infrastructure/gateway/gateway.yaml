@@ -4,7 +4,7 @@ metadata:
   name: orion
   namespace: gateway
   annotations:
-    io.cilium/lb-ipam-ips: "10.50.0.230"
+    io.cilium/lb-ipam-ips: "10.50.0.231"
 spec:
   gatewayClassName: cilium
   listeners:
