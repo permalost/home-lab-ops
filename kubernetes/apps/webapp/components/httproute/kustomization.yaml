@@ -3,7 +3,17 @@ kind: Component
 
 resources:
   - httproute.yaml
-  - namespace-label.yaml
+
+patches:
+  - target:
+      kind: Namespace
+    patch: |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: irrelevant
+        labels:
+          gateway.networking.k8s.io/access: "true"
 
 configurations:
   - nameReference.yaml
