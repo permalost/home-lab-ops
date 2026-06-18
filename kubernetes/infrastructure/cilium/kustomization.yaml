@@ -6,7 +6,6 @@ resources:
   - repository.yaml
   - release.yaml
   - policies/l2-policy.yaml
-  - policies/bgp-policy.yaml
   - policies/ipPool.yaml
   - policies/network-policy.yaml
 
