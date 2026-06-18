@@ -23,12 +23,14 @@ spec:
   values:
     provider:
       name: pihole
+    sources:
+      - gateway-httproute
+    domainFilters:
+      - ${domain}
+    registry: noop
+    policy: upsert-only
     extraArgs:
       - --pihole-server=http://pihole-svc.pihole.svc.cluster.local
-      - --source=gateway-httproute
-      - --domain-filter=${domain}
-      - --registry=noop
-      - --policy=upsert-only
     env:
       - name: EXTERNAL_DNS_PIHOLE_PASSWORD
         valueFrom:
