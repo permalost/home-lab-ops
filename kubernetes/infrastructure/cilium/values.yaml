@@ -55,6 +55,9 @@ ingressController:
   loadbalancerMode: shared
   default: false
 
+bgpControlPlane:
+  enabled: true
+
 # L2 Announcements
 # enableL2Announcements: true
 l2announcements:
