@@ -39,6 +39,7 @@ gatewayAPI:
 # for clusters with a single node
 operator:
   replicas: 1
+  rollOutPods: true
 hubble:
   enabled: true
   relay:
@@ -57,6 +58,7 @@ ingressController:
 
 bgpControlPlane:
   enabled: true
+rollOutCiliumPods: true
 
 # L2 Announcements
 # enableL2Announcements: true
