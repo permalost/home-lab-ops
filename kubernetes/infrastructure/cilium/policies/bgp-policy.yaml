@@ -10,7 +10,7 @@ spec:
       localASN: 65001
       peers:
         - name: unifi
-          peerAddress: 10.50.0.1/32
+          peerAddress: 10.50.0.1
           peerASN: 65000
           peerConfigRef:
             name: unifi
