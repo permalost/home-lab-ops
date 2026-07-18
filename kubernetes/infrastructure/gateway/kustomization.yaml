@@ -5,4 +5,5 @@ resources:
   - certificate.yaml
   - gateway.yaml
   - hubble-httproute.yaml
+  - http-redirect.yaml
   - reference-grant.yaml
