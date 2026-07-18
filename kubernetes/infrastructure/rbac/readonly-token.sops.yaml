@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: readonly-token
+    namespace: kube-system
+    annotations:
+        kubernetes.io/service-account.name: readonly
+type: kubernetes.io/service-account-token
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvTUxMamNHc0doR21Tb0U5
+            YU1LV3Q5UXBRMjN0Zk1MT29GTDhpd2NvdUZvCjhBTHoxM2t4MTUwc21tUXZTamJ2
+            VHRoay9CMXdYcE11ZkJhSzFjWHZ2SjAKLS0tIGhDcGlNelUyejZwcWU5eUhnZG5v
+            T296Z0NqS2k2TWlDbEQ5cm82VmxqZG8KkTtb98qjkm2JPHTPHYpI0i8ZzDpHMwHz
+            wpihPrpx9gXp5R3aGKrv55zE0S0pRB6NBB4jhoS1vIS9RHZnU1pZcQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-07-18T19:39:49Z"
+    mac: ENC[AES256_GCM,data:C3xq8l95s85xWXq7+hir9gWXCr0YMa4QUHdBirLF98MZTtGo+R4KFMjSs7REikJtwf+wkGGlO9z1Komr68YTok15NJ1Uo8/MiBjl51TxowMpJ3i2Th+SXlU27K867bBCBjD+S+Q/7tfZiNQFoPRFcl2Gv2zXxHSCDKTfSViy1Ys=,iv:9P7W9j5V3khnkG8GIdHx42lx0xF0TOnnzWYMUrDBFlg=,tag:aNTCStf9eCWvhlXSyBdzRg==,type:str]
+    version: 3.13.0
