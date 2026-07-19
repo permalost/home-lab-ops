@@ -6,4 +6,4 @@ spec:
   externalIPs: true
   loadBalancerIPs: true
   interfaces:
-    - ^enp[12]s0\.50$
+    - ^ethSel0\.50$
