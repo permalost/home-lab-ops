@@ -25,6 +25,7 @@ spec:
       name: pihole
     sources:
       - gateway-httproute
+      - ingress
     domainFilters:
       - ${domain}
     registry: noop
