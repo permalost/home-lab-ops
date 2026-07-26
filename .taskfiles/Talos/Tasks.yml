@@ -143,9 +143,8 @@ tasks:
     requires:
       vars: [NODE, IP, IMAGE]
     cmds:
-      - talosctl upgrade --nodes {{.IP}} --endpoints {{.IP}}
+      - talosctl upgrade -n {{.IP}} --endpoints {{.IP}}
           --image {{.IMAGE}}
-          --preserve
           --timeout 10m
 
   upgrade-k8s:

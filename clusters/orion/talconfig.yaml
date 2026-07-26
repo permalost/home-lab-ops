@@ -3,7 +3,7 @@
 # Reference: https://budimanjojo.github.io/talhelper/latest/reference/configuration/
 
 clusterName: orion
-talosVersion: v1.12.1
+talosVersion: v1.13.7
 kubernetesVersion: v1.33.0
 endpoint: https://10.50.0.10:6443
 
@@ -97,7 +97,7 @@ nodes:
   - hostname: orion-cp-03
     ipAddress: 10.50.0.13
     controlPlane: true
-    installDisk: /dev/disk/by-id/ata-ORICO_250929CA12802668
+    installDisk: /dev/disk/by-id/ata-NGFF_2280_128GB_SSD_2021031902002
     networkInterfaces:
       - deviceSelector:
           hardwareAddr: "5c:85:7e:4f:a2:92"
