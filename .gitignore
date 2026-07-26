@@ -1,5 +1,7 @@
 # Editors
 .vscode/
+# Claude Code
+.claude/
 # k8s
 kubeconfig
 talosconfig
