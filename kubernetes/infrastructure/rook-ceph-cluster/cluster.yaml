@@ -1,0 +1,57 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v20.2.2
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    count: 1
+    allowMultiplePerNode: false
+    modules:
+      - name: pg_autoscaler
+        enabled: true
+  dashboard:
+    enabled: true
+    ssl: true
+  monitoring:
+    enabled: false
+  network:
+    connections:
+      encryption:
+        enabled: false
+      compression:
+        enabled: false
+  crashCollector:
+    disable: false
+  cleanupPolicy:
+    confirmation: ""
+  removeOSDsIfOutAndSafeToRemove: false
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: orion-cp-01
+        devices:
+          - name: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_500GB_S6PXNS0W525343F
+      - name: orion-cp-02
+        devices:
+          - name: /dev/disk/by-id/ata-Samsung_SSD_870_QVO_2TB_S6R4NJ0W405219J
+      - name: orion-cp-03
+        devices:
+          - name: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_500GB_S6PXNL0W600075W
+      - name: orion-w-01
+        devices:
+          - name: /dev/disk/by-id/nvme-WD_BLACK_SN7100_2TB_251742800063
+      - name: orion-w-02
+        devices:
+          - name: /dev/disk/by-id/nvme-NX-2TB_2280_9I50508002207
+  disruptionManagement:
+    managePodBudgets: true
+    osdMaintenanceTimeout: 30
