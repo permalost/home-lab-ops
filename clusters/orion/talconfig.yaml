@@ -27,6 +27,7 @@ patches:
   - "@./patches/cluster/10-network-common.yaml"
   - "@./patches/cluster/20-kubelet-common.yaml"
   - "@./patches/cluster/30-cilium-prep.yaml"
+  - "@./patches/cluster/40-rook-ceph-prep.yaml"
 
 # Control-plane role patches applied in addition to cluster patches
 controlPlane:

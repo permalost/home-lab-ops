@@ -12,11 +12,12 @@ Trunk NIC: `enp2s0` (bus `0000:02:00.0`, Realtek r8169). Boot disk: SATA 128 GB 
 |---|---|---|---|---|
 | orion-cp-01 | 10.50.0.11/24 | 10.10.0.11/24 | `84:47:09:07:c6:4a` | `ata-SSD_128GB_2021092600394` |
 | orion-cp-02 | 10.50.0.12/24 | 10.10.0.12/24 | `84:47:09:07:c4:ff` | `ata-SSD_128GB_2021092601145` |
-| orion-cp-03 | 10.50.0.13/24 | 10.10.0.13/24 | `5c:85:7e:4f:a2:92` | `ata-ORICO_250929CA12802668` |
+| orion-cp-03 | 10.50.0.13/24 | 10.10.0.13/24 | `5c:85:7e:4f:a2:92` | `ata-NGFF_2280_128GB_SSD_2021031902002` |
 
 Additional disks on CP nodes (Ceph OSD candidates):
+- orion-cp-01: Samsung SSD 870 EVO 500 GB (`ata-Samsung_SSD_870_EVO_500GB_S6PXNS0W525343F`)
 - orion-cp-02: Samsung SSD 870 QVO 2 TB (`ata-Samsung_SSD_870_QVO_2TB_S6R4NJ0W405219J`)
-- orion-cp-03: NGFF 2280 128 GB SSD (`ata-NGFF_2280_128GB_SSD_2021031902002`)
+- orion-cp-03: Samsung SSD 870 EVO 500 GB (`ata-Samsung_SSD_870_EVO_500GB_S6PXNL0W600075W`)
 
 ## Worker Nodes — Bosgame
 
@@ -28,8 +29,8 @@ Trunk NIC: `enp1s0` (bus `0000:01:00.0`). Boot disk: Kingston 1 TB NVMe. A secon
 | orion-w-02 | 10.50.0.22/24 | 10.10.0.22/24 | `84:47:09:53:28:36` | `nvme-KINGSTON_OM8PGP41024N-A0_50026B738388057D` |
 
 Additional disks on worker nodes (Ceph OSD candidates):
-- orion-w-01: WD_BLACK SN7100 2 TB (`nvme-WD_BLACK_SN7100_2TB_...` — capture with `talosctl get disks`)
-- orion-w-02: NX-2TB 2280 (`nvme-...` — capture with `talosctl get disks`)
+- orion-w-01: WD_BLACK SN7100 2 TB (`nvme-WD_BLACK_SN7100_2TB_251742800063`)
+- orion-w-02: NX-2TB 2280 (`nvme-NX-2TB_2280_9I50508002207`)
 
 ## Cluster VIP
 
