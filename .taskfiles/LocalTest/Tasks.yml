@@ -15,7 +15,7 @@ tasks:
     vars:
       CLUSTER: '{{.CLUSTER | default "orion"}}'
     cmds:
-      - sh scripts/flux-build.sh {{.CLUSTER}}
+      - bash scripts/flux-build.sh {{.CLUSTER}}
 
   build-all:
     desc: "Offline-render Kustomizations for both clusters"
