@@ -18,7 +18,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | rbac | Cluster RBAC | — |
 | [weave-gitops](weave-gitops/README.md) | Flux CD web UI (na-only, pending migration to orion) | `flux-system` |
 
-*(Components without a linked README don't have one yet — tracked for the docs cleanup pass.)*
+*(Unlinked = no README yet.)*
 
 ## Dependency Order
 
