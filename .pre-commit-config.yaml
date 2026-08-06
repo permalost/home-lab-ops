@@ -27,15 +27,10 @@ repos:
         exclude: |
           (?x)^(
             kubernetes/clusters/.*/flux-system/gotk-components\.yaml|
-            kubernetes/bootstrap/.*|
             .*/secret\.ya?ml|
             .*/configMap.*\.ya?ml|
             .*\.sops\.ya?ml
           )$
-  - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.30
-    hooks:
-      - id: terraform-fmt
   - repo: local
     hooks:
       - id: taskfile-lint

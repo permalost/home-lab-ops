@@ -17,7 +17,6 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | coredns | Cluster DNS patch | `kube-system` |
 | rbac | Cluster RBAC | — |
 | [weave-gitops](weave-gitops/README.md) | Flux CD web UI (na-only, pending migration to orion) | `flux-system` |
-| [flagger](flagger/README.md) | Progressive delivery (canary deployments) — currently unreferenced by any cluster | `flagger-system` |
 
 *(Components without a linked README don't have one yet — tracked for the docs cleanup pass.)*
 
