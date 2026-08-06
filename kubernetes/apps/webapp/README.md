@@ -10,10 +10,8 @@ webapp/
 │   ├── deployment.yaml   # Deployment named "deploy"; container name = ${appName}, image = my-app, port 8080
 │   └── service.yaml      # Service named "svc", ClusterIP, port 8080 (name: http)
 └── components/
-    ├── ingress/          # nginx Ingress + cert-manager TLS at ${subdomain}.${domain} (needs an nginx
-    │                     #   ingress controller — dormant since na was decommissioned; kept for a
-    │                     #   future cluster that runs nginx)
-    ├── httproute/        # Gateway API HTTPRoute attached to a Gateway (orion cluster — the default)
+    ├── ingress/          # nginx Ingress + cert-manager TLS (dormant, no nginx on orion)
+    ├── httproute/        # Gateway API HTTPRoute (default — orion's routing layer)
     ├── pvc/              # ReadWriteOnce PVC + mounts at /data
     ├── tls-cert/         # cert-manager Certificate (for non-ingress TLS scenarios)
     ├── linkerd-inject/   # opt-in Linkerd sidecar injection on the pod template
@@ -53,7 +51,7 @@ Then add a cluster shell at `kubernetes/clusters/orion/my-service.yaml` via `tas
 
 ### ingress
 
-Adds an nginx `Ingress` with cert-manager TLS. Requires an nginx ingress controller in the target cluster — orion doesn't run one (Gateway API/`httproute` is its routing layer), so this component is currently dormant, kept for a possible future cluster.
+Adds an nginx `Ingress` with cert-manager TLS. Requires an nginx ingress controller — orion doesn't run one, so this is dormant.
 
 | Substitution var | Where to set | Example |
 |---|---|---|
@@ -62,7 +60,7 @@ Adds an nginx `Ingress` with cert-manager TLS. Requires an nginx ingress control
 
 ### httproute
 
-**The default — use this on orion.** Adds a Gateway API `HTTPRoute` attached to a Gateway (ns `gateway`, HTTPS listener). The Gateway name is `${gatewayName}` (substituted from the `cluster-settings` ConfigMap — `orion` on the orion cluster), not hardcoded, so this component works unmodified if a future cluster adds its own Gateway under a different name. TLS is handled by the wildcard cert at the Gateway — no per-app Certificate needed. Also labels the app namespace with `gateway.networking.k8s.io/access: "true"` so the Gateway permits route attachment.
+Default on orion. Adds a Gateway API `HTTPRoute` attached to `${gatewayName}` (ns `gateway`, HTTPS listener, substituted from `cluster-settings` — not hardcoded). TLS comes from the Gateway's wildcard cert. Labels the app namespace `gateway.networking.k8s.io/access: "true"` so the Gateway permits attachment.
 
 | Substitution var | Where to set | Example |
 |---|---|---|
