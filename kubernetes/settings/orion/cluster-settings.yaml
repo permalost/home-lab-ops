@@ -8,3 +8,4 @@ data:
   externalIp: 10.50.0.231
   certCloudflareEmail: permalost.commercial+cloudflare@gmail.com
   externalDnsIp: 10.50.0.232
+  gatewayName: orion

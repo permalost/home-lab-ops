@@ -17,7 +17,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/apps/pihole2/overlays/orion
+  path: ./kubernetes/apps/pihole/overlays/orion
   decryption:
     provider: sops
     secretRef:

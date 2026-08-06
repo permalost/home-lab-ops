@@ -11,7 +11,7 @@ labels:
 
 resources:
   - configMap.yaml
-  - deploy.yaml
+  - deployment.yaml
   - ingress.yaml
   - pvc.yaml
   - service.yaml

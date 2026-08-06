@@ -10,8 +10,10 @@ webapp/
 │   ├── deployment.yaml   # Deployment named "deploy"; container name = ${appName}, image = my-app, port 8080
 │   └── service.yaml      # Service named "svc", ClusterIP, port 8080 (name: http)
 └── components/
-    ├── ingress/          # nginx Ingress + cert-manager TLS at ${subdomain}.${domain} (na cluster)
-    ├── httproute/        # Gateway API HTTPRoute attached to the orion Gateway (orion cluster)
+    ├── ingress/          # nginx Ingress + cert-manager TLS at ${subdomain}.${domain} (needs an nginx
+    │                     #   ingress controller — dormant since na was decommissioned; kept for a
+    │                     #   future cluster that runs nginx)
+    ├── httproute/        # Gateway API HTTPRoute attached to a Gateway (orion cluster — the default)
     ├── pvc/              # ReadWriteOnce PVC + mounts at /data
     ├── tls-cert/         # cert-manager Certificate (for non-ingress TLS scenarios)
     ├── linkerd-inject/   # opt-in Linkerd sidecar injection on the pod template
@@ -29,7 +31,7 @@ resources:
   - ../webapp/base
 
 components:
-  - ../webapp/components/ingress
+  - ../webapp/components/httproute
 
 namespace: my-service
 namePrefix: my-service-
@@ -51,7 +53,7 @@ Then add a cluster shell at `kubernetes/clusters/orion/my-service.yaml` via `tas
 
 ### ingress
 
-Adds an nginx `Ingress` with cert-manager TLS. Use on the **na** cluster (nginx deployed).
+Adds an nginx `Ingress` with cert-manager TLS. Requires an nginx ingress controller in the target cluster — orion doesn't run one (Gateway API/`httproute` is its routing layer), so this component is currently dormant, kept for a possible future cluster.
 
 | Substitution var | Where to set | Example |
 |---|---|---|
@@ -60,12 +62,13 @@ Adds an nginx `Ingress` with cert-manager TLS. Use on the **na** cluster (nginx 
 
 ### httproute
 
-Adds a Gateway API `HTTPRoute` attached to the `orion` Gateway (ns `gateway`, HTTPS listener). TLS is handled by the wildcard cert at the Gateway — no per-app Certificate needed. Also labels the app namespace with `gateway.networking.k8s.io/access: "true"` so the Gateway permits route attachment. Use on the **orion** cluster.
+**The default — use this on orion.** Adds a Gateway API `HTTPRoute` attached to a Gateway (ns `gateway`, HTTPS listener). The Gateway name is `${gatewayName}` (substituted from the `cluster-settings` ConfigMap — `orion` on the orion cluster), not hardcoded, so this component works unmodified if a future cluster adds its own Gateway under a different name. TLS is handled by the wildcard cert at the Gateway — no per-app Certificate needed. Also labels the app namespace with `gateway.networking.k8s.io/access: "true"` so the Gateway permits route attachment.
 
 | Substitution var | Where to set | Example |
 |---|---|---|
 | `subdomain` | cluster shell `postBuild.substitute` | `dns` |
 | `domain` | `cluster-settings` ConfigMap | `orion.norseamerican.com` |
+| `gatewayName` | `cluster-settings` ConfigMap | `orion` |
 
 ### pvc
 
@@ -98,7 +101,7 @@ This writes `kubernetes/apps/my-service/kustomization.yaml` and `kubernetes/clus
 
 ## Handling secrets
 
-Per-app secrets live at `kubernetes/apps/<app-name>/secret.sops.yaml` (one file per app, distinct from cluster-wide secrets in `settings/cluster-secrets.sops.yaml`). Add one like this:
+Per-app secrets live at `kubernetes/apps/<app-name>/secret.sops.yaml` (one file per app, distinct from cluster-wide secrets in `kubernetes/settings/orion/cluster-secrets.sops.yaml`). Add one like this:
 
 ```bash
 # create the plaintext secret
