@@ -96,13 +96,11 @@ tasks:
           --tag=latest \
           --insecure \
           --interval=1m
-      # 2. Apply cluster-settings ConfigMap so substituteFrom can resolve
-      - |
-        case "{{.CLUSTER}}" in
-          na)    kubectl apply -f kubernetes/clusters/na/settings/cluster-settings.yaml ;;
-          orion) kubectl apply -f kubernetes/clusters/orion/cluster-settings.yaml ;;
-          *)     kubectl apply -f kubernetes/clusters/{{.CLUSTER}}/cluster-settings.yaml ;;
-        esac
+      # 2. Apply cluster-settings ConfigMap so substituteFrom can resolve.
+      #    NOTE: this is kubernetes/clusters/<cluster>/settings/cluster-settings.yaml
+      #    (the ConfigMap) — not kubernetes/clusters/<cluster>/cluster-settings.yaml
+      #    (that's the Flux Kustomization CR that points at the settings/ dir).
+      - kubectl apply -f kubernetes/clusters/{{.CLUSTER}}/settings/cluster-settings.yaml
       # 3. Apply all Flux Kustomization YAMLs for the cluster (skip bootstrap files)
       - |
         for f in kubernetes/clusters/{{.CLUSTER}}/*.yaml; do
