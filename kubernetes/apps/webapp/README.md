@@ -14,6 +14,8 @@ webapp/
     ├── httproute/        # Gateway API HTTPRoute attached to the orion Gateway (orion cluster)
     ├── pvc/              # ReadWriteOnce PVC + mounts at /data
     ├── tls-cert/         # cert-manager Certificate (for non-ingress TLS scenarios)
+    ├── probes/           # parameterized readiness/liveness httpGet probes
+    ├── security-context/ # pod-level securityContext.fsGroup
     ├── linkerd-inject/   # opt-in Linkerd sidecar injection on the pod template
     └── linkerd-disable/  # explicit Linkerd sidecar opt-out on the pod template
 ```
@@ -83,6 +85,23 @@ Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy`
 Adds a cert-manager `Certificate` for `${subdomain}.${domain}` using the `letsencrypt-prod` ClusterIssuer. Useful when you need a TLS secret without an nginx Ingress (e.g. Cilium Gateway, gRPC, direct TLS).
 
 Uses the same `subdomain` / `domain` substitution vars as `ingress`. Requires the `letsencrypt-prod` ClusterIssuer to exist; the certificate secret is written to `${subdomain}-${domain}-tls`.
+
+### probes
+
+Adds `readinessProbe` and `livenessProbe` (`httpGet`) to `spec.template.spec.containers/0`. Use for any app with a health endpoint instead of hand-rolling probes in a local patch (see `ai/openwebui/deploy.yaml` for a hand-rolled example predating this component).
+
+| Substitution var | Where to set | Example |
+|---|---|---|
+| `healthPath` | cluster shell `postBuild.substitute` | `/health` |
+| `healthPort` | cluster shell `postBuild.substitute` | `8642` |
+
+### security-context
+
+Adds a pod-level `securityContext.fsGroup` to `deploy`. Use when a container needs group-writable ownership on a mounted volume (e.g. it drops privileges internally to a non-default UID). Deliberately narrow — it does not set `runAsUser`/`runAsNonRoot`, since some images (e.g. those using an s6-overlay-style init) need to start as root before dropping privileges themselves; confirm what an image actually needs before assuming `runAsUser` is also required.
+
+| Substitution var | Where to set | Example |
+|---|---|---|
+| `fsGroup` | cluster shell `postBuild.substitute` | `10000` |
 
 ### linkerd-inject / linkerd-disable
 
