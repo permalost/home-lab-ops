@@ -4,10 +4,11 @@
 # Mirrors Flux's postBuild.substituteFrom behaviour without a live cluster.
 #
 # Usage: scripts/flux-build.sh <cluster>
-#   cluster: orion | na  (default: orion)
+#   cluster: orion  (default: orion)
 #
 # Prerequisites: kustomize, yq, python3
-#                sops (only for na when SOPS_AGE_KEY_FILE is set)
+#                sops (when the cluster has a cluster-secrets.sops.yaml and
+#                SOPS_AGE_KEY_FILE is set)
 
 set -euo pipefail
 
@@ -24,10 +25,7 @@ command -v python3   >/dev/null 2>&1 || { echo "ERROR: python3 not found" >&2; e
 # ── Variable substitution ────────────────────────────────────────────────────
 # Mirrors Flux's postBuild.substituteFrom: replaces ${VAR} in rendered YAML.
 
-case "$CLUSTER" in
-  na)   SETTINGS_FILE="$CLUSTER_DIR/settings/cluster-settings.yaml" ;;
-  *)    SETTINGS_FILE="$CLUSTER_DIR/cluster-settings.yaml" ;;
-esac
+SETTINGS_FILE="$CLUSTER_DIR/settings/cluster-settings.yaml"
 
 [[ -f "$SETTINGS_FILE" ]] || { echo "ERROR: settings file not found: $SETTINGS_FILE" >&2; exit 1; }
 
@@ -37,10 +35,10 @@ while IFS='=' read -r key val; do
   export "$key"="$val"
 done < <(yq eval '.data | to_entries | .[] | .key + "=" + .value' "$SETTINGS_FILE")
 
-# For na: optionally decrypt SOPS secret and export its vars too
-if [[ "$CLUSTER" == "na" ]]; then
-  SECRETS_FILE="$CLUSTER_DIR/settings/cluster-secrets.sops.yaml"
-  if [[ -f "$SECRETS_FILE" && -n "${SOPS_AGE_KEY_FILE:-}" && -f "${SOPS_AGE_KEY_FILE:-}" ]]; then
+# Optionally decrypt the cluster's SOPS secret and export its vars too.
+SECRETS_FILE="$CLUSTER_DIR/settings/cluster-secrets.sops.yaml"
+if [[ -f "$SECRETS_FILE" ]]; then
+  if [[ -n "${SOPS_AGE_KEY_FILE:-}" && -f "${SOPS_AGE_KEY_FILE:-}" ]]; then
     echo "INFO  Decrypting cluster secrets for $CLUSTER"
     DECRYPTED="$(sops -d "$SECRETS_FILE")"
 
@@ -82,9 +80,13 @@ KUSTOMIZE_FLAGS=("--load-restrictor=LoadRestrictionsNone")
 for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
     -not -path '*/flux-system/*' | sort); do
 
-  # Extract name|path for every Flux Kustomization object in this file.
-  # Files can contain multiple YAML documents (e.g. cert-manager + cert-manager-issuers).
-  while IFS='|' read -r name path; do
+  # Extract name|path|substitute for every Flux Kustomization object in this
+  # file. `substitute` is spec.postBuild.substitute (literal key=value pairs
+  # inline on the CR, e.g. appName/subdomain) — distinct from substituteFrom
+  # (the ConfigMap/Secret handled above) and just as required for a faithful
+  # render. Files can contain multiple YAML documents (e.g. cert-manager +
+  # cert-manager-issuers).
+  while IFS='|' read -r name path substitute; do
     [[ -z "$name" || "$name" == "null" ]] && continue
     [[ -z "$path" || "$path" == "null" ]] && continue
     path="${path#./}"   # strip leading ./
@@ -99,10 +101,31 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
       continue
     }
 
-    if kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" \
-        | python3 -c "$ENVSUBST_PY" \
-        > /dev/null 2>&1; then
-      echo "  ✓ $name"
+    # postBuild.substitute literals are scoped to this Kustomization only —
+    # export them for this build, then unset so they don't leak into the next.
+    LITERAL_KEYS=()
+    if [[ -n "$substitute" ]]; then
+      IFS=';' read -ra pairs <<< "$substitute"
+      for pair in "${pairs[@]}"; do
+        [[ -z "$pair" ]] && continue
+        key="${pair%%=*}"
+        val="${pair#*=}"
+        export "$key"="$val"
+        LITERAL_KEYS+=("$key")
+      done
+    fi
+
+    if RENDERED="$(kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" | python3 -c "$ENVSUBST_PY")"; then
+      # kustomize build succeeding says nothing about substitution — check
+      # separately for ${VAR} placeholders that never got resolved.
+      UNRESOLVED="$(printf '%s' "$RENDERED" | grep -oE '\$\{[A-Za-z_][A-Za-z0-9_]*(:[^}]*)?\}' | sort -u || true)"
+      if [[ -n "$UNRESOLVED" ]]; then
+        echo "  ✗ $name — unresolved variable(s):"
+        echo "$UNRESOLVED" | sed 's/^/      /'
+        FAILED=$((FAILED + 1))
+      else
+        echo "  ✓ $name"
+      fi
     else
       echo "  ✗ $name — FAILED (re-running to show error):"
       kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" \
@@ -111,8 +134,12 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
       FAILED=$((FAILED + 1))
     fi
 
+    for k in "${LITERAL_KEYS[@]:-}"; do
+      [[ -n "$k" ]] && unset "$k"
+    done
+
   done < <(yq eval \
-    'select(.kind == "Kustomization" and (.apiVersion | test("kustomize.toolkit.fluxcd.io"))) | .metadata.name + "|" + .spec.path' \
+    'select(.kind == "Kustomization" and (.apiVersion | test("kustomize.toolkit.fluxcd.io"))) | .metadata.name + "|" + .spec.path + "|" + ((.spec.postBuild.substitute // {}) | to_entries | map(.key + "=" + .value) | join(";"))' \
     "$ks_file" 2>/dev/null)
 
 done
