@@ -71,6 +71,8 @@ Adds a Gateway API `HTTPRoute` attached to the `orion` Gateway (ns `gateway`, HT
 
 Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy` container. A `nameReference` transformer rewires the volume's `claimName` when `namePrefix` is applied. The volumeMount patch targets `spec.template.spec.containers/0` — the first container in the Deployment.
 
+`webapp/base` declares empty `volumes: []` / `volumeMounts: []` lists, and this component appends to them (`op: add .../-`) rather than replacing them wholesale. That means it composes safely with other volume-adding patches in the same overlay (e.g. a ConfigMap mount) — combine `pvc` with your own patch by also using the append form (`/spec/template/spec/volumes/-`), not a full-array `op: add`.
+
 | Substitution var | Where to set | Example |
 |---|---|---|
 | `storageClass` | cluster shell `postBuild.substitute` | `longhorn` |
