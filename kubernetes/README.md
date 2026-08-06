@@ -39,15 +39,13 @@ See [infrastructure/README.md](infrastructure/README.md) for the full component 
 
 ## Apps
 
-| App | Description |
-|-----|-------------|
-| ai | LiteLLM proxy + Ollama + Open WebUI |
-| backend | Custom backend service |
-| faces | Face recognition service |
-| frontend | Custom frontend |
-| home-automation | Home Assistant / MQTT stack |
-| homebox | Home inventory management |
-| pihole | Primary DNS + ad-blocking |
-| pihole2 | Secondary DNS (HA pair) |
-| plans | Planning/notes app |
-| webapp | Custom web application |
+Only `pihole2/overlays/orion` is currently wired into the orion cluster. The
+rest are kept from the decommissioned na cluster, pending migration.
+
+| App | Description | Wired into orion? |
+|-----|-------------|--------------------|
+| ai | LiteLLM proxy + Ollama + Open WebUI | no |
+| home-automation | Mosquitto + Zigbee2MQTT | no |
+| homebox | Home inventory management | no |
+| pihole2 | DNS + ad-blocking | yes (`overlays/orion`) |
+| webapp | Shared base + components (ingress, httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |
