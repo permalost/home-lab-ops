@@ -133,11 +133,11 @@ SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
 
 The cluster shell already sets `decryption: { provider: sops, secretRef: { name: sops-age } }` so Flux will decrypt it automatically.
 
-For cluster-wide secrets (values substituted via `${var}` in any service), add the key to `kubernetes/clusters/orion/settings/cluster-secrets.sops.yaml`:
+For cluster-wide secrets (values substituted via `${var}` in any service), add the key to `kubernetes/settings/orion/cluster-secrets.sops.yaml`:
 
 ```bash
 SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
-  sops kubernetes/clusters/orion/settings/cluster-secrets.sops.yaml
+  sops kubernetes/settings/orion/cluster-secrets.sops.yaml
 # edit in the sops-opened editor, save, exit — it re-encrypts automatically
 ```
 

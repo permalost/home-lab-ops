@@ -43,7 +43,7 @@ done
 kubeconform_config=("-strict" "-ignore-missing-schemas" "-skip=Secret,ConfigMap" "-kubernetes-version" "1.33.0" "-schema-location" "/tmp/flux-crd-schemas" "-schema-location" "default" "-verbose")
 
 echo "INFO - Validating clusters"
-find ./kubernetes/clusters -maxdepth 4 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
+find ./kubernetes/clusters ./kubernetes/settings -maxdepth 4 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
   do
     kubeconform "${kubeconform_config[@]}" "${file}"
     if [[ ${PIPESTATUS[0]} != 0 ]]; then

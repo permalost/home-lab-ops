@@ -15,6 +15,14 @@ set -euo pipefail
 CLUSTER="${1:-orion}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_DIR="$REPO_ROOT/kubernetes/clusters/$CLUSTER"
+# settings/ deliberately lives outside CLUSTER_DIR, at kubernetes/settings/<cluster>/,
+# not kubernetes/clusters/<cluster>/settings/ — so it's never swept up by
+# kustomize-controller's implicit directory walk of CLUSTER_DIR (the path the
+# cluster's root Kustomization/flux-system reconciles), which has no sops
+# decryption config. It's reconciled solely by its own dedicated
+# cluster-settings Kustomization CR (kubernetes/clusters/<cluster>/cluster-settings.yaml),
+# which does have decryption configured.
+SETTINGS_DIR="$REPO_ROOT/kubernetes/settings/$CLUSTER"
 
 command -v kustomize >/dev/null 2>&1 || { echo "ERROR: kustomize not found. Run: task gen:tools" >&2; exit 1; }
 command -v yq        >/dev/null 2>&1 || { echo "ERROR: yq not found. Run: task gen:tools" >&2; exit 1; }
@@ -25,7 +33,7 @@ command -v python3   >/dev/null 2>&1 || { echo "ERROR: python3 not found" >&2; e
 # ── Variable substitution ────────────────────────────────────────────────────
 # Mirrors Flux's postBuild.substituteFrom: replaces ${VAR} in rendered YAML.
 
-SETTINGS_FILE="$CLUSTER_DIR/settings/cluster-settings.yaml"
+SETTINGS_FILE="$SETTINGS_DIR/cluster-settings.yaml"
 
 [[ -f "$SETTINGS_FILE" ]] || { echo "ERROR: settings file not found: $SETTINGS_FILE" >&2; exit 1; }
 
@@ -36,7 +44,7 @@ while IFS='=' read -r key val; do
 done < <(yq eval '.data | to_entries | .[] | .key + "=" + .value' "$SETTINGS_FILE")
 
 # Optionally decrypt the cluster's SOPS secret and export its vars too.
-SECRETS_FILE="$CLUSTER_DIR/settings/cluster-secrets.sops.yaml"
+SECRETS_FILE="$SETTINGS_DIR/cluster-secrets.sops.yaml"
 if [[ -f "$SECRETS_FILE" ]]; then
   if [[ -n "${SOPS_AGE_KEY_FILE:-}" && -f "${SOPS_AGE_KEY_FILE:-}" ]]; then
     echo "INFO  Decrypting cluster secrets for $CLUSTER"

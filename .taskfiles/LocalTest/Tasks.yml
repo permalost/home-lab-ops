@@ -87,16 +87,21 @@ tasks:
           --insecure \
           --interval=1m
       # 2. Apply cluster-settings ConfigMap so substituteFrom can resolve.
-      #    NOTE: this is kubernetes/clusters/<cluster>/settings/cluster-settings.yaml
-      #    (the ConfigMap) — not kubernetes/clusters/<cluster>/cluster-settings.yaml
-      #    (that's the Flux Kustomization CR that points at the settings/ dir).
-      - kubectl apply -f kubernetes/clusters/{{.CLUSTER}}/settings/cluster-settings.yaml
-      # 3. Apply all Flux Kustomization YAMLs for the cluster (skip bootstrap files)
+      #    NOTE: this is kubernetes/settings/<cluster>/cluster-settings.yaml
+      #    (the ConfigMap, lives outside kubernetes/clusters/<cluster>/ on
+      #    purpose — see cluster-settings.yaml's comment) — not
+      #    kubernetes/clusters/<cluster>/cluster-settings.yaml (that's the
+      #    Flux Kustomization CR that points at it).
+      - kubectl apply -f kubernetes/settings/{{.CLUSTER}}/cluster-settings.yaml
+      # 3. Apply all Flux Kustomization YAMLs for the cluster (skip
+      #    flux-system/, handled by `flux install` above). This DOES include
+      #    cluster-settings.yaml — that's the real Flux Kustomization CR that
+      #    reconciles kubernetes/settings/<cluster>/ (with sops decryption),
+      #    and everything else's dependsOn: cluster-settings waits on it.
       - |
         for f in kubernetes/clusters/{{.CLUSTER}}/*.yaml; do
           case "$f" in
-            */cluster-settings*) continue ;;
-            */flux-system*)      continue ;;
+            */flux-system*) continue ;;
           esac
           echo "Applying $f"
           kubectl apply -f "$f"
