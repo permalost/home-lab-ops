@@ -1,0 +1,19 @@
+# The httproute component hardcodes backendRefs.port: 80, so the
+# dashboard needs to be the Service's primary (port 80) port —
+# the same workaround pihole2 uses. targetPort references the
+# container port by name, so it survives the ports patch above
+# regardless of ordering.
+- op: replace
+  path: /spec/ports/0
+  value:
+    name: http
+    port: 80
+    targetPort: dashboard
+    protocol: TCP
+- op: add
+  path: /spec/ports/-
+  value:
+    name: gateway
+    port: 8642
+    targetPort: gateway
+    protocol: TCP

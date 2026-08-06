@@ -1,0 +1,43 @@
+# PVC-backed mutable state (sessions/, memories/, skills/, logs/, home/)
+# lives on the "data" volume, mounted at /opt/data — the container
+# manages the subdirectories itself.
+#
+# SOUL.md and config.yaml are operator-authored, not agent-written
+# (Hermes only self-modifies MEMORY.md and skills/ at runtime — both
+# under /opt/data on the PVC above), so they're sourced from a
+# git-managed ConfigMap and mounted read-only via subPath, the same
+# technique pihole2 and litellm use for single-file ConfigMap mounts.
+#
+# CONTRACT: a ConfigMap named "hermes-config" with keys SOUL.md and
+# config.yaml must exist in the same namespace before this Deployment
+# can start. It is intentionally NOT a resource in this base — see
+# ../README.md for how per-profile overlays are expected to produce it.
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /opt/data
+    name: data
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /opt/data/SOUL.md
+    name: config
+    subPath: SOUL.md
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /opt/data/config.yaml
+    name: config
+    subPath: config.yaml
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: data
+    persistentVolumeClaim:
+      claimName: data
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config
+    configMap:
+      name: hermes-config

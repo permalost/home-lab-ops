@@ -1,0 +1,10 @@
+# fsGroup only (not runAsUser/runAsNonRoot) — the image's s6-overlay
+# init may need to start as root before it drops to UID 10000
+# internally. fsGroup just ensures the mounted PVC is group-writable
+# by whatever UID the container ends up running as. Confirm empirically
+# once the image has actually been run; adjust if it turns out the
+# image needs PUID/PGID env vars instead (per its own docs).
+- op: add
+  path: /spec/template/spec/securityContext
+  value:
+    fsGroup: 10000

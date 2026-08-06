@@ -1,0 +1,26 @@
+# Fixed across every profile (property of the image, not the
+# persona) — hardcoded here rather than routed through the generic
+# webapp/components/probes component, so profile overlays don't need
+# to repeat healthPath/healthPort substitution vars.
+- op: add
+  path: /spec/template/spec/containers/0/readinessProbe
+  value:
+    httpGet:
+      path: /health
+      port: gateway
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 2
+    successThreshold: 1
+    failureThreshold: 3
+- op: add
+  path: /spec/template/spec/containers/0/livenessProbe
+  value:
+    httpGet:
+      path: /health
+      port: gateway
+    initialDelaySeconds: 10
+    periodSeconds: 20
+    timeoutSeconds: 2
+    successThreshold: 1
+    failureThreshold: 3

@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Shared tier for every Hermes Agent profile. Not deployed directly —
+# consumed by kubernetes/apps/hermes-agent/overlays/<profile>/, same
+# relationship pihole2/base has to pihole2/overlays/orion.
+#
+# Not built standalone by CI (see scripts/validate.sh exclusions),
+# same as webapp/base/webapp/components: it contains the unresolved
+# ${appName} substitution token, only resolved by Flux postBuild at
+# the profile's cluster-shell Kustomization.
+
+resources:
+  - ../../webapp/base
+  - pvc.yaml
+
+components:
+  - ../../webapp/components/httproute
+
+images:
+  - name: my-app
+    newName: nousresearch/hermes-agent
+    newTag: latest
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-ports.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-volumes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-resources.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-probes.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-update-ports.yaml

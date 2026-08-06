@@ -59,6 +59,7 @@ echo "INFO - Validating kustomize overlays"
 find . -type f -name $kustomize_config \
   -not -path '*/webapp/base/*' \
   -not -path '*/webapp/components/*' \
+  -not -path '*/hermes-agent/base/*' \
   -print0 | while IFS= read -r -d $'\0' file;
   do
     echo "INFO - Validating kustomization ${file/%$kustomize_config}"
@@ -72,7 +73,8 @@ done
 echo "INFO - Running kube-linter"
 kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
   --ignore-paths kubernetes/apps/webapp/base \
-  --ignore-paths kubernetes/apps/webapp/components
+  --ignore-paths kubernetes/apps/webapp/components \
+  --ignore-paths kubernetes/apps/hermes-agent/base
 
 echo "INFO - Validating Talos talconfig schema"
 talhelper validate talconfig clusters/orion/talconfig.yaml

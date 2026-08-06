@@ -1,0 +1,12 @@
+# Per Hermes's own sizing guidance (minimum 1Gi/1 core; 2-4Gi/2 cores
+# recommended). Profile overlays may patch this further for
+# heavier/lighter workloads.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi

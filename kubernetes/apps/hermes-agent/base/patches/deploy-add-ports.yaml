@@ -1,0 +1,12 @@
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0
+  value:
+    name: gateway
+    containerPort: 8642
+    protocol: TCP
+- op: add
+  path: /spec/template/spec/containers/0/ports/-
+  value:
+    name: dashboard
+    containerPort: 9119
+    protocol: TCP
