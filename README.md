@@ -1,28 +1,28 @@
 # home-lab-ops
 
-GitOps repository managing two home-lab Kubernetes clusters using [Flux CD](https://fluxcd.io) and [Talos Linux](https://talos.dev).
+GitOps repository managing a home-lab Kubernetes cluster using [Flux CD](https://fluxcd.io) and [Talos Linux](https://talos.dev).
 
-## Clusters
+## Cluster
 
 | Name | Platform | Status | Hardware |
 |------|----------|--------|----------|
-| **orion** | Talos Linux | Active (in progress) | 3x Beelink GK Mini (see `clusters/orion/README.md`) |
-| **na** | k3s (k3sup) | Active (being replaced by orion) | — |
+| **orion** | Talos Linux | Active | 3x Beelink GK Mini (see `clusters/orion/README.md`) |
+
+`kubernetes/apps/` also holds a set of workloads not yet wired into orion,
+kept from a previous k3s cluster (`na`, decommissioned) pending migration.
 
 ## Repository Structure
 
 ```text
 .
 ├── clusters/orion/          # Talos bare-metal provisioning (pre-Kubernetes layer)
-│   ├── config/patches/      # Per-hardware machineconfig patches
-│   ├── rendered/            # Generated full machineconfigs (gitignored secrets)
+│   ├── patches/              # Per-hardware machineconfig patches
+│   ├── clusterconfig/        # Generated machineconfigs (gitignored, contains PKI)
 │   └── docs/                # Network topology and runbooks
 │
 └── kubernetes/              # Flux GitOps layer (in-cluster state)
     ├── bootstrap/           # One-time Flux installer kustomization
-    ├── clusters/            # Per-cluster Flux entry points and settings
-    │   ├── orion/           # orion cluster (Talos)
-    │   └── na/              # na cluster (k3s)
+    ├── clusters/orion/      # Flux entry point and settings for orion
     ├── infrastructure/      # Shared HelmRelease/Kustomize components
     └── apps/                # Workload deployments
 ```

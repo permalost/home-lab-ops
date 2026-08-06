@@ -7,11 +7,10 @@ Flux-managed in-cluster state for all clusters. Flux is bootstrapped once per cl
 ```text
 kubernetes/
 ├── bootstrap/        # One-time Flux install kustomization (run once per cluster)
-├── clusters/         # Per-cluster Flux entry points
-│   ├── orion/        # Talos cluster (active)
-│   └── na/           # k3s cluster (active, being replaced by orion)
-├── infrastructure/   # Shared building blocks: CNI, ingress, storage, observability
-├── apps/             # Workload deployments
+├── clusters/orion/   # Flux entry point for the orion cluster
+├── infrastructure/   # Shared building blocks: CNI, gateway, storage, observability
+├── apps/             # Workload deployments (some not yet wired into orion — kept
+│                     #   from the decommissioned na cluster pending migration)
 └── repos/helm/       # HelmRepository source definitions
 ```
 
