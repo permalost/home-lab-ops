@@ -8,6 +8,8 @@ Flux-managed in-cluster state for all clusters. Flux is bootstrapped once per cl
 kubernetes/
 ├── bootstrap/        # One-time Flux install kustomization (run once per cluster)
 ├── clusters/orion/   # Flux entry point for the orion cluster
+├── settings/orion/   # cluster-settings ConfigMap + cluster-secrets sops Secret
+│                     #   (deliberately outside clusters/orion/ — see below)
 ├── infrastructure/   # Shared building blocks: CNI, gateway, storage, observability
 ├── apps/             # Workload deployments (some not yet wired into orion — kept
 │                     #   from the decommissioned na cluster pending migration)
@@ -18,10 +20,18 @@ kubernetes/
 
 Each cluster under `clusters/<name>/` contains:
 - `flux-system/` — Flux bootstrap components (`gotk-components.yaml`, `gotk-sync.yaml`)
-- `cluster-settings.yaml` — ConfigMap providing cluster-scoped variables (`${domain}`, `${externalIp}`)
+- `cluster-settings.yaml` — the Flux Kustomization CR that reconciles `settings/<name>/`
+  (with sops decryption) — not to be confused with `settings/<name>/cluster-settings.yaml`,
+  the actual ConfigMap providing cluster-scoped variables (`${domain}`, `${externalIp}`)
 - One Kustomization per infrastructure component and app, each pointing at the relevant path in `infrastructure/` or `apps/` with `substituteFrom: cluster-settings`
 
-Flux reconciles `clusters/<name>/` → which creates Kustomizations for each component → which render and apply the manifests in `infrastructure/` and `apps/`.
+`clusters/<name>/` has no root `kustomization.yaml` of its own — Flux auto-generates
+one by walking the directory, which is why `settings/<name>/` lives *outside*
+`clusters/<name>/`: if it were nested inside, the auto-generated root Kustomization
+would apply it too, without the sops decryption only the dedicated `cluster-settings`
+Kustomization CR has, racing the two on every reconcile.
+
+Flux reconciles `clusters/<name>/` → which creates Kustomizations for each component → which render and apply the manifests in `infrastructure/`, `apps/`, and `settings/<name>/`.
 
 ## Variable Substitution
 
