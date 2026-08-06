@@ -8,13 +8,17 @@ repo into Flux as a second `GitRepository`, read via a read-only deploy key.
 instead, one directory per profile. The deployment *mechanism*
 (`kubernetes/apps/hermes-agent/base` and per-profile overlays) stays here.
 
-Each profile has two Flux Kustomizations in the same namespace: the usual
-one from `sourceRef: flux-system` builds the Deployment/Service/PVC from
-this repo; a second one with `sourceRef: {kind: GitRepository, name:
-hermes-profiles}` runs a `configMapGenerator` (with
-`disableNameSuffixHash: true`, so the name stays stable) against that
-profile's directory in the private repo, producing the `hermes-config`
-ConfigMap the Deployment expects. See
+Every profile lands in the same shared `hermes` namespace (see
+`kubernetes/apps/hermes-agent/namespace.yaml`), so each profile has two
+Flux Kustomizations that both set the *same* `appName` substitution value
+to keep a cross-repo reference in sync: the usual one from `sourceRef:
+flux-system` builds the Deployment/Service/PVC from this repo (with
+`namePrefix: <profile>-` to avoid colliding with other profiles' objects);
+a second one with `sourceRef: {kind: GitRepository, name: hermes-profiles}`
+runs a `configMapGenerator` (with `disableNameSuffixHash: true`, name
+`${appName}-config`) against that profile's directory in the private
+repo, producing the ConfigMap the Deployment references by that same
+substituted name. See
 `kubernetes/apps/hermes-agent/overlays/nas-ops/README.md` for a concrete
 example.
 

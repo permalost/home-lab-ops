@@ -9,6 +9,12 @@ kind: Kustomization
 # same as webapp/base/webapp/components: it contains the unresolved
 # ${appName} substitution token, only resolved by Flux postBuild at
 # the profile's cluster-shell Kustomization.
+#
+# Every profile shares one "hermes" namespace (see ../namespace.yaml),
+# so profile overlays MUST set a unique namePrefix. nameReference.yaml
+# is what keeps the hand-rolled PVC volume's claimName in sync with
+# that prefix — webapp/components/pvc's own nameReference doesn't
+# apply here since this base hand-rolls its own PVC (see README.md).
 
 resources:
   - ../../webapp/base
@@ -16,6 +22,9 @@ resources:
 
 components:
   - ../../webapp/components/httproute
+
+configurations:
+  - nameReference.yaml
 
 images:
   - name: my-app

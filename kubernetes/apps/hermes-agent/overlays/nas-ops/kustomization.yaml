@@ -1,17 +1,23 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Namespace "hermes" is shared across every Hermes profile and is
+# NOT created here — see kubernetes/apps/hermes-agent/namespace.yaml
+# and its own Flux Kustomization. namePrefix is this profile's only
+# defense against colliding with another profile's Deployment/
+# Service/PVC in that shared namespace — see ../../base/README.md.
+
 resources:
   - ../../base
-  - namespace.yaml
   - secret.sops.yaml
 
-namespace: hermes-nas-ops
+namespace: hermes
+namePrefix: nas-ops-
 
 labels:
   - includeSelectors: true
     pairs:
-      app: hermes-nas-ops
+      app: nas-ops
       app.kubernetes.io/name: hermes-agent
 
 patches:
@@ -23,4 +29,4 @@ patches:
         path: /spec/template/spec/containers/0/envFrom
         value:
           - secretRef:
-              name: hermes-nas-ops-secrets
+              name: nas-ops-secrets

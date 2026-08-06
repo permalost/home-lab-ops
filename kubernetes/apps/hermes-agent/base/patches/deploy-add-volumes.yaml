@@ -8,10 +8,12 @@
 # git-managed ConfigMap and mounted read-only via subPath, the same
 # technique pihole2 and litellm use for single-file ConfigMap mounts.
 #
-# CONTRACT: a ConfigMap named "hermes-config" with keys SOUL.md and
-# config.yaml must exist in the same namespace before this Deployment
-# can start. It is intentionally NOT a resource in this base — see
-# ../README.md for how per-profile overlays are expected to produce it.
+# CONTRACT: a ConfigMap named "${appName}-config" with keys SOUL.md
+# and config.yaml must exist in the same namespace before this
+# Deployment can start. It is intentionally NOT a resource in this
+# base — see ../README.md for how per-profile overlays are expected
+# to produce it. Named per-profile (not a fixed literal) because every
+# profile shares one "hermes" namespace.
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
@@ -40,4 +42,4 @@
   value:
     name: config
     configMap:
-      name: hermes-config
+      name: ${appName}-config

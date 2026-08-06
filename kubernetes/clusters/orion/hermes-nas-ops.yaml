@@ -10,10 +10,15 @@ spec:
   timeout: 1m30s
   prune: true
   wait: true
+  dependsOn:
+    - name: hermes-agent
   sourceRef:
     kind: GitRepository
     name: hermes-profiles
   path: ./nas-ops
+  postBuild:
+    substitute:
+      appName: nas-ops
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -28,6 +33,7 @@ spec:
   wait: true
   dependsOn:
     - name: cluster-settings
+    - name: hermes-agent
     - name: hermes-profiles
     - name: hermes-nas-ops-config
     - name: rook-ceph-cluster
@@ -41,8 +47,8 @@ spec:
       name: sops-age
   postBuild:
     substitute:
-      appName: hermes-nas-ops
-      subdomain: hermes-nas-ops
+      appName: nas-ops
+      subdomain: nas-ops
       storageClass: rook-ceph-block
       storageSize: 5Gi
     substituteFrom:

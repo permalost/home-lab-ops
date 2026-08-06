@@ -1,0 +1,6 @@
+nameReference:
+  - kind: PersistentVolumeClaim
+    version: v1
+    fieldSpecs:
+      - path: spec/template/spec/volumes/persistentVolumeClaim/claimName
+        kind: Deployment

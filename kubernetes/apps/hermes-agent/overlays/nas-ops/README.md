@@ -2,15 +2,24 @@
 
 The first Hermes Agent profile: observes and — within a narrow, RBAC-enforced
 allowlist — acts on the two TrueNAS boxes. Extends `../../base`
-(image, ports, probes, volumes) and adds this profile's namespace, secrets,
-and TrueNAS API-key env injection.
+(image, ports, probes, volumes) and adds this profile's secrets and TrueNAS
+API-key env injection.
+
+Every Hermes profile shares one `hermes` namespace (created separately —
+see `../../namespace.yaml` — not by this overlay), so this overlay's only
+job for avoiding collisions with other profiles is `namePrefix: nas-ops-`
+(applies to the Deployment/Service/PVC from `../../base`) plus naming its
+own Secret so it lands as `nas-ops-secrets` after that prefix is applied.
 
 Persona (`SOUL.md`) and non-secret config (`config.yaml`) live in the
 private [`permalost/hermes-profiles`](https://github.com/permalost/hermes-profiles)
-repo (`nas-ops/` directory), pulled in as a `hermes-config` ConfigMap by a
+repo (`nas-ops/` directory), pulled in as an `nas-ops-config` ConfigMap by a
 separate Flux Kustomization — see `kubernetes/clusters/orion/hermes-nas-ops.yaml`
 (two Kustomization docs: `hermes-nas-ops-config` from the `hermes-profiles`
-source, `hermes-nas-ops` from this repo, the latter depending on the former).
+source, `hermes-nas-ops` from this repo, the latter depending on the former;
+both set the same `appName: nas-ops` substitution value so the
+independently-built ConfigMap name and the Deployment's reference to it
+agree).
 
 ## Status: skeleton only — not yet functional
 
