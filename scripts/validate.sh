@@ -70,6 +70,15 @@ find . -type f -name $kustomize_config \
     fi
 done
 
+# hermes-agent/base is excluded from the full kubeconform pass above
+# (unresolved ${appName} token). No Kustomization in THIS repo builds
+# it end-to-end anymore — the profile Kustomizations that do now live
+# in the private hermes-profiles repo — so this is the only structural
+# check left here: confirms the JSON patches still apply cleanly
+# without needing real substitution values.
+echo "INFO - Validating hermes-agent/base structurally (no substitution)"
+kustomize build ./kubernetes/apps/hermes-agent/base "${kustomize_flags[@]}" > /dev/null
+
 echo "INFO - Running kube-linter"
 kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
   --ignore-paths kubernetes/apps/webapp/base \

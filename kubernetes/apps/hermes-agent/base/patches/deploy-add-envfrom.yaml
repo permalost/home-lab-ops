@@ -1,0 +1,10 @@
+# CONTRACT: a Secret named "${appName}-secrets" must exist in the
+# shared namespace before this Deployment can start — same pattern as
+# the "${appName}-config" ConfigMap in deploy-add-volumes.yaml. Not a
+# resource in this base; produced by the profile's own content in the
+# private hermes-profiles repo.
+- op: add
+  path: /spec/template/spec/containers/0/envFrom
+  value:
+    - secretRef:
+        name: ${appName}-secrets

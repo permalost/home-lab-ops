@@ -1,20 +1,32 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Shared tier for every Hermes Agent profile. Not deployed directly —
-# consumed by kubernetes/apps/hermes-agent/overlays/<profile>/, same
-# relationship pihole2/base has to pihole2/overlays/orion.
+# The ONLY thing a Hermes profile needs, ever. Every profile-specific
+# value is a Flux postBuild.substitute token (appName, subdomain,
+# storageClass, storageSize) — there is deliberately no per-profile
+# overlay directory in this repo. A profile's own Flux Kustomization
+# (defined and applied from the private hermes-profiles repo, not
+# here — see kubernetes/infrastructure/hermes-profiles/README.md)
+# points straight at this base with its own substitution values, and
+# layers any structural difference (extra sidecars, extra volumes) on
+# top via that Kustomization's own spec.patches — see
+# kubernetes/clusters/orion/hermes-profiles-bootstrap.yaml.
 #
-# Not built standalone by CI (see scripts/validate.sh exclusions),
-# same as webapp/base/webapp/components: it contains the unresolved
-# ${appName} substitution token, only resolved by Flux postBuild at
-# the profile's cluster-shell Kustomization.
+# Not built standalone by CI with full validation (see
+# scripts/validate.sh exclusions) — it contains the unresolved
+# ${appName} token, only resolved by Flux postBuild at the profile's
+# Kustomization. validate.sh does run a plain `kustomize build`
+# against it with no substitution, as a structural-only safety net,
+# since no Kustomization in THIS repo exercises it end-to-end anymore.
 #
-# Every profile shares one "hermes" namespace (see ../namespace.yaml),
-# so profile overlays MUST set a unique namePrefix. nameReference.yaml
-# is what keeps the hand-rolled PVC volume's claimName in sync with
-# that prefix — webapp/components/pvc's own nameReference doesn't
-# apply here since this base hand-rolls its own PVC (see README.md).
+# Every profile shares one "hermes" namespace (see ../namespace.yaml).
+# namePrefix: ${appName}- (below) is what keeps profiles from
+# colliding — Flux's postBuild.substitute is a raw string replacement
+# over the fully-rendered manifest, so a templated namePrefix resolves
+# exactly like any other substituted field. nameReference.yaml is what
+# keeps the hand-rolled PVC volume's claimName in sync with that
+# prefix — webapp/components/pvc's own nameReference doesn't apply
+# here since this base hand-rolls its own PVC (see README.md).
 
 resources:
   - ../../webapp/base
@@ -25,6 +37,14 @@ components:
 
 configurations:
   - nameReference.yaml
+
+namePrefix: ${appName}-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: ${appName}
+      app.kubernetes.io/name: hermes-agent
 
 images:
   - name: my-app
@@ -40,6 +60,10 @@ patches:
       kind: Deployment
       name: deploy
     path: patches/deploy-add-volumes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-envfrom.yaml
   - target:
       kind: Deployment
       name: deploy

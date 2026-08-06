@@ -1,0 +1,26 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hermes-profiles-bootstrap
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 30s
+  timeout: 1m30s
+  prune: true
+  wait: true
+  dependsOn:
+    - name: hermes-agent
+    - name: hermes-profiles
+  sourceRef:
+    kind: GitRepository
+    name: hermes-profiles
+  path: ./flux
+  # The ONLY Flux object in home-lab-ops that changes as profiles come
+  # and go — and it doesn't. Everything under hermes-profiles:/flux/
+  # is a pair of Kustomization CRs, one per profile, self-registered
+  # from the private repo (a supported Flux "app-of-apps" pattern: a
+  # Kustomization's build output can legitimately include more
+  # Kustomization/GitRepository objects). Adding a profile means
+  # adding a directory + a Kustomization pair to hermes-profiles —
+  # nothing here.

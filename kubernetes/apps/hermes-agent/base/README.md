@@ -1,11 +1,19 @@
-# hermes-agent/base — shared Hermes Agent tier
+# hermes-agent/base — the only thing a Hermes profile needs, here
 
-Not a standalone overlay — like `webapp/base`, it contains the unresolved
-`${appName}` substitution token and is excluded from direct build/lint
-validation in `scripts/validate.sh`. Consumed by
-`kubernetes/apps/hermes-agent/overlays/<profile>/`, one per Hermes profile
-(persona), the same relationship `pihole2/base` has to
-`pihole2/overlays/orion`.
+There is deliberately no `kubernetes/apps/hermes-agent/overlays/<profile>/`
+anymore. Every profile-specific value is a Flux `postBuild.substitute`
+token (`appName`, `subdomain`, `storageClass`, `storageSize`), and every
+profile's own Flux `Kustomization` — defined and applied from the private
+[`hermes-profiles`](../../../infrastructure/hermes-profiles/README.md)
+repo, not here — points straight at this base with its own substitution
+values. Adding a profile touches this repo exactly once, ever: the
+bootstrap Kustomization at `kubernetes/clusters/orion/hermes-profiles-bootstrap.yaml`.
+
+Like `webapp/base`, this base contains the unresolved `${appName}` token
+and is excluded from full build/lint validation in `scripts/validate.sh`
+(which does run a plain structural `kustomize build` against it — no
+Kustomization in this repo exercises it end-to-end anymore, since the
+Kustomizations that do now live in `hermes-profiles`).
 
 Fixes everything common to every profile: the `nousresearch/hermes-agent`
 image, gateway (8642) + dashboard (9119) ports, the dashboard exposed via
@@ -18,33 +26,43 @@ and the volume layout below.
 All Hermes profiles live in a single `hermes` namespace
 (`../namespace.yaml`, its own Flux Kustomization — deliberately not owned
 by any one profile, so deleting a profile later doesn't prune the
-namespace out from under the others still running in it). That means
-**every profile overlay must set a unique `namePrefix`** (e.g.
-`nas-ops-`) so the Deployment/Service/PVC this base declares don't
-collide with another profile's. `nameReference.yaml` keeps the PVC
-volume's `claimName` in sync with that prefix automatically; give the
-Secret you add per-profile its final prefixed name directly rather than
-relying on kustomize to fix up its `envFrom` reference (unverified
-whether that's auto-rewired here — see the `nas-ops` overlay for the
-pattern actually in use).
+namespace out from under the others still running in it). `namePrefix:
+${appName}-` (set directly in this base) is what keeps profiles from
+colliding — Flux's `postBuild.substitute` is a raw string replacement
+over the *fully-rendered* manifest, so a templated `namePrefix` resolves
+exactly like any other substituted field, and `nameReference.yaml` keeps
+the PVC volume's `claimName` in sync with it. Verified end-to-end: build
+this base, hand-substitute `appName=nas-ops` (simulating what Flux does),
+and every name-reference (PVC claimName, ConfigMap/Secret references,
+HTTPRoute backendRef) lines up and validates against real Kubernetes
+schemas.
+
+## Structural differences (sidecars, extra volumes) don't need a change here either
+
+A profile needing something beyond this base's generic contract — e.g.
+`nas-ops`'s TrueNAS MCP sidecar containers — adds it via `spec.patches`
+on that profile's *own* Flux `Kustomization` object (JSON6902/strategic-merge,
+applied after this base builds, targeted by kind/name/labelSelector — a
+real Flux feature, not a Kustomize-level hack). That patch lives in
+`hermes-profiles`, not here. This base only needs to change if a future
+need can't be expressed as a patch against its output at all — a much
+higher bar than "needs a sidecar."
 
 ## Volume contract
 
 | Path | Source | Writable | Notes |
 |---|---|---|---|
-| `/opt/data` | PVC `data` (→ `<prefix>data` per profile) | yes | `sessions/`, `memories/`, `skills/`, `logs/`, `home/` — Hermes creates these itself. |
+| `/opt/data` | PVC `${appName}-data` | yes | `sessions/`, `memories/`, `skills/`, `logs/`, `home/` — Hermes creates these itself. |
 | `/opt/data/SOUL.md` | ConfigMap `${appName}-config` key `SOUL.md` | no (subPath mount) | Persona. Not agent-written — Hermes only self-modifies `MEMORY.md` and `skills/`; SOUL.md changes take effect on the *next new session*, no restart needed. |
 | `/opt/data/config.yaml` | ConfigMap `${appName}-config` key `config.yaml` | no (subPath mount) | Model/provider/MCP-server config. Also operator-authored — `hermes config set` is a human-run CLI command, not something the agent invokes on itself. |
 
-**The `${appName}-config` ConfigMap is not a resource in this base** —
-it's expected to exist in the shared namespace, named per-profile, by
-the time the Deployment starts. Named per-profile (not a fixed literal
-like the container name's `${appName}` alone) precisely because every
-profile shares one namespace. It's produced by a second, profile-specific
-Flux Kustomization running a `configMapGenerator` against that profile's
-directory in the private `hermes-profiles` repo, with the *same*
-`appName` substitution value set on both Kustomizations so the names
-line up — see the profile overlay's own README for the concrete wiring.
+Also expected, by the same `${appName}-<suffix>` convention: a Secret
+named `${appName}-secrets`, injected wholesale via `envFrom` (used for
+API keys, e.g. TrueNAS credentials for `nas-ops`). Neither the ConfigMap
+nor the Secret is a resource in this base — both are produced by the
+profile's own content in `hermes-profiles`, in the same Kustomization,
+with `postBuild.substitute.appName` set to the same value used here so
+the names agree.
 
 ## Why not `webapp/components/pvc`
 
@@ -58,6 +76,5 @@ around the component's fixed path.
 Both are generic, parameterized components meant for apps whose health
 path/port or `fsGroup` vary per deployment. For Hermes those values are
 fixed properties of the image, not the persona, so they're hardcoded
-directly in this base's patches — that way profile overlays don't have
-to repeat `${healthPath}`/`${healthPort}`/`${fsGroup}` substitution vars
-that would never actually change between profiles.
+directly in this base's patches — one less thing every profile would
+otherwise have to set identically.
