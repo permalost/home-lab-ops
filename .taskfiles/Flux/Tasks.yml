@@ -12,7 +12,7 @@ tasks:
     vars:
       GITHUB_USER: '{{.GITHUB_USER | default "permalost"}}'
       GITHUB_REPO: '{{.GITHUB_REPO | default "home-lab-ops"}}'
-      GITHUB_PATH: '{{.GITHUB_PATH | default "./kubernetes/clusters/home"}}'
+      GITHUB_PATH: '{{.GITHUB_PATH | default "./kubernetes/clusters/orion"}}'
     cmds:
       - flux bootstrap github --owner={{.GITHUB_USER}} --repository={{.GITHUB_REPO}} --branch=main --path={{.GITHUB_PATH}} --personal
 

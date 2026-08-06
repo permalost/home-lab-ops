@@ -14,19 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
       - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@main
+        uses: fluxcd/flux2/action@b4a96e1450065f59e2f0f6b6aae983c6eb9f4234  # v2.9.3
       - name: Check for updates
         id: update
         run: |
           flux install \
-            --export > ./kubernetes/clusters/na/flux-system/gotk-components.yaml
+            --export > ./kubernetes/clusters/orion/flux-system/gotk-components.yaml
 
           VERSION="$(flux -v)"
           echo "flux_version=$VERSION" >> $GITHUB_OUTPUT
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@d4f3be6ce6f4083b7ac7490ab98b48a62db1ee41  # v7.0.10
         with:
           branch: update-flux
           commit-message: Update to ${{ steps.update.outputs.flux_version }}

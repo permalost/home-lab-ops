@@ -11,19 +11,10 @@ tasks:
 
       Usage:
         task test:build               # defaults to orion
-        task test:build CLUSTER=na
     vars:
       CLUSTER: '{{.CLUSTER | default "orion"}}'
     cmds:
       - bash scripts/flux-build.sh {{.CLUSTER}}
-
-  build-all:
-    desc: "Offline-render Kustomizations for both clusters"
-    cmds:
-      - task: build
-        vars: {CLUSTER: orion}
-      - task: build
-        vars: {CLUSTER: na}
 
   # ── Tier 2: Full Flux reconciliation in kind ─────────────────────────────
 
@@ -85,7 +76,6 @@ tasks:
 
       Usage:
         task test:kind-reconcile               # defaults to orion
-        task test:kind-reconcile CLUSTER=na
     vars:
       CLUSTER: '{{.CLUSTER | default "orion"}}'
     cmds:

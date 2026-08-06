@@ -8,14 +8,18 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 |-----------|---------|-----------|
 | [cilium](cilium/README.md) | CNI, L2 load balancing, Gateway API, network policy | `kube-system` |
 | [cert-manager](cert-manager/README.md) | TLS certificate issuance (Let's Encrypt via Cloudflare DNS) | `cert-manager` |
-| [nginx](nginx/README.md) | Ingress controller (ingress-nginx) | `networking` |
-| [metallb](metallb/README.md) | Layer 2 load balancer IP pool (na cluster only) | `metallb-system` |
 | [vkms](vkms/README.md) | VictoriaMetrics observability stack (Grafana, vmagent, vmalert, vmsingle, Alertmanager) | `monitoring` |
-| [longhorn](longhorn/README.md) | Distributed block storage | `longhorn-system` |
-| [linkerd](linkerd/README.md) | Service mesh (mTLS, observability) | `linkerd` |
-| [flagger](flagger/README.md) | Progressive delivery (canary deployments) | `flagger-system` |
-| [democratic-csi](democratic-csi/README.md) | CSI driver for NFS/iSCSI storage | `democratic-csi` |
-| [weave-gitops](weave-gitops/README.md) | Flux CD web UI | `flux-system` |
+| rook-ceph-operator | Ceph operator | `rook-ceph` |
+| rook-ceph-cluster | Ceph cluster (default block storage) | `rook-ceph` |
+| gateway-api | Gateway API CRDs | `gateway-system` |
+| gateway | Gateway + HTTPRoutes, wildcard TLS | `gateway` |
+| external-dns | DNS record automation | `external-dns` |
+| coredns | Cluster DNS patch | `kube-system` |
+| rbac | Cluster RBAC | — |
+| [weave-gitops](weave-gitops/README.md) | Flux CD web UI (na-only, pending migration to orion) | `flux-system` |
+| [flagger](flagger/README.md) | Progressive delivery (canary deployments) — currently unreferenced by any cluster | `flagger-system` |
+
+*(Components without a linked README don't have one yet — tracked for the docs cleanup pass.)*
 
 ## Dependency Order
 

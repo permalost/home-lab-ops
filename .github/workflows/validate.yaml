@@ -73,9 +73,6 @@ jobs:
       - name: Offline render — orion
         run: bash scripts/flux-build.sh orion
 
-      - name: Offline render — na
-        run: bash scripts/flux-build.sh na
-
   talos:
     name: Validate Talos config
     runs-on: ubuntu-latest
