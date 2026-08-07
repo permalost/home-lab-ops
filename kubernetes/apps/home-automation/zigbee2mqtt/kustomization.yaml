@@ -31,3 +31,12 @@ patches:
       kind: Deployment
       name: deploy
     path: patches/deploy-add-config-init.yaml
+  # webapp/base defaults to cpu: 10m — fine for a static file server, not
+  # enough for a Node.js process doing zigbee-herdsman startup. Confirmed
+  # via cgroup cpu.stat on the live pod: >99% of periods throttled,
+  # ~15min of accumulated throttled time just to get through boot. The
+  # original (pre-webapp/base) standalone deployment had no limit at all.
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
