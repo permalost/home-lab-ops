@@ -8,8 +8,14 @@ orion via `kubernetes/clusters/orion/home-automation.yaml`, namespace
 
 | Subdirectory | Purpose |
 |-------------|---------|
-| `mosquitto/` | MQTT message broker (ClusterIP, no external route) |
-| `zigbee2mqtt/` | Zigbee coordinator bridge → MQTT, frontend at `z2m.${domain}` via HTTPRoute |
+| `mosquitto/` | MQTT message broker. Standalone manifests, no HTTP surface — `webapp/base` doesn't buy anything here, same reasoning as `external-endpoints`. |
+| `zigbee2mqtt/` | Zigbee coordinator bridge → MQTT. Built on `../../webapp/base` + `httproute`/`pvc` components, frontend at `z2m.${domain}`. |
+
+`zigbee2mqtt/patches/`: `svc-remap-port-80.yaml` (the `httproute` component hardcodes
+`backendRefs.port: 80`, so the Service gets remapped to match — same convention
+`pihole` uses), `httproute-add-homepage-annotations.yaml`, and
+`deploy-add-config-init.yaml` (the ConfigMap→PVC bootstrap initContainer, appends
+onto the volumes the `pvc` component already added).
 
 ## Config
 

@@ -24,7 +24,10 @@ spec:
       name: sops-age
   postBuild:
     substitute:
+      appName: zigbee2mqtt
       subdomain: z2m
+      storageClass: rook-ceph-block
+      storageSize: 100Mi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
