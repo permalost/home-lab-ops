@@ -1,0 +1,37 @@
+# Read-only cluster discovery: lets Homepage list services from HTTPRoute
+# annotations instead of a hand-maintained link list. ClusterRole (chart's
+# own, via enableRbac) only grants get/list on namespaces/pods/nodes/
+# ingresses/httproutes/gateways — no write access, matching the
+# "changes go through git+Flux" convention for this repo.
+enableRbac: true
+
+serviceAccount:
+  create: true
+
+env:
+  - name: HOMEPAGE_ALLOWED_HOSTS
+    value: "homepage.${domain}"
+
+config:
+  kubernetes:
+    mode: cluster
+    gateway: true
+
+  # Populated via gethomepage.dev/* annotations on each HTTPRoute instead of
+  # a static list here — see infrastructure/gateway/*-httproute.yaml.
+  services:
+  bookmarks:
+
+  widgets:
+    - resources:
+        backend: resources
+        expanded: true
+        cpu: true
+        memory: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+
+  settingsString: |
+    title: orion
+    headerStyle: boxed

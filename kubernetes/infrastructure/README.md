@@ -10,6 +10,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | [cert-manager](cert-manager/README.md) | TLS certificate issuance (Let's Encrypt via Cloudflare DNS) | `cert-manager` |
 | [vkms](vkms/README.md) | VictoriaMetrics observability stack (Grafana, vmagent, vmalert, vmsingle, Alertmanager) | `monitoring` |
 | [headlamp](headlamp/README.md) | Cluster dashboard (workloads, CRDs, logs, exec), read-only RBAC | `headlamp` |
+| [homepage](homepage/README.md) | Link dashboard, auto-discovers HTTPRoutes via annotations | `homepage` |
 | rook-ceph-operator | Ceph operator | `rook-ceph` |
 | rook-ceph-cluster | Ceph cluster (default block storage) | `rook-ceph` |
 | gateway-api | Gateway API CRDs | `gateway-system` |
