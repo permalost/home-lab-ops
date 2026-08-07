@@ -12,7 +12,16 @@
       command: ["sh", "-c"]
       args:
         [
-          "if [ ! -f '/dest/configuration.yaml' ] ; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi",
+          # devices.yaml/groups.yaml are stale — leftover 0-byte files from
+          # the pre-2.x external-file-reference config, no longer written
+          # by the seed ConfigMap. An empty file fails zigbee2mqtt 2.x's
+          # YAML parse (js-yaml throws on truly-empty input) before it
+          # even gets to run its own config migration, so the app never
+          # boots. Removed unconditionally (idempotent, safe once already
+          # gone) rather than gated behind the configuration.yaml check,
+          # since it must run on every boot until the stale files are gone
+          # from the PVC, not just the first one.
+          "if [ ! -f '/dest/configuration.yaml' ] ; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
         ]
       volumeMounts:
         - name: config-src
