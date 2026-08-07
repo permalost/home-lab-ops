@@ -7,7 +7,7 @@ The Flux GitOps layer lives in `../../kubernetes/clusters/orion/`.
 
 | Component | Version |
 |---|---|
-| Talos | v1.12.1 |
+| Talos | v1.13.7 |
 | Kubernetes | v1.33.0 |
 | Cilium | managed by Flux (see `kubernetes/infrastructure/cilium/`) |
 
@@ -64,7 +64,7 @@ task talos:apply-all INSECURE=true
 task talos:health
 
 # Upgrade Talos on one node
-task talos:upgrade-talos NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:v1.12.1
+task talos:upgrade-talos NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:v1.13.7
 
 # Upgrade Kubernetes
 task talos:upgrade-k8s TO=v1.33.0
