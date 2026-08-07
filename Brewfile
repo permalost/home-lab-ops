@@ -5,8 +5,9 @@ brew "age"
 brew "sops"
 brew "fluxcd/tap/flux"
 
-# K3s prep
-brew "k3sup", link: false
+# Talos
+brew "talhelper"
+brew "talosctl"
 
 # Kubernetes
 brew "kubectl"
@@ -22,10 +23,7 @@ brew "helm"
 
 # Dev tools
 brew "direnv"
-
-# Linkerd
-brew "linkerd"
-brew "step"
+brew "pre-commit"
 
 # Taskfile
 brew "go-task/tap/go-task"
