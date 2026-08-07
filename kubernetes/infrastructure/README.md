@@ -16,7 +16,6 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | external-dns | DNS record automation | `external-dns` |
 | coredns | Cluster DNS patch | `kube-system` |
 | rbac | Cluster RBAC | — |
-| [weave-gitops](weave-gitops/README.md) | Flux CD web UI (na-only, pending migration to orion) | `flux-system` |
 
 *(Unlinked = no README yet.)*
 
