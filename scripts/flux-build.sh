@@ -15,13 +15,9 @@ set -euo pipefail
 CLUSTER="${1:-orion}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_DIR="$REPO_ROOT/kubernetes/clusters/$CLUSTER"
-# settings/ deliberately lives outside CLUSTER_DIR, at kubernetes/settings/<cluster>/,
-# not kubernetes/clusters/<cluster>/settings/ — so it's never swept up by
-# kustomize-controller's implicit directory walk of CLUSTER_DIR (the path the
-# cluster's root Kustomization/flux-system reconciles), which has no sops
-# decryption config. It's reconciled solely by its own dedicated
-# cluster-settings Kustomization CR (kubernetes/clusters/<cluster>/cluster-settings.yaml),
-# which does have decryption configured.
+# settings/ lives outside CLUSTER_DIR (kubernetes/settings/<cluster>/, not
+# kubernetes/clusters/<cluster>/settings/) so Flux's implicit directory walk
+# of CLUSTER_DIR never applies it without decryption.
 SETTINGS_DIR="$REPO_ROOT/kubernetes/settings/$CLUSTER"
 
 command -v kustomize >/dev/null 2>&1 || { echo "ERROR: kustomize not found. Run: task gen:tools" >&2; exit 1; }
@@ -88,12 +84,9 @@ KUSTOMIZE_FLAGS=("--load-restrictor=LoadRestrictionsNone")
 for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
     -not -path '*/flux-system/*' | sort); do
 
-  # Extract name|path|substitute for every Flux Kustomization object in this
-  # file. `substitute` is spec.postBuild.substitute (literal key=value pairs
-  # inline on the CR, e.g. appName/subdomain) — distinct from substituteFrom
-  # (the ConfigMap/Secret handled above) and just as required for a faithful
-  # render. Files can contain multiple YAML documents (e.g. cert-manager +
-  # cert-manager-issuers).
+  # name|path|substitute per Kustomization object (files may hold multiple
+  # documents). substitute = spec.postBuild.substitute literals, separate
+  # from the ConfigMap/Secret substituteFrom handled above.
   while IFS='|' read -r name path substitute; do
     [[ -z "$name" || "$name" == "null" ]] && continue
     [[ -z "$path" || "$path" == "null" ]] && continue
@@ -109,8 +102,7 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
       continue
     }
 
-    # postBuild.substitute literals are scoped to this Kustomization only —
-    # export them for this build, then unset so they don't leak into the next.
+    # scoped to this Kustomization only; unset after building
     LITERAL_KEYS=()
     if [[ -n "$substitute" ]]; then
       IFS=';' read -ra pairs <<< "$substitute"
@@ -124,8 +116,7 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
     fi
 
     if RENDERED="$(kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" | python3 -c "$ENVSUBST_PY")"; then
-      # kustomize build succeeding says nothing about substitution — check
-      # separately for ${VAR} placeholders that never got resolved.
+      # a successful build doesn't mean substitution succeeded — check for leftovers
       UNRESOLVED="$(printf '%s' "$RENDERED" | grep -oE '\$\{[A-Za-z_][A-Za-z0-9_]*(:[^}]*)?\}' | sort -u || true)"
       if [[ -n "$UNRESOLVED" ]]; then
         echo "  ✗ $name — unresolved variable(s):"

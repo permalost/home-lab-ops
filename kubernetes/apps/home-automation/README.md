@@ -1,10 +1,7 @@
 # home-automation
 
-MQTT stack: Mosquitto as the broker, Zigbee2MQTT for Zigbee device
-integration. Not currently wired into any cluster — kept from the
-decommissioned na cluster pending migration to orion. (Home Assistant was
-also part of this stack; its manifests were removed as orphaned — never
-wired into a cluster.)
+MQTT stack: Mosquitto (broker) + Zigbee2MQTT (Zigbee bridge). Not wired into
+any cluster — kept from the decommissioned na cluster pending migration.
 
 ## Components
 
@@ -13,14 +10,10 @@ wired into a cluster.)
 | `mosquitto/` | MQTT message broker |
 | `zigbee2mqtt/` | Zigbee coordinator bridge → MQTT |
 
-## Configuration
+## Config
 
-Each component has its own `kustomization.yaml`, `deploy.yaml`, and `configMap.yaml`. Zigbee2MQTT publishes to Mosquitto.
-
-## Dependencies
-
-`mosquitto` must be ready before `zigbee2mqtt` attempts to connect to the broker.
+Zigbee2MQTT publishes to Mosquitto; `mosquitto` must be ready first.
 
 ## Troubleshooting
 
-- **MQTT broker unreachable:** Verify the `mosquitto` Service and that credentials in `configMap.yaml` match what clients are using.
+- **MQTT broker unreachable:** check the `mosquitto` Service and that `configMap.yaml` credentials match what clients use.
