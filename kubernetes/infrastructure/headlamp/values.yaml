@@ -1,0 +1,5 @@
+# Read-only: all cluster changes go through git+Flux, not the dashboard.
+# Login is still required (token paste) — unsafeUseServiceAccountToken stays
+# off since the route is reachable from the whole LAN.
+clusterRoleBinding:
+  clusterRoleName: view
