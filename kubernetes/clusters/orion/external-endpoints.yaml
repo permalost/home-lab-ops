@@ -1,0 +1,23 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-endpoints
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cilium
+    - name: gateway
+    - name: cluster-settings
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/external-endpoints
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

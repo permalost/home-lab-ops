@@ -1,0 +1,16 @@
+# Binds to service.yaml via the kubernetes.io/service-name label — that's
+# the only link, the EndpointSlice's own name doesn't matter.
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: unifi
+  labels:
+    kubernetes.io/service-name: unifi
+addressType: IPv4
+ports:
+  - name: https
+    protocol: TCP
+    port: 8443
+endpoints:
+  - addresses:
+      - 10.20.0.1

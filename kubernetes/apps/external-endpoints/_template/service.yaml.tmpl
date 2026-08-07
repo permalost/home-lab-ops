@@ -1,0 +1,11 @@
+# No selector: Kubernetes leaves endpoints alone, endpointslice.yaml
+# supplies them by hand ("Service without selector" pattern).
+apiVersion: v1
+kind: Service
+metadata:
+  name: __NAME__
+spec:
+  ports:
+    - port: __PORT__
+      protocol: TCP
+      name: http

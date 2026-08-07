@@ -1,0 +1,10 @@
+# For HTTPS-only backends (Unifi's controller UI, most BMCs/IPMI): tells
+# the Gateway to re-encrypt to the backend instead of forwarding plaintext.
+# Consumer must patch spec.targetRefs[0].name, spec.validation.hostname,
+# and spec.validation.caCertificateRefs[0].name — see ../../unifi and
+# ../../README.md.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - backendtlspolicy.yaml
