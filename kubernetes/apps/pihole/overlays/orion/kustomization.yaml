@@ -18,3 +18,11 @@ patches:
     target:
       kind: HTTPRoute
       name: route
+  # webapp/base's Service defaults to 8080 (what the httproute component
+  # assumes); pihole's own container really listens on 80, and
+  # patches/svc-update-ports.yaml already moved the Service there — this
+  # keeps the HTTPRoute's backend port in sync.
+  - path: patches/httproute-update-port.yaml
+    target:
+      kind: HTTPRoute
+      name: route
