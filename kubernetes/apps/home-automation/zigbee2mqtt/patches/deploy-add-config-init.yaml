@@ -12,27 +12,24 @@
       command: ["sh", "-c"]
       args:
         [
-          # devices.yaml/groups.yaml are stale — leftover 0-byte files from
-          # the pre-2.x external-file-reference config, no longer written
-          # by the seed ConfigMap. An empty file fails zigbee2mqtt 2.x's
-          # YAML parse (js-yaml throws on truly-empty input) before it
-          # even gets to run its own config migration, so the app never
-          # boots. Removed unconditionally (idempotent, safe once already
-          # gone) rather than gated behind the configuration.yaml check,
-          # since it must run on every boot until the stale files are gone
-          # from the PVC, not just the first one.
+          # Re-seeds configuration.yaml from the ConfigMap whenever
+          # SEED_VERSION doesn't match what's recorded in the PVC's
+          # .z2m-seed-version — not just on first boot. Bump SEED_VERSION
+          # any time configMap.yaml's configuration.yaml content changes
+          # and needs to land on an already-seeded PVC (zigbee2mqtt owns
+          # configuration.yaml after that — this only overwrites when the
+          # version marker is stale, so it won't clobber runtime state
+          # like a generated network_key once the network's actually up).
+          # Replaces two prior one-off content-sniffing hacks (stale
+          # "homeassistant: true", missing devices.yaml/groups.yaml) that
+          # each needed this same re-seed but detected it ad hoc.
           #
-          # Re-seed configuration.yaml if it's still the pre-2.x format
-          # (literal "homeassistant: true" line — our current ConfigMap
-          # never writes that, only "homeassistant:" as a block). zigbee2mqtt
-          # 2.x has a known upstream migration bug that crashes on exactly
-          # this combination (homeassistant: true + advanced.homeassistant_
-          # discovery_topic set) — see Koenkk/zigbee2mqtt#25518, closed
-          # "not planned", fix is to already be on the new schema. Safe to
-          # force here since no devices are paired yet (nothing to lose);
-          # self-limiting once the seeded config is current, since the
-          # marker won't match anymore.
-          "if [ ! -f '/dest/configuration.yaml' ] || grep -q '^homeassistant: true$' /dest/configuration.yaml 2>/dev/null; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
+          # SEED_VERSION history:
+          #   1 - na-era config, 1.x schema
+          #   2 - 2.x schema migration (homeassistant object, frontend.enabled, etc.)
+          #   3 - serial.adapter: zstack (zigbee-herdsman 10.x can't
+          #       auto-discover the adapter type over tcp:// anymore)
+          "SEED_VERSION=3; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.z2m-seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && echo \"$SEED_VERSION\" > /dest/.z2m-seed-version; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
         ]
       volumeMounts:
         - name: config-src
