@@ -1,0 +1,33 @@
+# Unifi's own self-signed leaf cert, trusted as its own CA (chain of one) so
+# BackendTLSPolicy can validate the re-encrypted hop to it. Pulled with:
+#   echo | openssl s_client -connect 10.20.0.1:8443 -servername 10.20.0.1 \
+#     2>/dev/null | openssl x509 > ca.crt
+# Re-run and update if the controller's cert is ever regenerated (currently
+# valid to 2027-09-16; not a secret, it's a public leaf cert).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unifi-ca
+data:
+  ca.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIDfTCCAmWgAwIBAgIEaEvCKjANBgkqhkiG9w0BAQsFADBrMQswCQYDVQQGEwJV
+    UzERMA8GA1UECAwITmV3IFlvcmsxETAPBgNVBAcMCE5ldyBZb3JrMRYwFAYDVQQK
+    DA1VYmlxdWl0aSBJbmMuMQ4wDAYDVQQLDAVVbmlGaTEOMAwGA1UEAwwFVW5pRmkw
+    HhcNMjUwNjEzMDYxNjEwWhcNMjcwOTE2MDYxNjEwWjBrMQswCQYDVQQGEwJVUzER
+    MA8GA1UECAwITmV3IFlvcmsxETAPBgNVBAcMCE5ldyBZb3JrMRYwFAYDVQQKDA1V
+    YmlxdWl0aSBJbmMuMQ4wDAYDVQQLDAVVbmlGaTEOMAwGA1UEAwwFVW5pRmkwggEi
+    MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDRV5s1WWO+Gm5GP70G+9WHUYGY
+    PlLqzrVfZ5bGsY4xj7iQB9nWVmBFq0yk+J5YWqBCedb38I9GXryS2RnAMOwoW8SB
+    E0I1XjDvIxjcVVcP1RKUlxznI2rwlVqmW3MvK7cBAlDB4hIujtIDD9pe8mFQ9aux
+    loecD63UkvdDVNrMwpSt0Ymz/VcEixZGZuPEzWJAx7+xgDDEg5TuExOCHxy/iFK2
+    KsOtMbBFnmuywrVXfQZa8PMNalpYtvlQSaJmZFJZn6PVRIJYUJ/FmwDfaVmgaxVi
+    LTQJdg88G9nM1Bdna6sq6I/aW+/MpgnlcCv8cohIqXWi3yOTaMqGo2elXUyhAgMB
+    AAGjKTAnMBAGA1UdEQQJMAeCBVVuaUZpMBMGA1UdJQQMMAoGCCsGAQUFBwMBMA0G
+    CSqGSIb3DQEBCwUAA4IBAQBKqeVe6BKxhQOCLZqGrbHB/pfKsh0mMtJeBh1aOFMK
+    1qScHMzndgZHOqQL/fk1NTWWdNc1fWlTLvkjRsEFUiBa60bNWOaRErtvARutooR3
+    zIzweNkVp5/8UbveySvzSjXuwXmVRJi7UMYGbx5Np51W0UWZxmn1ceG/Zclbpwjo
+    Jbs8U9w+ca4pyaGUob+Bs1Ub0OLfLXzBBYhCL33FTWTdaWtuMH7Vpy9w1SqnvDF/
+    A6Ya5EVpb8IvrIxnDYvaTIHqTxeOjACG3KTVvmrgbCfeFgusyhYPjjOV6OduXTmI
+    VAeRJa90lWKE3xb+V5WyiFmFE0nGhqbiAL3Xn3dC5QnL
+    -----END CERTIFICATE-----

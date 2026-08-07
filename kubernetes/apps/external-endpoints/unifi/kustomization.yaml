@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - service.yaml
+  - endpointslice.yaml
+  - configmap-ca.yaml
+  - httproute.yaml
+
+components:
+  - ../_components/backend-tls
+
+# Wires the generic backend-tls component to this instance's Service/ConfigMap.
+patches:
+  - target:
+      kind: BackendTLSPolicy
+    patch: |-
+      - op: replace
+        path: /spec/targetRefs/0/name
+        value: unifi
+      - op: replace
+        path: /spec/validation/caCertificateRefs/0/name
+        value: unifi-ca
+      - op: replace
+        path: /spec/validation/hostname
+        value: unifi

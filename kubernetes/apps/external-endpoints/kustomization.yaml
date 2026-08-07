@@ -6,4 +6,7 @@ namespace: external-endpoints
 resources:
   - namespace.yaml
   - opensprinkler
+  - slzb-06
+  - truenas
+  - unifi
   # - _template is a copy-and-edit starting point, not a resource — see README.md

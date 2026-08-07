@@ -32,3 +32,26 @@ sed -i '' \
 Then add `<name>` to `resources:` in `../kustomization.yaml`. No new Flux
 Kustomization, no namespace, no cert — it rides the existing ones. Run
 `task gen:validate` before pushing.
+
+## HTTPS-only backends
+
+The template assumes the backend speaks plain HTTP — the Gateway terminates
+TLS and forwards plaintext, same as every other app on orion. Some
+appliances (Unifi's controller UI, most BMCs/IPMI) only serve HTTPS,
+usually with a self-signed cert, and won't answer a plaintext request at
+all. For those:
+
+1. Pull the device's cert into a ConfigMap (`ca.crt` key) — not a secret,
+   it's a public leaf cert. `unifi/configmap-ca.yaml` documents the
+   `openssl s_client` one-liner used to fetch it.
+2. Add the `../_components/backend-tls` component and patch its
+   `BackendTLSPolicy` to point at your Service/ConfigMap names — see
+   `unifi/kustomization.yaml`.
+3. Set `validation.hostname` to whatever SAN the cert actually presents
+   (check with `openssl x509 -noout -ext subjectAltName`), not the
+   device's real hostname or the external `${domain}` — Envoy validates
+   the re-encrypted hop against that SAN, independent of the public
+   HTTPRoute hostname.
+
+Re-run the cert pull and update the ConfigMap if the device ever rotates
+its certificate.

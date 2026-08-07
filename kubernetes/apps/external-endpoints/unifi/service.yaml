@@ -1,0 +1,12 @@
+# No selector: Kubernetes leaves endpoints alone, endpointslice.yaml
+# supplies them by hand ("Service without selector" pattern). Port matches
+# Unifi's controller UI, which is HTTPS-only — see backendtlspolicy.yaml.
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi
+spec:
+  ports:
+    - port: 8443
+      protocol: TCP
+      name: https
