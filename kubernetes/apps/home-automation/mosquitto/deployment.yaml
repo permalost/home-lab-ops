@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,22 +8,27 @@ spec:
   strategy:
     type: Recreate
   selector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mosquitto
     spec:
       initContainers:
-        - name: create-config
+        - name: init-config
           image: eclipse-mosquitto:2.0.18
           command:
             [
               "sh",
               "-c",
-              "cp -Lr /src/* /dest/ && chmod a+rw /dest/mosquitto.conf && chown root /dest/password_file  && chmod 700 /dest/password_file && ls -al /dest",
+              "cp -Lr /src/* /dest/ && chmod a+rw /dest/mosquitto.conf && chown root /dest/password_file && chmod 700 /dest/password_file",
             ]
           volumeMounts:
-            - name: final-dir
-              mountPath: /dest
-            - name: temp-dir
+            - name: config-src
               mountPath: /src
+            - name: config
+              mountPath: /dest
       containers:
         - name: mosquitto
           image: "eclipse-mosquitto:2.0.18"
@@ -34,9 +38,9 @@ spec:
               containerPort: 1883
               protocol: TCP
           volumeMounts:
-            - name: mosquitto-data
+            - name: data
               mountPath: /mosquitto/data
-            - name: final-dir
+            - name: config
               mountPath: /mosquitto/config
           livenessProbe:
             tcpSocket:
@@ -61,15 +65,15 @@ spec:
             periodSeconds: 5
           resources:
             limits:
-              cpu: 10m
-              memory: 3Gi
+              cpu: 100m
+              memory: 256Mi
       volumes:
-        - name: mosquitto-data
+        - name: data
           persistentVolumeClaim:
             claimName: mosquitto-data
-        - name: final-dir
+        - name: config
           persistentVolumeClaim:
             claimName: mosquitto-conf
-        - name: temp-dir
+        - name: config-src
           configMap:
             name: mosquitto-base-config

@@ -1,6 +1,5 @@
----
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: mosquitto-data
 spec:
@@ -10,8 +9,8 @@ spec:
     requests:
       storage: 5Gi
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: mosquitto-conf
 spec:

@@ -1,0 +1,28 @@
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config-src
+    configMap:
+      name: settings
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: init-config
+      image: busybox:1.36
+      command: ["sh", "-c"]
+      args:
+        [
+          "if [ ! -f '/dest/configuration.yaml' ] ; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi",
+        ]
+      volumeMounts:
+        - name: config-src
+          mountPath: /src
+        - name: data
+          mountPath: /dest
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: TZ
+      value: America/Boise
+    - name: ZIGBEE2MQTT_DATA
+      value: /data

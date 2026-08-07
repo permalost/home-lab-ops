@@ -1,17 +1,40 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: smart-home
-
-commonLabels:
-  app: zigbee2mqtt
-  app.kubernetes.io/name: zigbee2mqtt
-labels:
-  - pairs:
-      toolkit.fluxcd.io/tenant: dev-team
 
 resources:
+  - ../../webapp/base
   - configMap.yaml
-  - deployment.yaml
-  - ingress.yaml
-  - pvc.yaml
-  - service.yaml
+
+namePrefix: zigbee2mqtt-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: zigbee2mqtt
+      app.kubernetes.io/name: zigbee2mqtt
+
+components:
+  - ../../webapp/components/httproute
+  - ../../webapp/components/pvc
+
+images:
+  - name: my-app
+    newName: koenkk/zigbee2mqtt
+    newTag: "1.38.0"
+
+# httproute component hardcodes backendRefs.port: 80 (matches the pihole-
+# style convention of remapping the Service itself to 80); zigbee2mqtt's
+# frontend stays on 8080, so the Service needs the same remap.
+patches:
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-remap-port-80.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-config-init.yaml
