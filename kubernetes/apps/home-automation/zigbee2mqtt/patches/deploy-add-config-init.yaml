@@ -21,7 +21,18 @@
           # gone) rather than gated behind the configuration.yaml check,
           # since it must run on every boot until the stale files are gone
           # from the PVC, not just the first one.
-          "if [ ! -f '/dest/configuration.yaml' ] ; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
+          #
+          # Re-seed configuration.yaml if it's still the pre-2.x format
+          # (literal "homeassistant: true" line — our current ConfigMap
+          # never writes that, only "homeassistant:" as a block). zigbee2mqtt
+          # 2.x has a known upstream migration bug that crashes on exactly
+          # this combination (homeassistant: true + advanced.homeassistant_
+          # discovery_topic set) — see Koenkk/zigbee2mqtt#25518, closed
+          # "not planned", fix is to already be on the new schema. Safe to
+          # force here since no devices are paired yet (nothing to lose);
+          # self-limiting once the seeded config is current, since the
+          # marker won't match anymore.
+          "if [ ! -f '/dest/configuration.yaml' ] || grep -q '^homeassistant: true$' /dest/configuration.yaml 2>/dev/null; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ ; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
         ]
       volumeMounts:
         - name: config-src
