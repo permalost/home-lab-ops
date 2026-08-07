@@ -12,4 +12,7 @@ spec:
   rules:
     - backendRefs:
         - name: svc
-          port: 80
+          # Matches webapp/base's Service port. Consumers that repatch the
+          # Service to a different port (e.g. pihole -> 80) must patch this
+          # HTTPRoute's port to match — see pihole/overlays/orion for the example.
+          port: 8080

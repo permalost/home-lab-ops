@@ -22,14 +22,7 @@ images:
     newName: koenkk/zigbee2mqtt
     newTag: "1.38.0"
 
-# httproute component hardcodes backendRefs.port: 80 (matches the pihole-
-# style convention of remapping the Service itself to 80); zigbee2mqtt's
-# frontend stays on 8080, so the Service needs the same remap.
 patches:
-  - target:
-      kind: Service
-      name: svc
-    path: patches/svc-remap-port-80.yaml
   - target:
       kind: HTTPRoute
       name: route

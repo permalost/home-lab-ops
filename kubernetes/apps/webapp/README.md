@@ -68,6 +68,13 @@ Default on orion. Adds a Gateway API `HTTPRoute` attached to `${gatewayName}` (n
 | `domain` | `cluster-settings` ConfigMap | `orion.norseamerican.com` |
 | `gatewayName` | `cluster-settings` ConfigMap | `orion` |
 
+`backendRefs.port` defaults to `8080` — matching `webapp/base`'s Service — because
+Gateway API's `HTTPRoute` only accepts a numeric port (unlike `ingress`'s
+`port: {name: http}`, there's no name-based backend ref to fall back on). If an
+overlay repatches the Service to a different port (pihole -> `80`, since its
+container really listens there), patch the HTTPRoute's `backendRefs[0].port` to
+match — see `apps/pihole/overlays/orion/patches/httproute-update-port.yaml`.
+
 ### pvc
 
 Adds a `ReadWriteOnce` PVC named `data` and mounts it at `/data` on the `deploy` container. A `nameReference` transformer rewires the volume's `claimName` when `namePrefix` is applied. The volumeMount patch targets `spec.template.spec.containers/0` — the first container in the Deployment.
