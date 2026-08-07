@@ -9,4 +9,5 @@ resources:
   - slzb-06
   - truenas
   - unifi
+  - neurio
   # - _template is a copy-and-edit starting point, not a resource — see README.md
