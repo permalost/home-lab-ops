@@ -12,6 +12,6 @@ labels:
 resources:
   - secret.yaml
   - configMap.yaml
-  - deploy.yaml
+  - deployment.yaml
   - ingress.yaml
   - service.yaml

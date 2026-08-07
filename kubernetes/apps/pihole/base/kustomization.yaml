@@ -6,7 +6,7 @@ resources:
   - secret.yaml
   - configMap.yaml
 
-namespace: pihole2
+namespace: pihole
 namePrefix: pihole-
 
 labels:

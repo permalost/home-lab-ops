@@ -4,7 +4,7 @@ metadata:
   name: route
 spec:
   parentRefs:
-    - name: orion
+    - name: ${gatewayName}
       namespace: gateway
       sectionName: https
   hostnames:
