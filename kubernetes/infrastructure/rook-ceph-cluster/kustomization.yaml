@@ -5,3 +5,4 @@ resources:
   - blockpool.yaml
   - reference-grant.yaml
   - csi-driver.yaml
+  - csi-rbd-rbac.yaml
