@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: external-endpoints
+
+resources:
+  - namespace.yaml
+  - opensprinkler
+  # - _template is a copy-and-edit starting point, not a resource — see README.md
