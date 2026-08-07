@@ -10,3 +10,11 @@ resources:
 
 components:
   - ../../../webapp/components/httproute
+
+# gethomepage.dev discovery for the homepage dashboard; component's
+# HTTPRoute is generic and takes no annotations of its own.
+patches:
+  - path: patches/httproute-add-homepage-annotations.yaml
+    target:
+      kind: HTTPRoute
+      name: route
