@@ -1,0 +1,70 @@
+# The rook-ceph chart's csi.installCsiOperator: true
+# (../rook-ceph-operator/release.yaml) only installs the ceph-csi-operator
+# controller, its CRDs, and RBAC — it does NOT create the
+# OperatorConfig/Driver CRs that actually make it deploy the CSI
+# provisioner/node plugin pods. Rook's own upstream example
+# (deploy/examples/operator.yaml in rook/rook) ships these as separate
+# "admin-managed" resources for exactly that reason. Without them, PVCs
+# using rook-ceph-block sit Pending forever ("waiting for a volume to be
+# created by rook-ceph.rbd.csi.ceph.com") since no CSIDriver is registered.
+#
+# Lives here (not rook-ceph-operator/) so it applies after the operator's
+# HelmRelease is Ready and the Driver/OperatorConfig CRDs actually exist —
+# rook-ceph-cluster's Flux Kustomization already dependsOn: rook-ceph-operator.
+#
+# Image tags mirror the rook-ceph-operator chart's own csi.* defaults
+# (helm show values rook-release/rook-ceph --version <chart version in
+# ../rook-ceph-operator/release.yaml>) — re-check these when that chart
+# version bumps.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rook-csi-operator-image-set-configmap
+  namespace: rook-ceph
+data:
+  provisioner: "registry.k8s.io/sig-storage/csi-provisioner:v6.2.0"
+  attacher: "registry.k8s.io/sig-storage/csi-attacher:v4.12.0"
+  resizer: "registry.k8s.io/sig-storage/csi-resizer:v2.1.0"
+  snapshotter: "registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0"
+  registrar: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0"
+  plugin: "quay.io/cephcsi/cephcsi:v3.17.0"
+  addons: "quay.io/csiaddons/k8s-sidecar:v0.14.0"
+---
+apiVersion: csi.ceph.io/v1
+kind: OperatorConfig
+metadata:
+  name: ceph-csi-operator-config
+  namespace: rook-ceph
+spec:
+  driverSpecDefaults:
+    log:
+      verbosity: 0
+    imageSet:
+      name: rook-csi-operator-image-set-configmap
+    enableMetadata: true
+    generateOMapInfo: false
+    fsGroupPolicy: File
+    deployCsiAddons: false
+    cephFsClientType: kernel
+    nodePlugin:
+      priorityClassName: "system-node-critical"
+      kubeletDirPath: /var/lib/kubelet
+      enableSeLinuxHostMount: false
+    controllerPlugin:
+      priorityClassName: "system-cluster-critical"
+      deploymentStrategy:
+        type: Recreate
+---
+# RBD only — orion's only StorageClass (rook-ceph-block) is RBD-backed;
+# no CephFS/NFS pools exist yet. Add those Driver CRs here if that changes.
+apiVersion: csi.ceph.io/v1
+kind: Driver
+metadata:
+  name: rook-ceph.rbd.csi.ceph.com # must match the StorageClass's provisioner
+  namespace: rook-ceph
+spec:
+  fsGroupPolicy: File
+  nodePlugin:
+    updateStrategy:
+      type: RollingUpdate
+  controllerPlugin: {}

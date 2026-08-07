@@ -4,3 +4,4 @@ resources:
   - cluster.yaml
   - blockpool.yaml
   - reference-grant.yaml
+  - csi-driver.yaml
