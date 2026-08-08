@@ -5,6 +5,7 @@ namespace: homebox
 
 resources:
   - ../webapp/base
+  - namespace.yaml
 
 namePrefix: homebox-
 
