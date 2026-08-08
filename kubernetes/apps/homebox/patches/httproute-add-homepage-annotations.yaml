@@ -6,5 +6,5 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Homebox"
     gethomepage.dev/description: "Home inventory management"
-    gethomepage.dev/group: "Home"
+    gethomepage.dev/group: "Inventory"
     gethomepage.dev/icon: "homebox.png"
