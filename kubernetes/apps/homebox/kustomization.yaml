@@ -1,48 +1,42 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-- ../webapp/base
-- pvc.yaml
-
-components:
-- ../webapp/components/ingress
-
 namespace: homebox
+
+resources:
+  - ../webapp/base
+
 namePrefix: homebox-
 
 labels:
-- includeSelectors: true
-  pairs:
-    app: homebox
-    app.kubernetes.io/name: homebox
+  - includeSelectors: true
+    pairs:
+      app: homebox
+      app.kubernetes.io/name: homebox
+
+components:
+  - ../webapp/components/httproute
+  - ../webapp/components/pvc
 
 images:
-- name: my-app
-  newName: ghcr.io/sysadminsmedia/homebox
-  newTag: 0.20.2
-
-configMapGenerator:
-  - name: env
-    files:
-      - environment
+  - name: my-app
+    newName: ghcr.io/sysadminsmedia/homebox
+    newTag: 0.26.2
 
 patches:
-- path: add-volumes.yaml
-  target:
-    kind: Deployment
-    name: deploy
-- target:
-    kind: Deployment
-    name: deploy
-  patch: |
-    - op: replace
-      path: /spec/template/spec/containers/0/ports/0/containerPort
-      value: 7745
-- target:
-    kind: Service
-    name: svc
-  patch: |
-    - op: replace
-      path: /spec/ports/0/port
-      value: 7745
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
