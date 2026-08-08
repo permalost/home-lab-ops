@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../webapp/base
+  - namespace.yaml
+
+components:
+  - ../webapp/components/httproute      # Gateway API route — the default; orion has no nginx ingress controller
+  - ../webapp/components/pvc            # mounts /data; set storageClass + storageSize in cluster shell postBuild.substitute
+
+namespace: grocy
+namePrefix: grocy-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: grocy
+      app.kubernetes.io/name: grocy
+
+images:
+  - name: my-app
+    newName: ghcr.io/linuxserver/grocy
+    newTag: "v4.6.0-ls334"
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-config-mountpath.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
