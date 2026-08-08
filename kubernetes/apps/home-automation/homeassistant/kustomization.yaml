@@ -7,6 +7,7 @@ resources:
   - ../../webapp/base
   - configMap.yaml
   - secret.yaml
+  - snapshot-cronjob.yaml
 
 namePrefix: homeassistant-
 

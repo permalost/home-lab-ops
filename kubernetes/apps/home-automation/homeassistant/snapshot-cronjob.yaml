@@ -1,0 +1,88 @@
+# Scheduled RBD snapshots of homeassistant-data via
+# infrastructure/snapshot-controller's VolumeSnapshotClass. Daily, keeps
+# the newest 7. deletionPolicy: Delete on that class means pruning here
+# actually frees the underlying Ceph storage, not just the k8s object.
+#
+# This only protects going forward from whenever it starts running — a
+# snapshot can only be taken from a PVC that still exists, so it doesn't
+# retroactively help if homeassistant-data is already gone. To restore
+# from a snapshot: create a new PVC with
+# spec.dataSource: {name: <snapshot>, kind: VolumeSnapshot,
+# apiGroup: snapshot.storage.k8s.io}, then repoint the Deployment at it.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snapshot-cronjob
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: snapshot-cronjob
+rules:
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: snapshot-cronjob
+subjects:
+  - kind: ServiceAccount
+    name: snapshot-cronjob
+roleRef:
+  kind: Role
+  name: snapshot-cronjob
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-snapshot
+spec:
+  schedule: "0 3 * * *"
+  timeZone: America/Boise
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: snapshot-cronjob
+          restartPolicy: OnFailure
+          containers:
+            - name: snapshot
+              image: alpine/k8s:1.33.0
+              env:
+                - name: KEEP
+                  value: "7"
+              command:
+                - bash
+                - -c
+                - |
+                  set -euo pipefail
+                  ns="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
+                  ts="$(date +%Y%m%d%H%M%S)"
+                  cat <<EOF | kubectl apply -f -
+                  apiVersion: snapshot.storage.k8s.io/v1
+                  kind: VolumeSnapshot
+                  metadata:
+                    name: homeassistant-data-$ts
+                    namespace: $ns
+                    labels:
+                      app: homeassistant-data-snapshot
+                  spec:
+                    volumeSnapshotClassName: rook-ceph-block
+                    source:
+                      persistentVolumeClaimName: homeassistant-data
+                  EOF
+                  kubectl get volumesnapshot -n "$ns" -l app=homeassistant-data-snapshot \
+                    -o jsonpath='{range .items[*]}{.metadata.creationTimestamp}{" "}{.metadata.name}{"\n"}{end}' \
+                    | sort -r | tail -n "+$((KEEP + 1))" | awk '{print $2}' \
+                    | xargs -r -n1 kubectl delete volumesnapshot -n "$ns"
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

@@ -1,0 +1,18 @@
+# deletionPolicy: Delete (not Retain) is deliberate — this class is for
+# apps/home-automation/homeassistant's rotating scheduled snapshots
+# (CronJob prunes old VolumeSnapshot objects on a schedule). Retain would
+# leak the underlying Ceph snapshot every time the CronJob deletes an old
+# VolumeSnapshot object, since deletionPolicy only governs what happens
+# when the *snapshot itself* is deleted — it has no bearing on protection
+# against the *source PVC* being deleted; existing VolumeSnapshots aren't
+# touched by that regardless of this setting.
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: rook-ceph-block
+driver: rook-ceph.rbd.csi.ceph.com
+deletionPolicy: Delete
+parameters:
+  clusterID: rook-ceph
+  csi.storage.k8s.io/snapshotter-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/snapshotter-secret-namespace: rook-ceph

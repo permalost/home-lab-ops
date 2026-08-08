@@ -107,6 +107,28 @@ pattern's kept consistent).
   plaintext was never recoverable, mosquitto only ever stored the hash.
   The new plaintext lives in `homeassistant/secret.yaml` (SOPS).
 
+## Backups
+
+`homeassistant-data`'s `rook-ceph-block` StorageClass has
+`reclaimPolicy: Delete` — no automatic retention if the PVC itself is ever
+lost. `homeassistant/snapshot-cronjob.yaml` takes a daily RBD snapshot
+(`infrastructure/snapshot-controller`'s `VolumeSnapshotClass`, `03:00
+America/Boise`) and prunes down to the newest 7 (`KEEP` env var on the
+CronJob). Only protects going forward from whenever it starts running — a
+snapshot can only be taken from a PVC that still exists.
+
+**Restore:** create a new PVC with
+`spec.dataSource: {name: <snapshot-name>, kind: VolumeSnapshot, apiGroup:
+snapshot.storage.k8s.io}` (`kubectl get volumesnapshot -n home-automation`
+to list them), then repoint `homeassistant-deploy`'s volume at it. Not
+scripted here — deliberately manual, since restoring is rare enough that
+automating it isn't worth the risk of automating it wrong.
+
+zigbee2mqtt/mosquitto don't have this — their PVCs matter less (zigbee2mqtt
+can be re-paired with devices; mosquitto has no state worth keeping beyond
+what's already in git). Add the same CronJob pattern for them too if that
+changes.
+
 ## Troubleshooting
 
 - **MQTT broker unreachable:** check the `mosquitto` Service and that the
