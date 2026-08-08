@@ -35,6 +35,10 @@ patches:
       name: deploy
     path: patches/deploy-add-env.yaml
   - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
       kind: Service
       name: svc
     path: patches/svc-target-port.yaml
