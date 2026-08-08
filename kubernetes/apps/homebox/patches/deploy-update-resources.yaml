@@ -1,0 +1,13 @@
+# webapp/base's cpu: 10m default throttles anything heavier than a static
+# file server (see #90 — zigbee2mqtt hit the same thing on boot). Here it
+# surfaced as registration hanging then 503ing: bcrypt password hashing
+# is a CPU burst 10m can't service in a reasonable time.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
