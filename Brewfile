@@ -6,6 +6,8 @@ brew "sops"
 brew "fluxcd/tap/flux"
 
 # Talos
+# keep talhelper current — old builds silently drop newer Talos config
+# fields (e.g. Layer2VIPConfig) instead of erroring
 brew "talhelper"
 brew "talosctl"
 
