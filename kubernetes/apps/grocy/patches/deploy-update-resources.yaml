@@ -1,0 +1,12 @@
+# webapp/base's cpu: 10m default throttles anything heavier than a static
+# file server (see #90, #104). Grocy is PHP-FPM + SQLite behind nginx —
+# sized well above that from the start.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi

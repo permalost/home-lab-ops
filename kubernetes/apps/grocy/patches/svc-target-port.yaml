@@ -1,0 +1,6 @@
+# Service stays on webapp/base's default port 8080 (matches what
+# httproute.yaml's backendRefs.port expects) — but grocy's container
+# actually listens on 80, so targetPort needs to be explicit.
+- op: add
+  path: /spec/ports/0/targetPort
+  value: 80
