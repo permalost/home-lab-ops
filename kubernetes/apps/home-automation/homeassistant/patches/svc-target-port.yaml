@@ -1,0 +1,8 @@
+# Service stays on webapp/base's default port 8080 (matches what
+# httproute.yaml's backendRefs.port expects) — but HA's container
+# actually listens on 8123, so targetPort needs to be explicit; without
+# it, targetPort implicitly defaults to the same value as port (8080),
+# which would be wrong.
+- op: add
+  path: /spec/ports/0/targetPort
+  value: 8123

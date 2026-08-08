@@ -1,56 +1,114 @@
 # home-automation
 
-MQTT stack: Mosquitto (broker) + Zigbee2MQTT (Zigbee bridge). Wired into
-orion via `kubernetes/clusters/orion/home-automation.yaml`, namespace
-`home-automation`.
+MQTT stack + Home Assistant, namespace `home-automation` for all three apps
+(so they can reach `mosquitto` by short name). Wired into orion via
+`kubernetes/clusters/orion/home-automation.yaml`, which holds **two** Flux
+Kustomization CRs (`---`-separated in one file, same pattern
+`cert-manager.yaml`/`gateway.yaml` already use for co-located CRs):
+
+- `home-automation` → `./kubernetes/apps/home-automation` (mosquitto + zigbee2mqtt)
+- `homeassistant` → `./kubernetes/apps/home-automation/homeassistant` directly (bypasses the aggregator)
 
 ## Components
 
 | Subdirectory | Purpose |
 |-------------|---------|
-| `mosquitto/` | MQTT message broker. Standalone manifests, no HTTP surface — `webapp/base` doesn't buy anything here, same reasoning as `external-endpoints`. |
+| `mosquitto/` | MQTT broker. Standalone manifests, no HTTP surface — `webapp/base` doesn't buy anything here. |
 | `zigbee2mqtt/` | Zigbee coordinator bridge → MQTT. Built on `../../webapp/base` + `httproute`/`pvc` components, frontend at `z2m.${domain}`. |
+| `homeassistant/` | Home Assistant. Also built on `../../webapp/base` + `httproute`/`pvc` components, frontend at `ha.${domain}`. |
 
-`zigbee2mqtt/patches/`: `httproute-add-homepage-annotations.yaml`,
-`deploy-add-config-init.yaml` (the ConfigMap→PVC bootstrap initContainer, appends
-onto the volumes the `pvc` component already added), and
-`deploy-update-resources.yaml` (`webapp/base`'s default `cpu: 10m` throttles a
-Node.js process badly — bumped to `500m`/`100m` request after confirming via
-the live pod's `cgroup cpu.stat` that it was throttled >99% of the time).
+### Why homeassistant is a separate Flux Kustomization CR
+
+One Flux `Kustomization` = one flat `postBuild.substitute` namespace — every
+`${VAR}` in its entire rendered output gets replaced from the same map, with
+no per-resource scoping. The `httproute`/`pvc` components both rely on
+generic vars (`${appName}`, `${subdomain}`, `${storageClass}`/`${storageSize}`)
+that need *different* values per app. `zigbee2mqtt` already claims those
+inside the `home-automation` Kustomization; folding `homeassistant` into the
+same one would mean both apps' `HTTPRoute`s resolving `${subdomain}` to
+whichever value happened to be set last — silently wrong, not a build error.
+
+Giving `homeassistant` its own Kustomization CR (pointing directly at
+`homeassistant/`, skipping the `mosquitto`+`zigbee2mqtt` aggregator) gives it
+its own substitute namespace, so both apps get full, uncompromised use of the
+shared components. `${domain}`/`${gatewayName}` don't have this problem —
+those come from `cluster-settings` (`substituteFrom`, not the literal
+`substitute` map) and are genuinely the same value for every app in the
+cluster.
+
+If a fourth home-automation app needs `httproute`/`pvc`, give it a third Flux
+Kustomization CR the same way, or hardcode its resources like `mosquitto/`
+does if it doesn't need real parameterization.
+
+### The seed-config pattern (all three apps)
+
+Each app's `configMap.yaml` (SOPS-encrypted) holds its initial config; an
+initContainer copies it onto a PVC. None of these apps should have their
+whole config directory overwritten on every boot — they write real state
+into it (zigbee2mqtt: paired devices, network key; Home Assistant: the
+recorder DB, `.storage/`; mosquitto's is closer to stateless, but the
+pattern's kept consistent).
+
+- **zigbee2mqtt / homeassistant** use a `SEED_VERSION` marker
+  (`.z2m-seed-version` / `.seed-version` on the PVC): re-copies only when the
+  version baked into the initContainer's `args` doesn't match what's
+  recorded on the PVC, otherwise leaves it alone. Bump the version any time
+  `configMap.yaml`'s config content changes and needs to land on an
+  already-seeded PVC.
+- **mosquitto**'s initContainer re-copies unconditionally on every boot
+  (its config is simple enough that this is safe), so ConfigMap changes
+  need a pod restart to take effect — nothing kubectl-mutates that
+  automatically, so `deployment.yaml`'s pod template carries a
+  `home-lab-ops/config-generation` annotation to bump by hand when that's
+  needed (forces a real rollout since the pod template itself changes).
 
 ## Config
 
-- Zigbee2MQTT publishes to Mosquitto over `mqtt://mosquitto:1883`; both apps
-  share the `home-automation` namespace so the short Service name resolves.
+- Zigbee2MQTT and Home Assistant both talk to Mosquitto over
+  `mosquitto:1883` / `mosquitto.home-automation.svc.cluster.local:1883`
+  (short name works since they're all in the same namespace).
 - Zigbee2MQTT's `serial.port` points at the SLZB-06 coordinator's ser2net
   TCP passthrough (`tcp://10.50.0.150:6638`) — same device wired in as
   `apps/external-endpoints/slzb-06` for its own admin UI at
-  `zigbee.${domain}`. Don't confuse the two hostnames.
-- Both apps write their SOPS-encrypted config directly into a ConfigMap
-  (`configMap.yaml`); an initContainer copies it onto a PVC on first boot so
-  the app can write its own state (device DB, retained MQTT data) without
-  mutating the ConfigMap. This means editing `configMap.yaml` only affects
-  *new* PVCs — an already-seeded one keeps its own copy (zigbee2mqtt owns it
-  from there, e.g. writing back paired devices).
-- zigbee2mqtt runs 2.x (`configMap.yaml` uses the 2.x schema: `homeassistant`
-  is an object now, not a bare boolean; `frontend` needs `enabled: true`).
-  Pairing new devices: **`permit_join` is not a config file setting in 2.x**
-  — it was removed upstream in favor of the frontend UI or an MQTT command
-  (`zigbee2mqtt/bridge/request/permit_join`, payload `{"value": true}`),
-  since a static "always open" toggle in config defeats the point. Toggle it
-  there when you need to pair, not here.
-- Upgrading the image tag on an already-seeded PVC: zigbee2mqtt has its own
-  automatic config migration (runs in-place on boot, backs up the pre-migration
-  file) — no manual intervention needed even though the initContainer won't
-  re-copy `configMap.yaml`'s newer schema onto an existing PVC.
+  `zigbee.${domain}`. Don't confuse the two hostnames. `serial.adapter:
+  zstack` is required explicitly (zigbee-herdsman 10.x can't auto-detect
+  over TCP) — confirmed against this coordinator's own logs (TI CC2652).
+- zigbee2mqtt runs 2.x. `permit_join` is **not** a config file setting in
+  2.x — toggle it via the frontend or
+  `zigbee2mqtt/bridge/request/permit_join` (`{"value": true}`) when
+  pairing new devices, not in git.
+- Home Assistant's seed config sets `http.trusted_proxies:
+  10.241.0.0/16` (orion's pod CIDR, from `talconfig.yaml` — required or HA
+  rejects requests coming through the Gateway) and
+  `homeassistant.external_url`. Resource limits are set well above
+  `webapp/base`'s defaults from the start (`1` cpu / `1Gi` mem limit) —
+  zigbee2mqtt's `webapp/base` default of `cpu: 10m` throttled it badly
+  (#90); no reason to rediscover that here.
+- **First boot of Home Assistant needs a human**: visiting `ha.${domain}`
+  walks through HA's own onboarding (create the admin account, name the
+  instance) — nothing about that is config-file-representable, so it isn't
+  automated here. After that, add the MQTT integration via *Settings →
+  Devices & services → Add integration → MQTT*
+  (`homeassistant/secret.yaml` has the broker credentials —
+  `mosquitto.home-automation.svc.cluster.local:1883`). zigbee2mqtt is
+  already publishing `homeassistant/...` discovery topics, so paired
+  Zigbee devices should show up automatically once MQTT is connected.
+- `mosquitto/configMap.yaml`'s `hass_mqtt_user` password was regenerated
+  from scratch when `homeassistant/` was added — the original (na-era)
+  plaintext was never recoverable, mosquitto only ever stored the hash.
+  The new plaintext lives in `homeassistant/secret.yaml` (SOPS).
 
 ## Troubleshooting
 
-- **MQTT broker unreachable:** check the `mosquitto` Service and that
-  `configMap.yaml` credentials (`z2m_mqtt_user` / `hass_mqtt_user`) match
-  what clients use.
+- **MQTT broker unreachable:** check the `mosquitto` Service and that the
+  credentials in use (`z2m_mqtt_user` / `hass_mqtt_user`) match
+  `mosquitto/configMap.yaml`'s `password_file`.
 - **Zigbee2MQTT can't reach the coordinator:** confirm the SLZB-06 is up at
   `10.50.0.150` and its ser2net port hasn't moved from `6638`.
-- **Config not applying:** the initContainer only copies config on first
-  boot (`if [ ! -f configuration.yaml ]`) — delete the PVC's contents or
-  exec in to force a re-copy after editing `configMap.yaml`.
+- **Home Assistant rejects requests / login weirdness behind the Gateway:**
+  check `http.trusted_proxies` in the seeded `configuration.yaml` still
+  covers the pod CIDR (`kubectl get ciliumnode` or `talconfig.yaml` if it's
+  ever changed).
+- **Config change not taking effect on an already-running pod:** see the
+  seed-config pattern above — bump `SEED_VERSION` (zigbee2mqtt/homeassistant)
+  or `home-lab-ops/config-generation` (mosquitto).

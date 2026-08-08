@@ -14,6 +14,13 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: mosquitto
+      annotations:
+        # configMap.yaml is referenced by static name, not configMapGenerator,
+        # so content changes don't get a hash suffix that forces a rollout.
+        # The initContainer copies config unconditionally on every boot, so
+        # bumping this (any value, e.g. short description of what changed)
+        # is enough to roll the pod and pick it up.
+        home-lab-ops/config-generation: "2-hass-mqtt-user-password-rotated"
     spec:
       initContainers:
         - name: init-config

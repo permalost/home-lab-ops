@@ -1,0 +1,4 @@
+# pvc component mounts its volume at /data by default; HA expects /config.
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /config
