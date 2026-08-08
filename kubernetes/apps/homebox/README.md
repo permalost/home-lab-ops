@@ -15,7 +15,7 @@ the `httproute` and `pvc` components — canonical example for `apps/webapp/`.
 
 Exposed via the `httproute` component at `${subdomain}.${domain}`
 (`inventory.orion.norseamerican.com`). gethomepage.dev annotations on the
-route surface it on the dashboard under "Home".
+route surface it on the dashboard under "Inventory".
 
 ## Troubleshooting
 
