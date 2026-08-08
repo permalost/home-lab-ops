@@ -176,3 +176,39 @@ nodes:
               - 10.10.0.22/24
     patches:
       - "@./patches/nodes/orion-w-02.yaml"
+
+  # ── AI/GPU nodes ───────────────────────────────────────────────────────────
+  # Hardware: NVIDIA DGX Spark (GB10, arm64) — onboard RJ45 is enP7s7
+
+  - hostname: orion-ai-01
+    ipAddress: 10.50.0.31
+    controlPlane: false
+    installDiskSelector:
+      serial: S8C2NG0YA00300
+    schematic:
+      customization:
+        # arm64.nobti baked into the installer itself — machine.install.extraKernelArgs
+        # is a no-op on this hardware's systemd-boot/UKI path (confirmed via
+        # /proc/cmdline after install; talosctl even warns about it at apply time).
+        extraKernelArgs:
+          - arm64.nobti
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/nonfree-kmod-nvidia-lts
+            - siderolabs/nvidia-container-toolkit-lts
+    networkInterfaces:
+      # Untagged (no vlans: block) — the Spark's switch port isn't confirmed
+      # trunked for VLAN 50 like the other orion nodes. Maintenance-mode DHCP
+      # already proved this range is reachable untagged on this port.
+      # TODO: move to tagged vlanId 50 (+10) once the switch port is verified.
+      - deviceSelector:
+          hardwareAddr: "4c:bb:47:80:5a:0c"
+        dhcp: false
+        mtu: 1500
+        addresses:
+          - 10.50.0.31/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.50.0.1
+    patches:
+      - "@./patches/nodes/orion-ai-01.yaml"

@@ -1,0 +1,26 @@
+machine:
+  certSANs:
+    - 10.50.0.31
+    - orion-ai-01.norseamerican.com
+  install:
+    wipe: true          # replace DGX OS outright — no leftover GPT/ESP
+    grubUseUKICmdline: false   # required: incompatible with extraKernelArgs below
+    extraKernelArgs:
+      - arm64.nobti     # kept for good measure; actual effect comes from the schematic-baked installer
+  # Requires arm64.nobti (baked into the schematic in talconfig.yaml) or the
+  # node crash-loops loading these — machine.install.extraKernelArgs alone is
+  # a no-op on this hardware's systemd-boot/UKI path.
+  kernel:
+    modules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+  nodeLabels:
+    nvidia.com/gpu.present: "true"
+  # nodeTaints deliberately NOT used: Kubernetes' NodeRestriction admission
+  # plugin forbids a node from modifying its own .spec.taints after initial
+  # creation. Talos's k8s.NodeApplyController runs post-creation and always
+  # gets rejected here — it also bundles this with the nodeLabels PATCH,
+  # which then fails atomically too. Taint is set via `kubectl taint` instead
+  # (admin credentials, not subject to NodeRestriction) — see runbook memory.
