@@ -77,10 +77,19 @@ pattern's kept consistent).
   2.x — toggle it via the frontend or
   `zigbee2mqtt/bridge/request/permit_join` (`{"value": true}`) when
   pairing new devices, not in git.
-- Home Assistant's seed config sets `http.trusted_proxies:
-  10.241.0.0/16` (orion's pod CIDR, from `talconfig.yaml` — required or HA
-  rejects requests coming through the Gateway) and
-  `homeassistant.external_url`. Resource limits are set well above
+- Home Assistant's reverse-proxy trust (`use_x_forwarded_for` /
+  `trusted_proxies: 10.241.0.0/16`, orion's pod CIDR from `talconfig.yaml`)
+  is seeded via `.storage/http` (`homeassistant/configMap.yaml`'s
+  `http-storage.json` key), **not** `configuration.yaml`'s `http:` block.
+  HA stages YAML `http:` config as an unconfirmed "pending" trial that
+  auto-reverts (and restarts) if nothing promotes it within 5 minutes of
+  boot — fine if a human's watching the UI, impossible for an unattended
+  GitOps deploy, and once it fails the trial it's marked "never retry" and
+  won't self-heal on the next restart either. Seeding storage directly,
+  pre-marked `stable`, skips the trial. Also matches where upstream is
+  headed anyway: YAML `http:` config is deprecated as of this HA version,
+  breaking entirely in 2027.2.0. `homeassistant.external_url` still comes
+  from `configuration.yaml` as normal. Resource limits are set well above
   `webapp/base`'s defaults from the start (`1` cpu / `1Gi` mem limit) —
   zigbee2mqtt's `webapp/base` default of `cpu: 10m` throttled it badly
   (#90); no reason to rediscover that here.
@@ -105,10 +114,14 @@ pattern's kept consistent).
   `mosquitto/configMap.yaml`'s `password_file`.
 - **Zigbee2MQTT can't reach the coordinator:** confirm the SLZB-06 is up at
   `10.50.0.150` and its ser2net port hasn't moved from `6638`.
-- **Home Assistant rejects requests / login weirdness behind the Gateway:**
-  check `http.trusted_proxies` in the seeded `configuration.yaml` still
-  covers the pod CIDR (`kubectl get ciliumnode` or `talconfig.yaml` if it's
-  ever changed).
+- **Home Assistant rejects requests / login weirdness behind the Gateway,
+  or logs "A request from a reverse proxy was received... not set-up for
+  reverse proxies":** check `.storage/http`'s `stable.trusted_proxies`
+  (not `configuration.yaml` — see above) still covers the pod CIDR
+  (`kubectl get ciliumnode` or `talconfig.yaml` if it's ever changed). If
+  this shows up on a pod that's been running a while, HA's own pending-config
+  trial (see above) may have reverted a change — check for `pending` in
+  `.storage/http` with `"error": "not_promoted"`.
 - **Config change not taking effect on an already-running pod:** see the
   seed-config pattern above — bump `SEED_VERSION` (zigbee2mqtt/homeassistant)
   or `home-lab-ops/config-generation` (mosquitto).

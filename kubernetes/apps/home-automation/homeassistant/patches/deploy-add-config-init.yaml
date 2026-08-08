@@ -19,8 +19,14 @@
         # SEED_VERSION history:
         #   1 - initial configuration.yaml (default_config, http.trusted_proxies,
         #       homeassistant.external_url)
+        #   2 - moved http.* out of configuration.yaml into .storage/http,
+        #       pre-marked "stable" — HA stages YAML http: config as an
+        #       unconfirmed "pending" trial that auto-reverts if nothing
+        #       promotes it within 5 minutes of boot (fine interactively,
+        #       impossible for an unattended deploy); seeding storage
+        #       directly, already confirmed, skips that trial entirely.
         [
-          "SEED_VERSION=1; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && echo \"$SEED_VERSION\" > /dest/.seed-version; fi",
+          "SEED_VERSION=2; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi",
         ]
       volumeMounts:
         - name: config-src
