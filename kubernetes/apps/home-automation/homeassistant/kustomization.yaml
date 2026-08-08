@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: home-automation
+
+resources:
+  - ../../webapp/base
+  - configMap.yaml
+  - secret.yaml
+
+namePrefix: homeassistant-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: homeassistant
+      app.kubernetes.io/name: homeassistant
+
+components:
+  - ../../webapp/components/httproute
+  - ../../webapp/components/pvc
+
+images:
+  - name: my-app
+    newName: ghcr.io/home-assistant/home-assistant
+    newTag: "2026.8.1"
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-config-mountpath.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-config-init.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml

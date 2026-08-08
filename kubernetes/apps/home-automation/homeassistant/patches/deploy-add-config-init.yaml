@@ -1,0 +1,29 @@
+# pvc component (applied first, before this app's own patches) already
+# adds the "data" volume + a volumeMount at /data on container 0 — this
+# only appends the config-src volume onto that (via /-, not a full
+# replace) and adds the initContainer. See
+# patches/deploy-config-mountpath.yaml for /data -> /config.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config-src
+    configMap:
+      name: settings
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: init-config
+      image: busybox:1.36
+      command: ["sh", "-c"]
+      args:
+        # SEED_VERSION history:
+        #   1 - initial configuration.yaml (default_config, http.trusted_proxies,
+        #       homeassistant.external_url)
+        [
+          "SEED_VERSION=1; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && echo \"$SEED_VERSION\" > /dest/.seed-version; fi",
+        ]
+      volumeMounts:
+        - name: config-src
+          mountPath: /src
+        - name: data
+          mountPath: /dest

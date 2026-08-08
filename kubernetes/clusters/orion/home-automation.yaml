@@ -33,3 +33,49 @@ spec:
         name: cluster-settings
       - kind: Secret
         name: cluster-secrets
+---
+# Separate Kustomization (not folded into home-automation above) so it
+# gets its own postBuild.substitute namespace — homeassistant/ uses the
+# webapp/base httproute/pvc components, which need ${appName}/${subdomain}/
+# ${storageClass}/${storageSize} substituted to different values than
+# zigbee2mqtt already claims above. One Kustomization = one flat
+# substitute namespace, so this can't share the one above. See
+# apps/home-automation/README.md. Same pattern as cert-manager.yaml /
+# gateway.yaml already use for co-located CRs — kept in this file rather
+# than a new one since they're logically the same app group.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: homeassistant
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cilium
+    - name: gateway
+    - name: cert-manager-issuers
+    - name: cluster-settings
+    - name: home-automation
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/home-automation/homeassistant
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substitute:
+      appName: homeassistant
+      subdomain: ha
+      storageClass: rook-ceph-block
+      storageSize: 10Gi
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets

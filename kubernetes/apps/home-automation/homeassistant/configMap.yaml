@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: settings
+data:
+    configuration.yaml: ENC[AES256_GCM,data:5xuLQWSKgOhGbAkZgMt29Mch0LXuraxfWLMlI8FDLRVFeouEZ2MJTfHcPRtYV/GORboiDrc0WDH2FNq0s8vEraiJvzIVVpvK1ixOo/b5+VDrlYuImSt+GpA3ZH2uy9pFVTJqshRdRv7WnLI2tnBP6FxPIe/46qxaVuLiI0sJIqva6wJ/sVTfEESCNk4yH5SLZheTxekkzoWO,iv:bkmZIlYjCwHBjEH9kTHeWVj8qnyt1js8opYALYDjtpg=,tag:8H6Foq9QAaEFxuKPNNEcBA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB4cUx4YlVDWktCdW8zT3lm
+            anF0QzQrNnhJbXRDamx0VUNUdHNGNTlIZ0MwCmFmTk9KWWMxRy9Zc05TZW5FVDlW
+            R0t2VlFlMkUxUGwzYkhVbnlPNzhGZzgKLS0tIEljaWtubkE5Y0podFZlMXZtd2Yr
+            QWF4aWtPVVRDN3BrM1drVUJoWkwzQ3cKajmvNpuVQwLv6RsfPkh5Vr8SkqfLnpWN
+            qqIFVkrb8gR8HpiO2CKF9+0/KIZEOqSgbPQBiVTBO25URQ6sxpbxEw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-08-08T01:04:11Z"
+    mac: ENC[AES256_GCM,data:LThPruADmd84jZ1KYrAk5ygoxboe4kC70K0hjQNPB7XNdqGZZO690TLR4gjgTg/ehTa6ivh0uKhk4Gyp0RM3/snGLJP343Ri7BKYBlcu6lQYeEqaTGAZSwfQ98Z9DaVUFHIB1DYo9c1LJMCAc694E18nTbgqbIFR+0YQtpFFwo4=,iv:fmT91z2cyLO0kL1RJRf4082XxcXUlRoi2WN/tojRVEs=,tag:f2koUipy6mVvPbR4vKq6NA==,type:str]
+    version: 3.13.0

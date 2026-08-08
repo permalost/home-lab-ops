@@ -1,0 +1,13 @@
+# Learned from zigbee2mqtt: webapp/base's cpu: 10m default throttles
+# anything heavier than a static file server badly (see #90). HA is a
+# full Python app with a web UI + recorder DB — sized well above that
+# from the start rather than discovering it the same way again.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
