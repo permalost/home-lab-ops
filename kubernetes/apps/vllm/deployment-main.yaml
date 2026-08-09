@@ -10,6 +10,14 @@ metadata:
 spec:
   revisionHistoryLimit: 3
   replicas: 1
+  # Matches startupProbe's 30-min cold-load budget below. K8s' own default
+  # (600s) is a *separate* watchdog from the probe — it fires independently
+  # and marks the rollout Progressing:False/ProgressDeadlineExceeded, which
+  # Flux's health check reads as Failed, well before a legitimately slow
+  # model load finishes. Confirmed live: both vllm Deployments hit this at
+  # the 600s default while still mid-load, blocking the whole Kustomization
+  # chain despite nothing actually being broken.
+  progressDeadlineSeconds: 1800
   strategy:
     type: Recreate
   selector:
