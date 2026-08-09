@@ -1,5 +1,5 @@
-# Hermes "main" model — drives the agent loop. Qwen3.6-27B leads the MoE aux
-# model by 8-11 pts on Terminal-Bench/agentic benchmarks; see kubernetes/apps/vllm/README.md.
+# Hermes "main" model. Qwen3.6-27B leads the MoE aux model on agentic
+# benchmarks — see kubernetes/apps/vllm/README.md.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,13 +10,9 @@ metadata:
 spec:
   revisionHistoryLimit: 3
   replicas: 1
-  # Matches startupProbe's 30-min cold-load budget below. K8s' own default
-  # (600s) is a *separate* watchdog from the probe — it fires independently
-  # and marks the rollout Progressing:False/ProgressDeadlineExceeded, which
-  # Flux's health check reads as Failed, well before a legitimately slow
-  # model load finishes. Confirmed live: both vllm Deployments hit this at
-  # the 600s default while still mid-load, blocking the whole Kustomization
-  # chain despite nothing actually being broken.
+  # Must stay >= startupProbe's cold-load budget below. K8s' own default
+  # (600s) is a separate watchdog from the probe and fires independently,
+  # marking the rollout Failed before a slow-but-fine load finishes.
   progressDeadlineSeconds: 1800
   strategy:
     type: Recreate
@@ -36,20 +32,16 @@ spec:
       runtimeClassName: nvidia
       nodeSelector:
         nvidia.com/gpu.present: "true"
-      # Toleration must match the taint applied by hand via `kubectl taint` on
-      # orion-ai-01 (not tracked in git — see clusters/orion/patches/nodes/orion-ai-01.yaml).
-      # Confirm the live key/value with `kubectl describe node orion-ai-01` before relying on this.
+      # Must match the taint applied by hand via `kubectl taint` on
+      # orion-ai-01 (not in git — NodeRestriction blocks Talos from setting
+      # it). Verify with `kubectl describe node orion-ai-01` if scheduling fails.
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
           effect: NoSchedule
-      # Purges any cached checkpoint that isn't the one currently configured
-      # below, before the main container starts. See deployment-aux.yaml for
-      # why — a real disk-full crash there, caused by a prior checkpoint's
-      # data never getting cleaned up on a model swap. Not hit here yet since
-      # this model hasn't changed, but applied for the same reason up front.
-      # KEEP must match the model in the main container's args exactly, or
-      # this deletes the checkpoint that's about to be used.
+      # Deletes any cached checkpoint that doesn't match the model below, so
+      # switching models doesn't leave orphaned data filling the PVC. KEEP
+      # must match the model arg exactly or this deletes what's about to load.
       initContainers:
         - name: clean-stale-models
           image: busybox:1.36.1
@@ -79,10 +71,9 @@ spec:
               memory: 64Mi
       containers:
         - name: vllm
-          # TODO: pin to a resolved digest, not this moving tag. Stock vLLM release
-          # images lack sm_121 (Blackwell) kernels for aarch64 — this hardware needs
-          # the CUDA 13 nightly track. Validate on the real node before merging; see
-          # vLLM issue #36821 and the DGX Spark blog post linked in README.md.
+          # TODO: pin to a resolved digest. Stock vLLM images lack sm_121
+          # (Blackwell) kernels for aarch64 — needs the CUDA 13 nightly
+          # track (vLLM #36821, DGX Spark writeup linked in README.md).
           image: "vllm/vllm-openai:cu130-nightly"
           imagePullPolicy: IfNotPresent
           args:
@@ -93,14 +84,12 @@ spec:
             - --max-model-len=65536
             - --max-num-seqs=8
             - --enable-auto-tool-choice
-            # NOT "hermes" — that parser name refers to the vLLM parser's origin,
-            # not this model family. Qwen3.6 needs its own parser or tool calls
-            # arrive as literal text JSON.
+            # Not "hermes" — that name refers to the parser's origin, not
+            # this model family. Wrong parser = tool calls as literal JSON.
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
-            # Fraction of the *whole* unified-memory pool, shared with vllm-aux,
-            # the OS, and every other pod on the node. Keep main+aux well under 0.75
-            # total — GB10 has reported freezing above ~80% utilization.
+            # Fraction of total unified memory, shared with vllm-aux and the
+            # OS. Keep main+aux combined well under ~0.75.
             - --gpu-memory-utilization=0.40
           ports:
             - name: http
@@ -114,14 +103,9 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
-            # Sized for unified memory: weights + KV cache both draw from this,
-            # not a separate host-RAM budget as on a discrete-GPU node.
-            # Rebalanced after a live OOM (see deployment-aux.yaml): this
-            # container's actual measured peak is ~23GB
-            # (cgroup memory.peak, confirmed via `kubectl exec ... cat
-            # /sys/fs/cgroup/memory.peak`) — the original 45Gi limit here was
-            # unused headroom that vllm-aux's heavier NVFP4+MTP load needed
-            # more than this one did.
+            # Unified memory: weights + KV cache draw from this, not a
+            # separate host-RAM budget. Measured real peak ~23GB (cgroup
+            # memory.peak) — sized with headroom above that.
             requests:
               cpu: "2"
               memory: 25Gi
@@ -129,8 +113,8 @@ spec:
               cpu: "8"
               memory: 32Gi
               nvidia.com/gpu: 1
-          # Cold start = weight download (first run) + ~25s JIT compile on every
-          # start. Generous startupProbe avoids a restart-loop before first serve.
+          # Cold start = weight load + JIT compile. Generous startupProbe
+          # avoids a restart-loop before first serve.
           startupProbe:
             httpGet:
               path: /health
