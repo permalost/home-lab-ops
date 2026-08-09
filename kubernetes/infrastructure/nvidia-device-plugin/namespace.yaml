@@ -1,4 +1,11 @@
+# privileged PSS required — device plugin pods need SYS_ADMIN and hostPath
+# mounts (kubelet-device-plugins-dir, mps-root, mps-shm, cdi-root); baseline
+# (the cluster default) rejects both. Same requirement as cilium's namespace.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: nvidia-device-plugin
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
