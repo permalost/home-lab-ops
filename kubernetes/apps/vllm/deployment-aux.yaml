@@ -132,17 +132,24 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
-            # See deployment-main.yaml for the OOM history behind these
-            # numbers. Kept as-is for this checkpoint swap — the model is a
-            # similar size (~22GB per its card) to what these limits were
-            # already sized for; revisit if this build's actual footprint
-            # differs once it's running.
+            # Bumped again after a second live OOM on the AEON-7 image: this
+            # attempt got past weight loading (~22GB) and torch.compile
+            # cleanly — no code bug this time — then exceeded the old 60Gi
+            # limit sometime after, likely during CUDA graph capture / KV
+            # cache allocation. Couldn't capture the exact peak (cgroup
+            # stats reset on restart, container was gone before it could be
+            # read) — this bump is evidence-based, not precisely measured;
+            # tighten once a stable real number is observed via
+            # `kubectl exec ... cat /sys/fs/cgroup/memory.peak` on a
+            # successful run. 80Gi + vllm-main's 32Gi leaves ~9.67GiB margin
+            # against the node's actual 121.67GiB (confirmed in the crash
+            # log, not the earlier ~121GiB estimate).
             requests:
               cpu: "2"
-              memory: 40Gi
+              memory: 50Gi
             limits:
               cpu: "8"
-              memory: 60Gi
+              memory: 80Gi
               nvidia.com/gpu: 1
           startupProbe:
             httpGet:

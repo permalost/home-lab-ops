@@ -103,11 +103,25 @@ delete the checkpoint that's about to be used.
   ([forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060)).
   Don't raise either without lowering the other to compensate. Separately,
   confirmed live that container memory *limits* also matter independently of
-  this fraction — `vllm-aux` was genuinely OOMKilled once at its old 40Gi
-  limit (see git history on `deployment-aux.yaml`); current limits (32Gi
-  main / 60Gi aux) are based on `vllm-main`'s measured real peak (~23GB), not
-  just guesswork, but `vllm-aux`'s footprint under the new image/checkpoint
-  is still unconfirmed.
+  this fraction — `vllm-aux` has been genuinely OOMKilled twice now (first at
+  40Gi, then again at 60Gi after switching to the AEON-7 image/checkpoint —
+  that attempt got past weight loading and torch.compile cleanly, so it's a
+  sizing gap, not a code bug). Current limits (32Gi main / 80Gi aux) leave
+  ~9.67GiB margin against the node's actual 121.67GiB (confirmed in a crash
+  log, more precise than the ~121GiB estimate used earlier). `vllm-aux`'s
+  real peak still isn't precisely measured — cgroup stats reset on each
+  crash before they could be read — so this may need another round.
+- **Time-slicing gives zero memory isolation between `main` and `aux`.**
+  Confirmed live: when both Deployments restarted around the same time (both
+  got a new pod template from the `clean-stale-models` initContainer added
+  in the same change), `vllm-main` failed to start with
+  `Free memory on device cuda:0 (31.84/121.67 GiB) ... is less than desired
+  GPU memory utilization (0.4, 48.67 GiB)` — `vllm-aux` was mid-load and
+  transiently holding a large chunk of the shared pool at that exact moment.
+  Not a bug in `vllm-main` itself; expected to stop recurring once `vllm-aux`
+  stops crash-looping and the two aren't repeatedly restarting in the same
+  window. No explicit startup ordering/staggering added between them yet —
+  revisit if this keeps happening once `vllm-aux` is otherwise stable.
 - **Node taint toleration is confirmed correct.** Live-verified: the taint is
   `nvidia.com/gpu=true:NoSchedule`, and `operator: Exists` matches regardless
   of value — no longer an open risk, but still applied by hand via `kubectl
