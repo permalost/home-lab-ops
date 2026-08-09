@@ -70,12 +70,22 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
+            # Bumped after a live OOM: this container was genuinely
+            # OOMKilled at the old 40Gi limit while loading (exit 137),
+            # severely enough to trigger the node's kernel OOM killer
+            # (collateral: node_exporter, an unrelated pause process). NVFP4
+            # dequantization plus the MTP speculative-decoding draft model
+            # both add transient memory beyond vllm-main's plainer FP8 load,
+            # so this container gets the larger share — vllm-main's actual
+            # peak (~23GB, see deployment-main.yaml) had far more headroom
+            # than it needed. Combined limits stay ~76% of the node's ~121GiB
+            # (nothing else meaningful is scheduled on orion-ai-01).
             requests:
               cpu: "2"
-              memory: 35Gi
+              memory: 40Gi
             limits:
               cpu: "8"
-              memory: 40Gi
+              memory: 60Gi
               nvidia.com/gpu: 1
           startupProbe:
             httpGet:
