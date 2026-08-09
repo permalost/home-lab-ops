@@ -27,7 +27,14 @@ spec:
     substitute:
       storageClass: rook-ceph-block
       mainStorageSize: 35Gi
-      auxStorageSize: 30Gi
+      # 30Gi wasn't enough once switched off the NVIDIA checkpoint (#113):
+      # the old nvidia/Qwen3.6-35B-A3B-NVFP4 download (~22GB) is still on the
+      # volume with nothing to clean it up automatically, leaving no room for
+      # the new AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 checkpoint (~23.4GB) —
+      # confirmed live, HF's downloader stalled at 94% disk usage. Sized for
+      # both to coexist rather than requiring manual cleanup; PVC expansion
+      # is non-destructive on rook-ceph-block (allowVolumeExpansion: true).
+      auxStorageSize: 60Gi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
