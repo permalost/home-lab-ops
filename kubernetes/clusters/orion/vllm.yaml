@@ -27,7 +27,13 @@ spec:
     substitute:
       storageClass: rook-ceph-block
       mainStorageSize: 35Gi
-      auxStorageSize: 30Gi
+      # Sized for one checkpoint (~23.4GB) plus headroom, matching mainStorageSize
+      # — not sized to hold two checkpoints simultaneously. Both deployments now
+      # run a clean-stale-models initContainer (see deployment-*.yaml) that
+      # purges any cached checkpoint not matching the currently-configured
+      # model before the main container starts, so old data from a prior
+      # checkpoint swap no longer accumulates and doesn't need this padded out.
+      auxStorageSize: 35Gi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings

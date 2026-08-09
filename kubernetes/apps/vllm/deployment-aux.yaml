@@ -56,6 +56,39 @@ spec:
         - key: nvidia.com/gpu
           operator: Exists
           effect: NoSchedule
+      # Purges any cached checkpoint that isn't the one currently configured
+      # below, before the main container starts. Learned the hard way (#113
+      # -> disk-full crash): switching --model here without this left the
+      # prior checkpoint's ~22GB sitting on the PVC forever, un-reclaimed.
+      # KEEP must match the model in the main container's args exactly, or
+      # this deletes the checkpoint that's about to be used.
+      initContainers:
+        - name: clean-stale-models
+          image: busybox:1.36.1
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cd /models
+              KEEP="models--AEON-7--Qwen3.6-35B-A3B-heretic-NVFP4"
+              for d in models--*; do
+                [ -d "$d" ] || continue
+                if [ "$d" != "$KEEP" ]; then
+                  echo "Removing stale model cache: $d"
+                  rm -rf -- "$d"
+                fi
+              done
+          volumeMounts:
+            - name: weights
+              mountPath: /models
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
       containers:
         - name: vllm
           # Dated, pinned tag — not `:latest` (which the upstream repo
