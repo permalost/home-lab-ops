@@ -88,9 +88,14 @@ spec:
             # this model family. Wrong parser = tool calls as literal JSON.
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
-            # Fraction of total unified memory, shared with vllm-aux and the
-            # OS. Keep main+aux combined well under ~0.75.
-            - --gpu-memory-utilization=0.40
+            # Lowered from 0.40: computed against currently-free memory at
+            # the instant this engine initializes, not a fixed reservation
+            # (same mechanism as vllm-aux — see its comment and README.md).
+            # Real measured peak here was 19.66GB (cgroup memory.peak) — the
+            # old 48.67GB target was mostly unused slack. Shrinking it
+            # reduces how much this claim can collide with whatever
+            # vllm-aux is doing at that same instant.
+            - --gpu-memory-utilization=0.20
           ports:
             - name: http
               containerPort: 8000
