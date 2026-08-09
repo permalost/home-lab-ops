@@ -1,0 +1,29 @@
+runtimeClassName: nvidia
+deviceListStrategy: envvar
+
+# orion-ai-01 only — the sole node carrying the GPU extensions/labels.
+nodeSelector:
+  nvidia.com/gpu.present: "true"
+
+# Taint is applied by hand via `kubectl taint` (see clusters/orion/patches/nodes/orion-ai-01.yaml
+# — NodeRestriction blocks Talos from setting it itself). Confirm the live key/value with
+# `kubectl describe node orion-ai-01` before relying on this toleration; update if it differs.
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+
+# Time-slicing: advertises the single GB10 as 4 schedulable nvidia.com/gpu units so
+# vllm-main and vllm-aux can both claim "1 GPU" concurrently. Safe here because memory
+# is unified and both models' footprints fit well inside it — this is NOT MIG/hardware
+# partitioning, it's cooperative scheduling on one physical device.
+config:
+  default: orion-ai-01
+  map:
+    orion-ai-01: |-
+      version: v1
+      sharing:
+        timeSlicing:
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 4

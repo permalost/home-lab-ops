@@ -1,0 +1,12 @@
+# Weights cache for vllm-aux only (Qwen3.6-35B-A3B-NVFP4, ~23.4Gi).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-aux-weights
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${storageClass}
+  resources:
+    requests:
+      storage: ${auxStorageSize}

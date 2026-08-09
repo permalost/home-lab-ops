@@ -1,0 +1,25 @@
+# See hermes-a/config/config.yaml — identical, both instances share the same
+# vllm backends (vLLM/continuous batching handles concurrent agents fine).
+model:
+  provider: custom
+  base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
+  default: qwen3.6-27b
+  context_length: 64000
+
+auxiliary_models:
+  title:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  compression:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  approval:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  web_extraction:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
