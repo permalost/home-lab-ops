@@ -109,15 +109,20 @@ rather than competing with it for memory.
   live: `vllm-aux` (0.30) went to `Available KV cache memory: -16.82 GiB` and
   crashed when `vllm-main` finished a retry and claimed its own share at that
   exact moment — `wait-for-main` only anchors the start of the race, not its
-  resolution minutes later. `vllm-main`'s real footprint is small (6.76GB
-  resident, 19.66GB peak, confirmed via cgroup `memory.current`/`memory.peak`)
-  and `vllm-aux`'s architecture is inherently cheap on KV cache per token (see
-  "Why these two models"), so `aux` never needed the full 0.30 — lowered to
-  0.15, shrinking its target so it's far less likely to collide with whatever
-  `main` is doing. `main` stays at 0.40 (`main` 0.40 + `aux` 0.15 = 0.55
-  combined target, well under the ~0.80 threshold where GB10 has been
-  reported to freeze —
-  [forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060)).
+  resolution minutes later. Both real footprints are much smaller than their
+  old targets (confirmed via cgroup `memory.current`/`memory.peak`):
+  `vllm-main` at 6.76GB resident / 19.66GB peak against a 48.67GB (0.40)
+  target, and `vllm-aux`'s architecture is inherently cheap on KV cache per
+  token (see "Why these two models"). Both lowered — `aux` 0.30→0.15,
+  `main` 0.40→0.20 — shrinking each target so a collision is far less likely
+  regardless of which one is mid-retry. Combined target dropped 0.70→0.35
+  (~43GB of the node's 121.67GiB, vs. the old ~85GB), well under the ~0.80
+  threshold where GB10 has been reported to freeze —
+  [forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060).
+  Still probabilistic, not a guarantee — a smaller static target doesn't
+  prevent a transient spike, only makes one far less likely; if this recurs,
+  the next step is mutual startup coordination between the two Deployments,
+  not further fraction tuning.
   Container memory *limits* matter independently of this fraction —
   `vllm-aux` has been OOMKilled twice on those (40Gi, then 60Gi, unrelated to
   the utilization-fraction issue); current limits (32Gi main / 80Gi aux)
