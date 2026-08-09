@@ -82,12 +82,18 @@ spec:
           resources:
             # Sized for unified memory: weights + KV cache both draw from this,
             # not a separate host-RAM budget as on a discrete-GPU node.
+            # Rebalanced after a live OOM (see deployment-aux.yaml): this
+            # container's actual measured peak is ~23GB
+            # (cgroup memory.peak, confirmed via `kubectl exec ... cat
+            # /sys/fs/cgroup/memory.peak`) — the original 45Gi limit here was
+            # unused headroom that vllm-aux's heavier NVFP4+MTP load needed
+            # more than this one did.
             requests:
               cpu: "2"
-              memory: 40Gi
+              memory: 25Gi
             limits:
               cpu: "8"
-              memory: 45Gi
+              memory: 32Gi
               nvidia.com/gpu: 1
           # Cold start = weight download (first run) + ~25s JIT compile on every
           # start. Generous startupProbe avoids a restart-loop before first serve.
