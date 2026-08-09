@@ -11,6 +11,9 @@ metadata:
 spec:
   revisionHistoryLimit: 3
   replicas: 1
+  # See deployment-main.yaml — same rationale, confirmed live on this
+  # Deployment specifically (hit ProgressDeadlineExceeded at the 600s default).
+  progressDeadlineSeconds: 1800
   strategy:
     type: Recreate
   selector:
@@ -51,7 +54,10 @@ spec:
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
             - --gpu-memory-utilization=0.30
-            - --speculative-config={"method":"qwen3_next_mtp","num_speculative_tokens":3}
+            # "mtp", not the deprecated "qwen3_next_mtp" — vLLM auto-remaps the
+            # old name today (confirmed live) but logs a deprecation warning;
+            # fixed ahead of it being dropped from a future nightly build.
+            - --speculative-config={"method":"mtp","num_speculative_tokens":3}
           ports:
             - name: http
               containerPort: 8000
