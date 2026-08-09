@@ -1,7 +1,8 @@
 # vllm
 
 OpenAI-compatible inference for the two Hermes agent deployments
-(`kubernetes/apps/hermes/`), served via vLLM on `orion-ai-01` (DGX Spark).
+(`kubernetes/apps/hermes-sage/`, `kubernetes/apps/hermes-hearth/`), served via
+vLLM on `orion-ai-01` (DGX Spark).
 
 Hand-written, not composed from `webapp/base` — GPU scheduling, per-model
 resource sizing, and cold-start probes don't fit that template's defaults
@@ -19,6 +20,10 @@ time-slicing (`kubernetes/infrastructure/nvidia-device-plugin/`, 4 replicas
 advertised). Each has its own PVC — they serve different models, so nothing is
 shared and no RWX/CephFS storage class is needed (`rook-ceph-block`, RWO, is
 enough).
+
+Both the Deployment and Service carry a `model` label (`qwen3.6-27b` /
+`qwen3.6-35b-a3b`) — `kubectl get pods -n vllm -L model` shows what's running
+without digging through container args.
 
 ## Why these two models
 

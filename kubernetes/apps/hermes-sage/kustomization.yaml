@@ -10,18 +10,18 @@ components:
   - ../webapp/components/httproute      # optional external access (dashboard) — see README
   - ../webapp/components/pvc            # mounts /opt/data (retargeted below); size in cluster shell postBuild.substitute
 
-namespace: hermes-a
-namePrefix: hermes-a-
+namespace: hermes-sage
+namePrefix: hermes-sage-
 
 labels:
   - includeSelectors: true
     pairs:
-      app: hermes-a
-      app.kubernetes.io/name: hermes-a
+      app: hermes-sage
+      app.kubernetes.io/name: hermes-sage
 
 images:
   - name: my-app
-    newName: nousresearch/hermes-agent
+    newName: nousresearch/hermes-sagegent
     newTag: "latest"
 
 configMapGenerator:
@@ -58,3 +58,7 @@ patches:
       kind: Service
       name: svc
     path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml

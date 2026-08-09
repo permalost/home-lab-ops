@@ -1,19 +1,21 @@
-# hermes-a
+# hermes-sage
 
-One of two Hermes Agent instances (see also `hermes-b/` — identical, separate
-namespace/PVC/keys) pointed at the local vLLM stack in `kubernetes/apps/vllm/`.
-No cloud API keys — `model.provider: custom` in `config/config.yaml` routes to
+General-purpose Hermes Agent instance — assistant duties and the instance
+used for testing/iterating on the local model stack. See also
+`hermes-hearth/` (Home Assistant integration; identical setup otherwise).
+Pointed at the local vLLM stack in `kubernetes/apps/vllm/` — no cloud API
+keys, `model.provider: custom` in `config/config.yaml` routes to
 `vllm-main`/`vllm-aux` over the cluster network.
 
 ## Configuration
 
-- **Namespace:** `hermes-a`
+- **Namespace:** `hermes-sage`
 - Image `nousresearch/hermes-agent:latest`, runs `gateway run`.
 - Container listens on `8642` (OpenAI-compatible API + health); `patches/`
   retarget the base's 8080 default (Deployment containerPort, Service
   targetPort) to match.
 - PVC via the `pvc` component, mounted at `/opt/data` (sessions, memories,
-  skills, logs) — size set in `clusters/orion/hermes-a.yaml`
+  skills, logs) — size set in `clusters/orion/hermes-sage.yaml`
   `postBuild.substitute`.
 - `config/config.yaml` ships through git as a ConfigMap, projected via
   `subPath` onto `/opt/data/config.yaml` — not part of the PVC, so config
@@ -24,10 +26,11 @@ No cloud API keys — `model.provider: custom` in `config/config.yaml` routes to
 
 ## Ingress / Endpoints
 
-Exposed via the `httproute` component — optional, only useful for reaching the
-dashboard/API from outside the cluster. Nothing in this stack requires it:
-Hermes talks to vLLM over in-cluster DNS, and there's no scheduled reason for
-external traffic to reach Hermes itself yet.
+Exposed via the `httproute` component at `${subdomain}.${domain}`
+(`hermes-sage.orion.norseamerican.com`) — optional, only useful for reaching
+the dashboard/API from outside the cluster. gethomepage.dev annotations
+surface it under "AI". Nothing in this stack requires external access:
+Hermes talks to vLLM over in-cluster DNS.
 
 ## Troubleshooting
 
@@ -35,4 +38,4 @@ external traffic to reach Hermes itself yet.
   wrong `--tool-call-parser` there is the most likely cause, not this app.
 - **Config not taking effect:** confirm the ConfigMap regenerated (kustomize
   content-hashes it) and the pod actually restarted — `kubectl rollout restart
-  deploy/hermes-a-deploy -n hermes-a`.
+  deploy/hermes-sage-deploy -n hermes-sage`.

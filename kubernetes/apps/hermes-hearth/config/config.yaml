@@ -1,5 +1,7 @@
-# See hermes-a/config/config.yaml — identical, both instances share the same
-# vllm backends (vLLM/continuous batching handles concurrent agents fine).
+# See hermes-sage/config/config.yaml — identical, both instances share the
+# same vllm backends (vLLM/continuous batching handles concurrent agents fine).
+# Home Assistant connection/tool wiring is not set up yet — this instance is
+# presently just Hermes pointed at the local models, same as hermes-sage.
 model:
   provider: custom
   base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1

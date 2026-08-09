@@ -1,6 +1,6 @@
 # Mounted at /opt/data/config.yaml (subPath onto the pvc component's volume —
-# see patches/deploy-mount-config.yaml). Not secret; API_SERVER_KEY lives in
-# secret.yaml instead.
+# see patches/deploy-mount-configmap.yaml). Not secret; API_SERVER_KEY lives
+# in secret.yaml instead.
 model:
   provider: custom
   base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1

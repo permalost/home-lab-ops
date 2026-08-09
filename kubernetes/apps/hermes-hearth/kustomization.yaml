@@ -10,14 +10,14 @@ components:
   - ../webapp/components/httproute      # optional external access (dashboard) — see README
   - ../webapp/components/pvc            # mounts /opt/data (retargeted below); size in cluster shell postBuild.substitute
 
-namespace: hermes-b
-namePrefix: hermes-b-
+namespace: hermes-hearth
+namePrefix: hermes-hearth-
 
 labels:
   - includeSelectors: true
     pairs:
-      app: hermes-b
-      app.kubernetes.io/name: hermes-b
+      app: hermes-hearth
+      app.kubernetes.io/name: hermes-hearth
 
 images:
   - name: my-app
@@ -58,3 +58,7 @@ patches:
       kind: Service
       name: svc
     path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
