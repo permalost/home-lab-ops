@@ -119,7 +119,18 @@ spec:
             - --enable-auto-tool-choice
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
-            - --gpu-memory-utilization=0.30
+            # Lowered from 0.30: this fraction is computed against whatever's
+            # free at the exact instant this engine initializes, not a fixed
+            # reservation — confirmed live, it went negative
+            # ("Available KV cache memory: -16.82 GiB") when vllm-main
+            # finished retrying and claimed its own share at the same
+            # moment. wait-for-main only anchors the start of that race, not
+            # its resolution minutes later. Real weights here are ~22GB and
+            # this architecture's KV cache is inherently cheap per token (see
+            # README.md), so 0.30 was more target than actually needed —
+            # shrinking it makes the target smaller and far less likely to
+            # collide with whatever vllm-main is doing at that instant.
+            - --gpu-memory-utilization=0.15
             # compressed-tensors — this checkpoint's actual format, not modelopt.
             - --quantization=compressed-tensors
             - --kv-cache-dtype=fp8_e4m3

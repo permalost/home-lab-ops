@@ -68,15 +68,17 @@ every pod start. **Its `KEEP` value must be kept in sync by hand with the
 them, so a checkpoint change needs both updated together, or the
 initContainer deletes the checkpoint that's about to be used.
 
-## Startup is sequenced — main first, then aux
+## Startup is sequenced — main first, then aux (partial fix)
 
 `vllm-aux`'s `wait-for-main` initContainer blocks until `vllm-main` reports
-healthy before `vllm-aux` starts loading. Time-slicing gives the two zero
-memory isolation on the shared GPU (see below) — letting both load at once
-once starved `vllm-main` of its GPU memory share mid-startup. Sequencing
-keeps their memory peaks from overlapping. One-directional: if `vllm-main` is
-ever down, `vllm-aux` waits rather than competing with it for memory, which
-is the right failure mode here.
+healthy before `vllm-aux` starts loading. This fixes the *cold-start*
+collision (both loading at once) but isn't sufficient alone — confirmed
+live, `vllm-aux` still crashed on an unrelated retry cycle ~25 minutes later,
+when `vllm-main` finished a late retry and claimed memory at the exact
+moment `vllm-aux` reached its own KV cache allocation check. See the
+`--gpu-memory-utilization` risk below for the actual fix to that. One-
+directional and kept that way: if `vllm-main` is ever down, `vllm-aux` waits
+rather than competing with it for memory.
 
 ## Known risks — read before deploying
 
@@ -102,15 +104,24 @@ is the right failure mode here.
   hardware needs the CUDA 13 nightly track.
 - **Tool-call parser is `qwen3_coder`, not `hermes`.** Wrong parser → tool
   calls arrive as literal text JSON and Hermes fails silently.
-- **`--gpu-memory-utilization` is a fraction of total unified memory**,
-  shared by both deployments and the OS. `main` (0.40) + `aux` (0.30) = 0.70,
-  under the ~0.80 threshold where GB10 has been reported to freeze
-  ([forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060)).
+- **`--gpu-memory-utilization` is computed against currently-free memory at
+  the instant each engine initializes, not a fixed reservation.** Confirmed
+  live: `vllm-aux` (0.30) went to `Available KV cache memory: -16.82 GiB` and
+  crashed when `vllm-main` finished a retry and claimed its own share at that
+  exact moment — `wait-for-main` only anchors the start of the race, not its
+  resolution minutes later. `vllm-main`'s real footprint is small (6.76GB
+  resident, 19.66GB peak, confirmed via cgroup `memory.current`/`memory.peak`)
+  and `vllm-aux`'s architecture is inherently cheap on KV cache per token (see
+  "Why these two models"), so `aux` never needed the full 0.30 — lowered to
+  0.15, shrinking its target so it's far less likely to collide with whatever
+  `main` is doing. `main` stays at 0.40 (`main` 0.40 + `aux` 0.15 = 0.55
+  combined target, well under the ~0.80 threshold where GB10 has been
+  reported to freeze —
+  [forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060)).
   Container memory *limits* matter independently of this fraction —
-  `vllm-aux` has been OOMKilled twice (40Gi, then 60Gi); current limits
-  (32Gi main / 80Gi aux) leave ~9.67GiB margin against the node's actual
-  121.67GiB. `vllm-aux`'s real peak still isn't precisely measured (cgroup
-  stats reset on crash) — may need another round.
+  `vllm-aux` has been OOMKilled twice on those (40Gi, then 60Gi, unrelated to
+  the utilization-fraction issue); current limits (32Gi main / 80Gi aux)
+  leave ~9.67GiB margin against the node's actual 121.67GiB.
 - **Node taint toleration is confirmed correct.** Live-verified:
   `nvidia.com/gpu=true:NoSchedule`, and `operator: Exists` matches regardless
   of value. Still applied by hand via `kubectl taint`, not tracked in git —
