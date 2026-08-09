@@ -27,14 +27,13 @@ spec:
     substitute:
       storageClass: rook-ceph-block
       mainStorageSize: 35Gi
-      # 30Gi wasn't enough once switched off the NVIDIA checkpoint (#113):
-      # the old nvidia/Qwen3.6-35B-A3B-NVFP4 download (~22GB) is still on the
-      # volume with nothing to clean it up automatically, leaving no room for
-      # the new AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 checkpoint (~23.4GB) —
-      # confirmed live, HF's downloader stalled at 94% disk usage. Sized for
-      # both to coexist rather than requiring manual cleanup; PVC expansion
-      # is non-destructive on rook-ceph-block (allowVolumeExpansion: true).
-      auxStorageSize: 60Gi
+      # Sized for one checkpoint (~23.4GB) plus headroom, matching mainStorageSize
+      # — not sized to hold two checkpoints simultaneously. Both deployments now
+      # run a clean-stale-models initContainer (see deployment-*.yaml) that
+      # purges any cached checkpoint not matching the currently-configured
+      # model before the main container starts, so old data from a prior
+      # checkpoint swap no longer accumulates and doesn't need this padded out.
+      auxStorageSize: 35Gi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings

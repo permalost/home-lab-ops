@@ -25,6 +25,10 @@ Both the Deployment and Service carry a `model` label (`qwen3.6-27b` /
 `qwen3.6-35b-a3b-heretic`) — `kubectl get pods -n vllm -L model` shows what's
 running without digging through container args.
 
+Both Deployments also run a `clean-stale-models` initContainer that purges any
+cached checkpoint under `/models` not matching the currently-configured model,
+before the main container starts — see "PVCs stay right-sized" below.
+
 ## Why these two models
 
 `Qwen3.6-27B` (dense) leads `Qwen3.6-35B-A3B` (MoE) by 8-11 points on
@@ -46,6 +50,23 @@ Hermes's `approval` role (see `hermes-sage/config.yaml`,
 `hermes-hearth/config.yaml`) currently has no safety guardrails of its own.
 Revisit this if that stops being acceptable — e.g. by routing `approval`
 specifically back to `vllm-main` instead of `vllm-aux`.
+
+## PVCs stay right-sized — checkpoints don't accumulate
+
+Each PVC (`mainStorageSize: 35Gi`, `auxStorageSize: 35Gi` in
+`clusters/orion/vllm.yaml`) is sized for **one** checkpoint plus headroom, not
+for holding old ones alongside new. Learned this live: switching `vllm-aux`
+off NVIDIA's checkpoint onto AEON-7's (see below) left the ~22GB old download
+sitting on the volume with nothing to reclaim it, which filled a 30Gi PVC and
+crashed the pod mid-download with a disk-full error.
+
+Fix is the `clean-stale-models` initContainer on both Deployments — a plain
+`busybox` step that deletes any `models--*` cache directory not matching the
+model the main container is about to serve, every pod start. **Its `KEEP`
+value must be kept in sync with the `--model` (or positional `serve` arg) in
+the same file by hand** — there's no single source of truth linking them, so
+a checkpoint change needs both updated together, or the initContainer will
+delete the checkpoint that's about to be used.
 
 ## Known risks — read before deploying
 
