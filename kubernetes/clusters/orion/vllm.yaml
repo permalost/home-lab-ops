@@ -6,14 +6,9 @@ metadata:
 spec:
   interval: 10m
   retryInterval: 30s
-  # Must exceed the Deployments' progressDeadlineSeconds (1800s/30m, see
-  # deployment-*.yaml) — this timeout gates Flux's own wait: true health
-  # check, which is a *separate* budget from the Deployment-level one.
-  # Confirmed live: with this at 15m, Flux reported HealthCheckFailed and
-  # gave up on every reconcile before the Deployment's own 30-min allowance
-  # for a legitimately slow cold load was ever exhausted — the exact
-  # premature-failure problem progressDeadlineSeconds was raised to avoid,
-  # just one layer up. Set with margin above 30m, not equal to it.
+  # Must exceed the Deployments' progressDeadlineSeconds (30m) — this gates
+  # Flux's own wait: true health check, a separate budget from the
+  # Deployment-level one. Set with margin, not equal.
   timeout: 35m
   prune: true
   wait: true
@@ -35,12 +30,9 @@ spec:
     substitute:
       storageClass: rook-ceph-block
       mainStorageSize: 35Gi
-      # Sized for one checkpoint (~23.4GB) plus headroom, matching mainStorageSize
-      # — not sized to hold two checkpoints simultaneously. Both deployments now
-      # run a clean-stale-models initContainer (see deployment-*.yaml) that
-      # purges any cached checkpoint not matching the currently-configured
-      # model before the main container starts, so old data from a prior
-      # checkpoint swap no longer accumulates and doesn't need this padded out.
+      # One checkpoint plus headroom, not two — the clean-stale-models
+      # initContainer (deployment-*.yaml) purges old checkpoints on every
+      # pod start, so this doesn't need padding for leftover data.
       auxStorageSize: 35Gi
     substituteFrom:
       - kind: ConfigMap

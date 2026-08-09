@@ -1,25 +1,17 @@
 # Hermes "auxiliary" model — title generation, context compression, approval
 # scoring, web summarization.
 #
-# ⚠ CHECKPOINT NOTICE: AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 is a deliberately
-# uncensored/"abliterated" variant (safety refusals stripped, 5/100 refusal
-# rate per its own model card) — not a plain re-quantization of the stock
-# model. This was an explicit, informed choice (see PR description), made
-# knowing this same model backs Hermes's `approval` role in
-# hermes-sage/hermes-hearth's config.yaml — i.e. the guardrail-gating role is
-# currently served by a guardrail-stripped model. Revisit if that stops being
-# acceptable.
+# ⚠ AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 is a deliberately uncensored
+# ("abliterated", 5/100 refusal rate) checkpoint, not a re-quantization — an
+# informed choice, made knowing it also backs Hermes's `approval` role
+# (hermes-sage/hermes-hearth config.yaml). Revisit if that's unacceptable.
 #
-# ⚠ IMAGE NOTICE: switched off the official vllm/vllm-openai image because
-# NVIDIA's own nvidia/Qwen3.6-35B-A3B-NVFP4 checkpoint hit a real, currently
-# open vLLM bug on this exact hardware — a KeyError loading MoE expert scale
-# tensors (see vllm-project/vllm#44081, #38980). ghcr.io/aeon-7's image
-# carries unmerged upstream patches specifically for this; it's a
-# single-maintainer, unaudited community build with an explicit warranty
-# disclaimer, pinned to a dated tag (not `:latest`) for reproducibility.
-# Speculative decoding (DFlash) deliberately left out of this first attempt —
-# it needs its own unmerged vLLM PR (#40898) on top of everything else here;
-# get the base path proven first.
+# ⚠ Runs ghcr.io/aeon-7's image, not the official vllm-openai one: NVIDIA's
+# own checkpoint hits an open vLLM bug on this hardware (KeyError loading
+# MoE expert scale tensors — vLLM #44081, #38980). AEON-7's image carries
+# unmerged patches for it; single-maintainer, unaudited, warranty-disclaimed
+# (see README.md). DFlash speculative decoding deliberately left out — needs
+# its own unmerged PR (#40898) on top of everything else here.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,8 +22,7 @@ metadata:
 spec:
   revisionHistoryLimit: 3
   replicas: 1
-  # See deployment-main.yaml — same rationale, confirmed live on this
-  # Deployment specifically (hit ProgressDeadlineExceeded at the 600s default).
+  # See deployment-main.yaml.
   progressDeadlineSeconds: 1800
   strategy:
     type: Recreate
@@ -51,18 +42,14 @@ spec:
       runtimeClassName: nvidia
       nodeSelector:
         nvidia.com/gpu.present: "true"
-      # See deployment-main.yaml — same taint caveat applies.
+      # See deployment-main.yaml.
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
           effect: NoSchedule
-      # Purges any cached checkpoint that isn't the one currently configured
-      # below, before the main container starts. Learned the hard way (#113
-      # -> disk-full crash): switching --model here without this left the
-      # prior checkpoint's ~22GB sitting on the PVC forever, un-reclaimed.
-      # KEEP must match the model in the main container's args exactly, or
-      # this deletes the checkpoint that's about to be used.
       initContainers:
+        # Deletes any cached checkpoint that doesn't match the model below —
+        # see deployment-main.yaml. KEEP must match the model arg exactly.
         - name: clean-stale-models
           image: busybox:1.36.1
           command:
@@ -89,17 +76,36 @@ spec:
             limits:
               cpu: 200m
               memory: 64Mi
+        # Waits for vllm-main to be healthy before this pod loads. Time-
+        # slicing gives no memory isolation between the two — simultaneous
+        # loads once starved vllm-main of its GPU memory share mid-startup
+        # (see README.md). Sequencing keeps their memory peaks from overlapping.
+        - name: wait-for-main
+          image: busybox:1.36.1
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              until wget -q -T 5 -O /dev/null http://vllm-main.vllm.svc.cluster.local:8000/health; do
+                echo "Waiting for vllm-main..."
+                sleep 15
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 32Mi
       containers:
         - name: vllm
-          # Dated, pinned tag — not `:latest` (which the upstream repo
-          # itself documents as floating, internally pointing at builds like
-          # this one). UNVALIDATED beyond static research: confirm it
-          # actually starts and loads on orion-ai-01 before trusting this.
+          # Dated, pinned tag — the upstream repo's :latest floats. See
+          # README.md for the trust tradeoff.
           image: "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-07-27-v0.26.0"
           imagePullPolicy: IfNotPresent
-          # This image's default entrypoint is a multi-model fleet launcher;
-          # override to plain `vllm serve` for a single-model container,
-          # matching the image's own documented single-model invocation.
+          # Default entrypoint is a multi-model fleet launcher; override to
+          # plain `vllm serve` for a single model.
           command:
             - vllm
           args:
@@ -114,8 +120,7 @@ spec:
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
             - --gpu-memory-utilization=0.30
-            # compressed-tensors, not modelopt — this checkpoint's actual
-            # quantization format, per the image's own documented recipe.
+            # compressed-tensors — this checkpoint's actual format, not modelopt.
             - --quantization=compressed-tensors
             - --kv-cache-dtype=fp8_e4m3
             - --attention-backend=TRITON_ATTN
@@ -132,17 +137,17 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
-            # See deployment-main.yaml for the OOM history behind these
-            # numbers. Kept as-is for this checkpoint swap — the model is a
-            # similar size (~22GB per its card) to what these limits were
-            # already sized for; revisit if this build's actual footprint
-            # differs once it's running.
+            # OOMKilled twice at lower limits (40Gi, then 60Gi) — this
+            # image/checkpoint's real footprint is heavier than vllm-main's.
+            # Not precisely measured (cgroup stats reset on crash); may need
+            # another round once a successful run's peak can be read via
+            # `kubectl exec ... cat /sys/fs/cgroup/memory.peak`.
             requests:
               cpu: "2"
-              memory: 40Gi
+              memory: 50Gi
             limits:
               cpu: "8"
-              memory: 60Gi
+              memory: 80Gi
               nvidia.com/gpu: 1
           startupProbe:
             httpGet:
@@ -166,10 +171,7 @@ spec:
           persistentVolumeClaim:
             claimName: vllm-aux-weights
         - name: shm
-          # Bumped from 4Gi to 16Gi to match this image's own documented
-          # recipe (--shm-size=16g) — untested whether the smaller size
-          # would've been enough, not worth risking a second failure mode
-          # to find out.
+          # 16Gi to match this image's documented recipe (--shm-size=16g).
           emptyDir:
             medium: Memory
             sizeLimit: 16Gi

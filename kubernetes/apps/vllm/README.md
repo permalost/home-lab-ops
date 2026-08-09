@@ -25,9 +25,11 @@ Both the Deployment and Service carry a `model` label (`qwen3.6-27b` /
 `qwen3.6-35b-a3b-heretic`) — `kubectl get pods -n vllm -L model` shows what's
 running without digging through container args.
 
-Both Deployments also run a `clean-stale-models` initContainer that purges any
-cached checkpoint under `/models` not matching the currently-configured model,
-before the main container starts — see "PVCs stay right-sized" below.
+Both Deployments run a `clean-stale-models` initContainer (purges any cached
+checkpoint that doesn't match what's configured, before the main container
+starts — see "PVCs stay right-sized" below). `vllm-aux` also runs a
+`wait-for-main` initContainer that blocks until `vllm-main` is healthy — see
+"Startup is sequenced" below.
 
 ## Why these two models
 
@@ -55,74 +57,72 @@ specifically back to `vllm-main` instead of `vllm-aux`.
 
 Each PVC (`mainStorageSize: 35Gi`, `auxStorageSize: 35Gi` in
 `clusters/orion/vllm.yaml`) is sized for **one** checkpoint plus headroom, not
-for holding old ones alongside new. Learned this live: switching `vllm-aux`
-off NVIDIA's checkpoint onto AEON-7's (see below) left the ~22GB old download
-sitting on the volume with nothing to reclaim it, which filled a 30Gi PVC and
-crashed the pod mid-download with a disk-full error.
+for holding old ones alongside new. A checkpoint swap once left the old
+download (~22GB) sitting on the volume with nothing to reclaim it, filling a
+30Gi PVC and crashing the pod mid-download with a disk-full error.
 
-Fix is the `clean-stale-models` initContainer on both Deployments — a plain
-`busybox` step that deletes any `models--*` cache directory not matching the
-model the main container is about to serve, every pod start. **Its `KEEP`
-value must be kept in sync with the `--model` (or positional `serve` arg) in
-the same file by hand** — there's no single source of truth linking them, so
-a checkpoint change needs both updated together, or the initContainer will
-delete the checkpoint that's about to be used.
+Fix is the `clean-stale-models` initContainer on both Deployments — deletes
+any `models--*` cache directory not matching the model about to be served,
+every pod start. **Its `KEEP` value must be kept in sync by hand with the
+`--model`/`serve` arg in the same file** — no single source of truth links
+them, so a checkpoint change needs both updated together, or the
+initContainer deletes the checkpoint that's about to be used.
+
+## Startup is sequenced — main first, then aux
+
+`vllm-aux`'s `wait-for-main` initContainer blocks until `vllm-main` reports
+healthy before `vllm-aux` starts loading. Time-slicing gives the two zero
+memory isolation on the shared GPU (see below) — letting both load at once
+once starved `vllm-main` of its GPU memory share mid-startup. Sequencing
+keeps their memory peaks from overlapping. One-directional: if `vllm-main` is
+ever down, `vllm-aux` waits rather than competing with it for memory, which
+is the right failure mode here.
 
 ## Known risks — read before deploying
 
-- **`vllm-aux` runs an unaudited third-party image.** `ghcr.io/aeon-7/aeon-vllm-ultimate`
-  is a single-maintainer community build carrying unmerged upstream vLLM
-  patches, with an explicit warranty disclaimer. It's pinned to a dated tag
-  (not `:latest`, which the project itself documents as floating) for
-  reproducibility, but the image itself hasn't been security-audited by
-  anyone. Switched to it because NVIDIA's official `nvidia/Qwen3.6-35B-A3B-NVFP4`
-  checkpoint hit a real, currently-open vLLM bug on this hardware — a
-  `KeyError` loading MoE expert scale tensors
-  ([vLLM #44081](https://github.com/vllm-project/vllm/issues/44081),
+- **`vllm-aux` runs an unaudited third-party image and checkpoint.**
+  `ghcr.io/aeon-7/aeon-vllm-ultimate` is a single-maintainer community build
+  carrying unmerged upstream vLLM patches, with an explicit warranty
+  disclaimer — pinned to a dated tag (not `:latest`, which the project itself
+  documents as floating) for reproducibility, but not security-audited by
+  anyone. Switched to it because NVIDIA's official
+  `nvidia/Qwen3.6-35B-A3B-NVFP4` checkpoint hits a real, currently-open vLLM
+  bug on this hardware — a `KeyError` loading MoE expert scale tensors
+  ([#44081](https://github.com/vllm-project/vllm/issues/44081),
   [#38980](https://github.com/vllm-project/vllm/issues/38980), both open, no
-  fix landed). r0b0tlab's `vllm-v0250-cu130-sm121` was the more conservative
-  alternative considered (properly pinned, official checkpoint, but no
-  specific claim of fixing this bug) — revisit that if the AEON-7 image turns
-  out to be unreliable.
+  fix landed). `r0b0tlab/vllm-v0250-cu130-sm121` was the more conservative
+  alternative considered (properly pinned, official checkpoint, no specific
+  claim of fixing this bug) — revisit if AEON-7's image proves unreliable.
 - **`vllm-main`'s image is still unpinned.** `vllm/vllm-openai:cu130-nightly`
-  is a moving tag, not a reproducible pin — whatever's cached on the node from
-  first pull is what actually runs, regardless of what the tag currently
-  points to upstream. Confirmed working for `vllm-main`'s checkpoint
-  specifically; unresolved as a general risk. Stock vLLM release images lack
+  is a moving tag — whatever's cached on the node from first pull is what
+  runs, regardless of what the tag points to upstream now. Confirmed working
+  for this checkpoint; unresolved as a general risk. Stock vLLM releases lack
   sm_121 (Blackwell) kernels for aarch64
-  ([vLLM #36821](https://github.com/vllm-project/vllm/issues/36821), open) —
-  this hardware needs the CUDA 13 nightly track
-  ([vLLM's own DGX Spark writeup](https://vllm.ai/blog/2026-06-01-vllm-dgx-spark)
-  confirms this works in general).
-- **Tool-call parser is `qwen3_coder`, not `hermes`.** Wrong parser → tool calls
-  arrive as literal text JSON and Hermes fails silently.
-- **`--gpu-memory-utilization` is a fraction of total unified memory**, shared
-  by both deployments, the OS, and every other pod. `main` (0.40) + `aux` (0.30)
-  = 0.70 total, deliberately under the ~0.80 threshold where GB10 has been
-  reported to freeze
+  ([#36821](https://github.com/vllm-project/vllm/issues/36821), open) — this
+  hardware needs the CUDA 13 nightly track.
+- **Tool-call parser is `qwen3_coder`, not `hermes`.** Wrong parser → tool
+  calls arrive as literal text JSON and Hermes fails silently.
+- **`--gpu-memory-utilization` is a fraction of total unified memory**,
+  shared by both deployments and the OS. `main` (0.40) + `aux` (0.30) = 0.70,
+  under the ~0.80 threshold where GB10 has been reported to freeze
   ([forum report](https://forums.developer.nvidia.com/t/gemma-4-on-dgx-spark-gb10-system-freeze-at-80-utilization-sm-121-kernel-issues/366060)).
-  Don't raise either without lowering the other to compensate. Separately,
-  confirmed live that container memory *limits* also matter independently of
-  this fraction — `vllm-aux` was genuinely OOMKilled once at its old 40Gi
-  limit (see git history on `deployment-aux.yaml`); current limits (32Gi
-  main / 60Gi aux) are based on `vllm-main`'s measured real peak (~23GB), not
-  just guesswork, but `vllm-aux`'s footprint under the new image/checkpoint
-  is still unconfirmed.
-- **Node taint toleration is confirmed correct.** Live-verified: the taint is
+  Container memory *limits* matter independently of this fraction —
+  `vllm-aux` has been OOMKilled twice (40Gi, then 60Gi); current limits
+  (32Gi main / 80Gi aux) leave ~9.67GiB margin against the node's actual
+  121.67GiB. `vllm-aux`'s real peak still isn't precisely measured (cgroup
+  stats reset on crash) — may need another round.
+- **Node taint toleration is confirmed correct.** Live-verified:
   `nvidia.com/gpu=true:NoSchedule`, and `operator: Exists` matches regardless
-  of value — no longer an open risk, but still applied by hand via `kubectl
-  taint` and not tracked in git, so it could drift.
-- **Cold start is slow.** First run downloads weights to the PVC (tens of GB)
-  plus JIT compile on every start; this stacks with Kubernetes' own
-  `progressDeadlineSeconds` (separate from the `startupProbe` — both are set
-  to a matching 30-minute budget now, confirmed live that the K8s-level
-  default of 10 minutes fires independently and marks the rollout `Failed`
-  well before a legitimately slow model load finishes).
-- **DFlash speculative decoding is deliberately not configured for `vllm-aux`.**
-  It needs its own unmerged vLLM PR
+  of value. Still applied by hand via `kubectl taint`, not tracked in git —
+  could drift.
+- **Cold start is slow.** Weight download + JIT compile on every start,
+  stacked with Kubernetes' `progressDeadlineSeconds` and the Flux
+  Kustomization's own `timeout` (both set to a matching ~30-35 min budget —
+  see `clusters/orion/vllm.yaml`).
+- **DFlash speculative decoding isn't configured for `vllm-aux`.** Needs its
+  own unmerged vLLM PR
   ([#40898](https://github.com/vllm-project/vllm/pull/40898)) on top of
-  everything else already unproven here — get the base serving path working
-  first before adding it back.
+  everything else already unproven here.
 
 ## Verify
 
