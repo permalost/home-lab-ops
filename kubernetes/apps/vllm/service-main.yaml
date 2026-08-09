@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vllm-main
+  labels:
+    app.kubernetes.io/name: vllm-main
+    model: qwen3.6-27b
 spec:
   type: ClusterIP
   selector:

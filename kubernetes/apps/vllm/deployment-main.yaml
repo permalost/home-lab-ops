@@ -4,6 +4,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vllm-main
+  labels:
+    app.kubernetes.io/name: vllm-main
+    model: qwen3.6-27b
 spec:
   revisionHistoryLimit: 3
   replicas: 1
@@ -16,6 +19,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: vllm-main
+        model: qwen3.6-27b
     spec:
       serviceAccountName: default
       automountServiceAccountToken: true

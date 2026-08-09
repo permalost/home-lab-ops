@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: hermes-a
+  name: hermes-sage
   namespace: flux-system
 spec:
   interval: 10m
@@ -18,15 +18,15 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./kubernetes/apps/hermes-a
+  path: ./kubernetes/apps/hermes-sage
   decryption:
     provider: sops
     secretRef:
       name: sops-age
   postBuild:
     substitute:
-      appName: hermes-a
-      subdomain: hermes-a
+      appName: hermes-sage
+      subdomain: hermes-sage
       storageClass: rook-ceph-block
       storageSize: 5Gi
     substituteFrom:
