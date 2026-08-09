@@ -1,13 +1,32 @@
 # Hermes "auxiliary" model — title generation, context compression, approval
-# scoring, web summarization. High-volume/low-difficulty, so throughput (NVFP4 +
-# MTP, ~108 tok/s measured) matters more here than the raw quality edge vllm-main has.
+# scoring, web summarization.
+#
+# ⚠ CHECKPOINT NOTICE: AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 is a deliberately
+# uncensored/"abliterated" variant (safety refusals stripped, 5/100 refusal
+# rate per its own model card) — not a plain re-quantization of the stock
+# model. This was an explicit, informed choice (see PR description), made
+# knowing this same model backs Hermes's `approval` role in
+# hermes-sage/hermes-hearth's config.yaml — i.e. the guardrail-gating role is
+# currently served by a guardrail-stripped model. Revisit if that stops being
+# acceptable.
+#
+# ⚠ IMAGE NOTICE: switched off the official vllm/vllm-openai image because
+# NVIDIA's own nvidia/Qwen3.6-35B-A3B-NVFP4 checkpoint hit a real, currently
+# open vLLM bug on this exact hardware — a KeyError loading MoE expert scale
+# tensors (see vllm-project/vllm#44081, #38980). ghcr.io/aeon-7's image
+# carries unmerged upstream patches specifically for this; it's a
+# single-maintainer, unaudited community build with an explicit warranty
+# disclaimer, pinned to a dated tag (not `:latest`) for reproducibility.
+# Speculative decoding (DFlash) deliberately left out of this first attempt —
+# it needs its own unmerged vLLM PR (#40898) on top of everything else here;
+# get the base path proven first.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vllm-aux
   labels:
     app.kubernetes.io/name: vllm-aux
-    model: qwen3.6-35b-a3b
+    model: qwen3.6-35b-a3b-heretic
 spec:
   revisionHistoryLimit: 3
   replicas: 1
@@ -23,7 +42,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: vllm-aux
-        model: qwen3.6-35b-a3b
+        model: qwen3.6-35b-a3b-heretic
     spec:
       serviceAccountName: default
       automountServiceAccountToken: true
@@ -39,13 +58,21 @@ spec:
           effect: NoSchedule
       containers:
         - name: vllm
-          # TODO: same digest-pin caveat as deployment-main.yaml.
-          image: "vllm/vllm-openai:cu130-nightly"
+          # Dated, pinned tag — not `:latest` (which the upstream repo
+          # itself documents as floating, internally pointing at builds like
+          # this one). UNVALIDATED beyond static research: confirm it
+          # actually starts and loads on orion-ai-01 before trusting this.
+          image: "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-07-27-v0.26.0"
           imagePullPolicy: IfNotPresent
+          # This image's default entrypoint is a multi-model fleet launcher;
+          # override to plain `vllm serve` for a single-model container,
+          # matching the image's own documented single-model invocation.
+          command:
+            - vllm
           args:
-            - --model=nvidia/Qwen3.6-35B-A3B-NVFP4
+            - serve
+            - AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4
             - --served-model-name=qwen3.6-35b-a3b
-            - --quantization=modelopt
             - --port=8000
             - --download-dir=/models
             - --max-model-len=65536
@@ -54,10 +81,12 @@ spec:
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
             - --gpu-memory-utilization=0.30
-            # "mtp", not the deprecated "qwen3_next_mtp" — vLLM auto-remaps the
-            # old name today (confirmed live) but logs a deprecation warning;
-            # fixed ahead of it being dropped from a future nightly build.
-            - --speculative-config={"method":"mtp","num_speculative_tokens":3}
+            # compressed-tensors, not modelopt — this checkpoint's actual
+            # quantization format, per the image's own documented recipe.
+            - --quantization=compressed-tensors
+            - --kv-cache-dtype=fp8_e4m3
+            - --attention-backend=TRITON_ATTN
+            - --trust-remote-code
           ports:
             - name: http
               containerPort: 8000
@@ -70,16 +99,11 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
-            # Bumped after a live OOM: this container was genuinely
-            # OOMKilled at the old 40Gi limit while loading (exit 137),
-            # severely enough to trigger the node's kernel OOM killer
-            # (collateral: node_exporter, an unrelated pause process). NVFP4
-            # dequantization plus the MTP speculative-decoding draft model
-            # both add transient memory beyond vllm-main's plainer FP8 load,
-            # so this container gets the larger share — vllm-main's actual
-            # peak (~23GB, see deployment-main.yaml) had far more headroom
-            # than it needed. Combined limits stay ~76% of the node's ~121GiB
-            # (nothing else meaningful is scheduled on orion-ai-01).
+            # See deployment-main.yaml for the OOM history behind these
+            # numbers. Kept as-is for this checkpoint swap — the model is a
+            # similar size (~22GB per its card) to what these limits were
+            # already sized for; revisit if this build's actual footprint
+            # differs once it's running.
             requests:
               cpu: "2"
               memory: 40Gi
@@ -109,6 +133,10 @@ spec:
           persistentVolumeClaim:
             claimName: vllm-aux-weights
         - name: shm
+          # Bumped from 4Gi to 16Gi to match this image's own documented
+          # recipe (--shm-size=16g) — untested whether the smaller size
+          # would've been enough, not worth risking a second failure mode
+          # to find out.
           emptyDir:
             medium: Memory
-            sizeLimit: 4Gi
+            sizeLimit: 16Gi
