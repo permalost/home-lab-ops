@@ -27,8 +27,11 @@
         #       directly, already confirmed, skips that trial entirely.
         #   3 - added rest: sensors for the local Neurio energy monitor
         #       (apps/external-endpoints/neurio).
+        #   4 - added rest: sensors for Grocy pantry tracking
+        #       (apps/grocy): due/overdue/expired/missing product counts
+        #       and shopping list item count.
         [
-          "SEED_VERSION=3; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi",
+          "SEED_VERSION=4; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi",
         ]
       volumeMounts:
         - name: config-src
