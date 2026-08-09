@@ -1,0 +1,14 @@
+# Weights cache for vllm-main only (Qwen3.6-27B-FP8, ~27Gi) — each deployment
+# serves a different model so PVCs are NOT shared; no RWX/CephFS need here,
+# rook-ceph-block (RWO) is sufficient.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-main-weights
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${storageClass}
+  resources:
+    requests:
+      storage: ${mainStorageSize}

@@ -1,0 +1,18 @@
+# Optional external access for debugging (curl, a laptop-side Hermes pointed
+# in over the LAN). In-cluster Hermes talks to vllm-main.vllm.svc.cluster.local:8000
+# directly and does not need this route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vllm-main
+spec:
+  parentRefs:
+    - name: ${gatewayName}
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - vllm.${domain}
+  rules:
+    - backendRefs:
+        - name: vllm-main
+          port: 8000

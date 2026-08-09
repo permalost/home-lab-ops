@@ -1,0 +1,36 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hermes-a
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 30s
+  timeout: 15m
+  prune: true
+  wait: true
+  dependsOn:
+    - name: cilium
+    - name: gateway
+    - name: cert-manager-issuers
+    - name: cluster-settings
+    - name: vllm
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/hermes-a
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substitute:
+      appName: hermes-a
+      subdomain: hermes-a
+      storageClass: rook-ceph-block
+      storageSize: 5Gi
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets

@@ -1,0 +1,15 @@
+# Appends onto the arrays the pvc component already created — config.yaml is
+# not persisted on the PVC itself, it's projected in via subPath so config
+# changes ship through git/Flux rather than living only on the volume.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config
+    configMap:
+      name: hermes-config
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: config
+    subPath: config.yaml
+    mountPath: /opt/data/config.yaml

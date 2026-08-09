@@ -1,0 +1,35 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: vllm
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 30s
+  timeout: 15m
+  prune: true
+  wait: true
+  dependsOn:
+    - name: cilium
+    - name: gateway
+    - name: cert-manager-issuers
+    - name: cluster-settings
+    - name: nvidia-device-plugin
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/vllm
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substitute:
+      storageClass: rook-ceph-block
+      mainStorageSize: 35Gi
+      auxStorageSize: 30Gi
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets

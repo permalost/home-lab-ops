@@ -1,0 +1,60 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../webapp/base
+  - namespace.yaml
+  - secret.yaml
+
+components:
+  - ../webapp/components/httproute      # optional external access (dashboard) — see README
+  - ../webapp/components/pvc            # mounts /opt/data (retargeted below); size in cluster shell postBuild.substitute
+
+namespace: hermes-a
+namePrefix: hermes-a-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: hermes-a
+      app.kubernetes.io/name: hermes-a
+
+images:
+  - name: my-app
+    newName: nousresearch/hermes-agent
+    newTag: "latest"
+
+configMapGenerator:
+  - name: hermes-config
+    files:
+      - config.yaml=config/config.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-args.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-config-mountpath.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-mount-configmap.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-target-port.yaml

@@ -1,0 +1,106 @@
+# Hermes "main" model — drives the agent loop. Qwen3.6-27B leads the MoE aux
+# model by 8-11 pts on Terminal-Bench/agentic benchmarks; see kubernetes/apps/vllm/README.md.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-main
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vllm-main
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vllm-main
+    spec:
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      runtimeClassName: nvidia
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      # Toleration must match the taint applied by hand via `kubectl taint` on
+      # orion-ai-01 (not tracked in git — see clusters/orion/patches/nodes/orion-ai-01.yaml).
+      # Confirm the live key/value with `kubectl describe node orion-ai-01` before relying on this.
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: vllm
+          # TODO: pin to a resolved digest, not this moving tag. Stock vLLM release
+          # images lack sm_121 (Blackwell) kernels for aarch64 — this hardware needs
+          # the CUDA 13 nightly track. Validate on the real node before merging; see
+          # vLLM issue #36821 and the DGX Spark blog post linked in README.md.
+          image: "vllm/vllm-openai:cu130-nightly"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --model=Qwen/Qwen3.6-27B-FP8
+            - --served-model-name=qwen3.6-27b
+            - --port=8000
+            - --download-dir=/models
+            - --max-model-len=65536
+            - --max-num-seqs=8
+            - --enable-auto-tool-choice
+            # NOT "hermes" — that parser name refers to the vLLM parser's origin,
+            # not this model family. Qwen3.6 needs its own parser or tool calls
+            # arrive as literal text JSON.
+            - --tool-call-parser=qwen3_coder
+            - --enable-prefix-caching
+            # Fraction of the *whole* unified-memory pool, shared with vllm-aux,
+            # the OS, and every other pod on the node. Keep main+aux well under 0.75
+            # total — GB10 has reported freezing above ~80% utilization.
+            - --gpu-memory-utilization=0.40
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: HF_HOME
+              value: /models
+          volumeMounts:
+            - name: weights
+              mountPath: /models
+            - name: shm
+              mountPath: /dev/shm
+          resources:
+            # Sized for unified memory: weights + KV cache both draw from this,
+            # not a separate host-RAM budget as on a discrete-GPU node.
+            requests:
+              cpu: "2"
+              memory: 40Gi
+            limits:
+              cpu: "8"
+              memory: 45Gi
+              nvidia.com/gpu: 1
+          # Cold start = weight download (first run) + ~25s JIT compile on every
+          # start. Generous startupProbe avoids a restart-loop before first serve.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 20
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 30
+            failureThreshold: 6
+      volumes:
+        - name: weights
+          persistentVolumeClaim:
+            claimName: vllm-main-weights
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 4Gi

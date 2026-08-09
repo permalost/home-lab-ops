@@ -1,0 +1,26 @@
+# Mounted at /opt/data/config.yaml (subPath onto the pvc component's volume —
+# see patches/deploy-mount-config.yaml). Not secret; API_SERVER_KEY lives in
+# secret.yaml instead.
+model:
+  provider: custom
+  base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
+  default: qwen3.6-27b
+  context_length: 64000
+
+auxiliary_models:
+  title:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  compression:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  approval:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b
+  web_extraction:
+    provider: custom
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    model: qwen3.6-35b-a3b

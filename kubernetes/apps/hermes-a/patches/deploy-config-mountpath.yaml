@@ -1,0 +1,5 @@
+# pvc component mounts its volume at /data by default; Hermes expects /opt/data
+# (sessions/, memories/, skills/, logs/, config.yaml all live under it).
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /opt/data

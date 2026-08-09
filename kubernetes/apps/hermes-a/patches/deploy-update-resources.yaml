@@ -1,0 +1,12 @@
+# Hermes itself is a lightweight orchestrator — the actual inference load runs
+# on vllm-main/vllm-aux. webapp/base's 10m/500Mi default is too tight for a
+# long-running agent with session/memory state, but this doesn't need GPU-scale sizing.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
