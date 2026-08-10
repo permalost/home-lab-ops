@@ -9,8 +9,9 @@ the local vLLM models, same as `hermes-sage`.
 ## Configuration
 
 - **Namespace:** `hermes-hearth`
-- Same image, config shape, PVC layout, and `API_SERVER_KEY` secret pattern
-  as `hermes-sage` — see that README for details.
+- Same image, config shape, PVC layout, and `API_SERVER_KEY`/dashboard secret
+  pattern as `hermes-sage` — see that README for details, including the
+  dashboard/terminal security note.
 - Size set in `clusters/orion/hermes-hearth.yaml` `postBuild.substitute`.
 
 ## Ingress / Endpoints

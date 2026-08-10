@@ -37,6 +37,10 @@ patches:
   - target:
       kind: Deployment
       name: deploy
+    path: patches/deploy-dashboard-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
     path: patches/deploy-args.yaml
   - target:
       kind: Deployment
@@ -59,6 +63,14 @@ patches:
       name: svc
     path: patches/svc-target-port.yaml
   - target:
+      kind: Service
+      name: svc
+    path: patches/svc-dashboard-port.yaml
+  - target:
       kind: HTTPRoute
       name: route
     path: patches/httproute-add-homepage-annotations.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-dashboard-port.yaml

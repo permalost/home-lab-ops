@@ -1,0 +1,9 @@
+# Adds the dashboard's port alongside the API port from
+# deploy-container-port.yaml — separate s6 service inside the same
+# container, HERMES_DASHBOARD_PORT default (see deploy-add-env.yaml).
+- op: add
+  path: /spec/template/spec/containers/0/ports/-
+  value:
+    name: dashboard
+    containerPort: 9119
+    protocol: TCP
