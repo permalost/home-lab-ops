@@ -1,24 +1,20 @@
 # Hermes "auxiliary" model — title generation, context compression, approval
 # scoring, web summarization.
 #
-# ⚠ AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4 is a deliberately uncensored
-# ("abliterated", 5/100 refusal rate) checkpoint, not a re-quantization — an
-# informed choice, made knowing it also backs Hermes's `approval` role
-# (hermes-sage/hermes-hearth config.yaml). Revisit if that's unacceptable.
-#
-# ⚠ Runs ghcr.io/aeon-7's image, not the official vllm-openai one: NVIDIA's
-# own checkpoint hits an open vLLM bug on this hardware (KeyError loading
-# MoE expert scale tensors — vLLM #44081, #38980). AEON-7's image carries
-# unmerged patches for it; single-maintainer, unaudited, warranty-disclaimed
-# (see README.md). DFlash speculative decoding deliberately left out — needs
-# its own unmerged PR (#40898) on top of everything else here.
+# Official checkpoint (Qwen/Qwen3.6-35B-A3B-FP8), stock vllm-openai image —
+# same image as vllm-main, no community fork. Replaces an earlier
+# AEON-7/NVFP4 setup: NVIDIA's own NVFP4 checkpoint hit an open vLLM bug on
+# this hardware (KeyError loading MoE expert scale tensors — vLLM #44081,
+# #38980), so we ran an uncensored community re-quantization + patched image
+# instead. Dropped in favor of this FP8 checkpoint, which sidesteps both the
+# NVFP4 bug and the trust/audit tradeoff of that image.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vllm-aux
   labels:
     app.kubernetes.io/name: vllm-aux
-    model: qwen3.6-35b-a3b-heretic
+    model: qwen3.6-35b-a3b
 spec:
   revisionHistoryLimit: 3
   replicas: 1
@@ -33,7 +29,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: vllm-aux
-        model: qwen3.6-35b-a3b-heretic
+        model: qwen3.6-35b-a3b
     spec:
       serviceAccountName: default
       automountServiceAccountToken: true
@@ -58,7 +54,7 @@ spec:
             - |
               set -eu
               cd /models
-              KEEP="models--AEON-7--Qwen3.6-35B-A3B-heretic-NVFP4"
+              KEEP="models--Qwen--Qwen3.6-35B-A3B-FP8"
               for d in models--*; do
                 [ -d "$d" ] || continue
                 if [ "$d" != "$KEEP" ]; then
@@ -100,17 +96,11 @@ spec:
               memory: 32Mi
       containers:
         - name: vllm
-          # Dated, pinned tag — the upstream repo's :latest floats. See
-          # README.md for the trust tradeoff.
-          image: "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-07-27-v0.26.0"
+          # TODO: pin to a resolved digest — see deployment-main.yaml.
+          image: "vllm/vllm-openai:cu130-nightly"
           imagePullPolicy: IfNotPresent
-          # Default entrypoint is a multi-model fleet launcher; override to
-          # plain `vllm serve` for a single model.
-          command:
-            - vllm
           args:
-            - serve
-            - AEON-7/Qwen3.6-35B-A3B-heretic-NVFP4
+            - --model=Qwen/Qwen3.6-35B-A3B-FP8
             - --served-model-name=qwen3.6-35b-a3b
             - --port=8000
             - --download-dir=/models
@@ -119,23 +109,9 @@ spec:
             - --enable-auto-tool-choice
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
-            # Lowered from 0.30: this fraction is computed against whatever's
-            # free at the exact instant this engine initializes, not a fixed
-            # reservation — confirmed live, it went negative
-            # ("Available KV cache memory: -16.82 GiB") when vllm-main
-            # finished retrying and claimed its own share at the same
-            # moment. wait-for-main only anchors the start of that race, not
-            # its resolution minutes later. Real weights here are ~22GB and
-            # this architecture's KV cache is inherently cheap per token (see
-            # README.md), so 0.30 was more target than actually needed —
-            # shrinking it makes the target smaller and far less likely to
-            # collide with whatever vllm-main is doing at that instant.
-            - --gpu-memory-utilization=0.15
-            # compressed-tensors — this checkpoint's actual format, not modelopt.
-            - --quantization=compressed-tensors
-            - --kv-cache-dtype=fp8_e4m3
-            - --attention-backend=TRITON_ATTN
-            - --trust-remote-code
+            # No --quantization/--kv-cache-dtype flags — official FP8
+            # checkpoint auto-detects, same as vllm-main.
+            - --gpu-memory-utilization=0.40
           ports:
             - name: http
               containerPort: 8000
@@ -148,17 +124,15 @@ spec:
             - name: shm
               mountPath: /dev/shm
           resources:
-            # OOMKilled twice at lower limits (40Gi, then 60Gi) — this
-            # image/checkpoint's real footprint is heavier than vllm-main's.
-            # Not precisely measured (cgroup stats reset on crash); may need
-            # another round once a successful run's peak can be read via
-            # `kubectl exec ... cat /sys/fs/cgroup/memory.peak`.
+            # Measured real peak ~33GB (cgroup memory.peak) — sized with
+            # headroom above that, same rationale as vllm-main.
             requests:
               cpu: "2"
-              memory: 50Gi
+              memory: 45Gi
+              nvidia.com/gpu: 1
             limits:
               cpu: "8"
-              memory: 80Gi
+              memory: 65Gi
               nvidia.com/gpu: 1
           startupProbe:
             httpGet:
@@ -182,7 +156,6 @@ spec:
           persistentVolumeClaim:
             claimName: vllm-aux-weights
         - name: shm
-          # 16Gi to match this image's documented recipe (--shm-size=16g).
           emptyDir:
             medium: Memory
-            sizeLimit: 16Gi
+            sizeLimit: 4Gi

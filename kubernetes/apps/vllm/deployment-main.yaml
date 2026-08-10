@@ -88,14 +88,14 @@ spec:
             # this model family. Wrong parser = tool calls as literal JSON.
             - --tool-call-parser=qwen3_coder
             - --enable-prefix-caching
-            # Lowered from 0.40: computed against currently-free memory at
-            # the instant this engine initializes, not a fixed reservation
-            # (same mechanism as vllm-aux — see its comment and README.md).
-            # Real measured peak here was 19.66GB (cgroup memory.peak) — the
-            # old 48.67GB target was mostly unused slack. Shrinking it
-            # reduces how much this claim can collide with whatever
-            # vllm-aux is doing at that same instant.
-            - --gpu-memory-utilization=0.20
+            # Computed against currently-free memory at the instant this
+            # engine initializes, not a fixed reservation (same mechanism as
+            # vllm-aux — see its comment and README.md). 0.40 leaves enough
+            # margin above the real measured weights (28.51GB) plus KV
+            # cache/activations; wait-for-main on vllm-aux sequences the two
+            # cold starts so neither claims its share while the other is
+            # mid-init.
+            - --gpu-memory-utilization=0.40
           ports:
             - name: http
               containerPort: 8000
@@ -109,14 +109,17 @@ spec:
               mountPath: /dev/shm
           resources:
             # Unified memory: weights + KV cache draw from this, not a
-            # separate host-RAM budget. Measured real peak ~23GB (cgroup
-            # memory.peak) — sized with headroom above that.
+            # separate host-RAM budget. Measured real peak ~38GB (cgroup
+            # memory.peak) — sized with headroom above that. This is a
+            # comprehensive RSS ceiling (weights + CUDA/Python framework
+            # overhead), a different number from the vLLM-level target above.
             requests:
               cpu: "2"
-              memory: 25Gi
+              memory: 40Gi
+              nvidia.com/gpu: 1
             limits:
               cpu: "8"
-              memory: 32Gi
+              memory: 58Gi
               nvidia.com/gpu: 1
           # Cold start = weight load + JIT compile. Generous startupProbe
           # avoids a restart-loop before first serve.

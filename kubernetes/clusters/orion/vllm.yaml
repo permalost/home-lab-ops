@@ -32,8 +32,9 @@ spec:
       mainStorageSize: 35Gi
       # One checkpoint plus headroom, not two — the clean-stale-models
       # initContainer (deployment-*.yaml) purges old checkpoints on every
-      # pod start, so this doesn't need padding for leftover data.
-      auxStorageSize: 35Gi
+      # pod start, so this doesn't need padding for leftover data. 50Gi:
+      # the official Qwen3.6-35B-A3B-FP8 checkpoint alone is ~38GB.
+      auxStorageSize: 50Gi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
