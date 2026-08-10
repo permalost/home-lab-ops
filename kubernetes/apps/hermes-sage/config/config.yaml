@@ -7,6 +7,17 @@ model:
   default: qwen3.6-27b
   context_length: 64000
 
+# Registers vllm-aux as a second user-selectable model (dashboard model
+# picker / `/model` in chat) — distinct from auxiliary_models below, which
+# only routes specific internal tasks to it and doesn't make it selectable
+# on its own.
+providers:
+  vllm-aux:
+    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    models:
+      - qwen3.6-35b-a3b
+    context_length: 65536
+
 auxiliary_models:
   title:
     provider: custom
