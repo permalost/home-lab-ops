@@ -14,3 +14,24 @@
         secretKeyRef:
           name: hermes-secrets
           key: API_SERVER_KEY
+    # Dashboard (see README.md "Dashboard"). HERMES_DASHBOARD gates the s6
+    # service itself — unset, it exits immediately and the slot reports
+    # down. Non-loopback binds require an auth provider or the dashboard
+    # fails closed; basic auth is the bundled zero-IDP option.
+    - name: HERMES_DASHBOARD
+      value: "1"
+    - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+    - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+    # Cilium Gateway's proxy-header forwarding isn't guaranteed reliable
+    # for this — declare the real external URL so OAuth-style redirect
+    # logic (unused here, but shared code path) doesn't have to guess.
+    - name: HERMES_DASHBOARD_PUBLIC_URL
+      value: "https://hermes-sage.orion.norseamerican.com"

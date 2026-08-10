@@ -1,0 +1,5 @@
+# Route external traffic to the dashboard port, not the bare API — see
+# README.md "Ingress / Endpoints".
+- op: replace
+  path: /spec/rules/0/backendRefs/0/port
+  value: 9119

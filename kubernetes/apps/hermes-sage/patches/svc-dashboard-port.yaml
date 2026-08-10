@@ -1,0 +1,10 @@
+# Second Service port for the dashboard, alongside the API port
+# (svc-target-port.yaml) — httproute-dashboard-port.yaml routes external
+# traffic here instead of the API port.
+- op: add
+  path: /spec/ports/-
+  value:
+    name: dashboard
+    port: 9119
+    protocol: TCP
+    targetPort: 9119
