@@ -14,12 +14,9 @@ vLLM models, same as `hermes-sage`.
   pattern as `hermes-sage` — see that README for details, including the
   dashboard/terminal security note.
 - Size set in `clusters/orion/hermes-hearth.yaml` `postBuild.substitute`.
-- `HOME_ASSISTANT_URL` (`https://ha.orion.norseamerican.com`) / `HOME_ASSISTANT_TOKEN`
-  (long-lived access token, SOPS-encrypted in `secret.yaml`) are set on the
-  container via `patches/deploy-add-env.yaml`, staged for the HA integration —
-  not yet referenced by `config.yaml`. Home Assistant's built-in MCP server
-  endpoint is `/api/mcp` (bearer auth); wiring that into `mcp_servers` is the
-  next step.
+- Default model is `qwen3.6-35b-a3b` on `vllm-aux`; `vllm-main`/`qwen3.6-27b`
+  is registered as a secondary picker option (see `providers:` in
+  `config.yaml`) — kept mainly for `hermes-sage`, which still defaults to it.
 
 ## Home Assistant
 
@@ -43,6 +40,17 @@ tools (`ha_list_entities`, `ha_get_state`, `ha_list_services`,
 - HA blocks `shell_command`/`command_line`/`python_script`/`pyscript`/
   `hassio`/`rest_command` service calls from `ha_call_service` itself
   (upstream safety restriction, not something this deployment adds).
+
+## Compression
+
+`config.yaml`'s `compression:` block deviates from upstream defaults —
+default `protect_last_n(20)+protect_first_n(3)` protects more messages than
+these sessions typically contain (8-16), so the compressible middle window
+was empty and compression still ran a 57-145s summarizer call for nothing.
+Measured before the fix: 63 attempts, 6,131s total, 34 ended
+`failure_class: no_progress`. See `agent.log` telemetry fields
+`middle_window_tokens`, `total_duration_ms`, `failure_class` if tuning
+further — `grep -i compress /opt/data/logs/agent.log` on the pod.
 
 ## Ingress / Endpoints
 

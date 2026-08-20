@@ -1,22 +1,25 @@
-# See hermes-sage/config/config.yaml — identical, both instances share the
-# same vllm backends (vLLM/continuous batching handles concurrent agents fine).
-# Home Assistant connection/tool wiring is not set up yet — this instance is
-# presently just Hermes pointed at the local models, same as hermes-sage.
+# See hermes-sage/config/config.yaml for the shared vllm-backend shape.
+# Home Assistant is wired up (see README "Home Assistant") — HASS_URL/
+# HASS_TOKEN env vars auto-activate the ha_* tools, no config here needed.
 model:
   provider: custom
-  base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
-  default: qwen3.6-27b
+  base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+  default: qwen3.6-35b-a3b
+  # Server's real ceiling is 65536 (see providers.vllm-main below, same
+  # server). Understated here as the only available output-token headroom
+  # mechanism — Hermes has no max_tokens/output-reservation field.
+  # compression.threshold_tokens derives from this number.
   context_length: 64000
 
-# Registers vllm-aux as a second user-selectable model (dashboard model
+# Registers vllm-main as a second user-selectable model (dashboard model
 # picker / `/model` in chat) — distinct from auxiliary_models below, which
-# only routes specific internal tasks to it and doesn't make it selectable
-# on its own.
+# only routes specific internal tasks and doesn't make it selectable on its
+# own.
 providers:
-  vllm-aux:
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+  vllm-main:
+    base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
     models:
-      - qwen3.6-35b-a3b
+      - qwen3.6-27b
     context_length: 65536
 
 auxiliary_models:
@@ -36,3 +39,28 @@ auxiliary_models:
     provider: custom
     base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
     model: qwen3.6-35b-a3b
+
+# Defaults protect first_n(3)+last_n(20)=23 messages against 8-16 message
+# sessions here — the compressible middle window was empty, so compression
+# still ran a 57-145s summarizer call and returned messages=N->N. See
+# README "Home Assistant" for the telemetry that led to these values.
+compression:
+  protect_last_n: 6
+  protect_first_n: 1
+
+  # Sessions here peak ~31k of the 65k window; default 0.50 fired with
+  # ample headroom left.
+  threshold: 0.75
+  threshold_tokens: 48000
+
+  # One attempt ran 718s despite the documented 600s ceiling. Past ~45s
+  # with a non-empty middle window, abandon rather than stall the session.
+  context_timeout_seconds: 45
+  context_total_ceiling_seconds: 120
+
+  # Deterministic tool-result pruning — no LLM call, so it can't stall.
+  # Default min-thresholds were sized for large tool results; ha_* results
+  # are 82-605 chars post area-filtering (see hermes's own MEMORY.md).
+  proactive_prune_tokens: 12000
+  proactive_prune_min_result_chars: 3000
+  proactive_prune_min_reclaim_tokens: 2048
