@@ -106,6 +106,17 @@ pattern's kept consistent).
   from scratch when `homeassistant/` was added — the original (na-era)
   plaintext was never recoverable, mosquitto only ever stored the hash.
   The new plaintext lives in `homeassistant/secret.yaml` (SOPS).
+- **Automations are split git/UI-owned** (`configuration.yaml`'s
+  `automation gitops:`/`automation ui:` keys, SEED_VERSION 5+):
+  `automations_gitops.yaml` (in `configMap.yaml`, this repo) is re-copied
+  onto the PVC unconditionally every boot — edit it in git, bump
+  `SEED_VERSION` in `patches/deploy-add-config-init.yaml` to roll it out.
+  `automations.yaml`/`scenes.yaml`/`scripts.yaml` are created empty only if
+  missing, then left alone — HA's UI editors own them from then on. Current
+  git-owned automations do occupancy lighting (hall/kitchen/dining room):
+  no activation before sunset, warm white sunset→+2h, red-only after (hall
+  has no color-capable fixture, falls back to dim white) — plus two
+  `sensor.home_power`-based energy alerts.
 
 ## Troubleshooting
 
