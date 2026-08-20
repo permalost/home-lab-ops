@@ -35,3 +35,12 @@
     # logic (unused here, but shared code path) doesn't have to guess.
     - name: HERMES_DASHBOARD_PUBLIC_URL
       value: "https://hermes-hearth.orion.norseamerican.com"
+    # Home Assistant connection creds — not yet consumed by config.yaml
+    # (no mcp_servers entry wired up), staged here for that follow-up.
+    - name: HOME_ASSISTANT_URL
+      value: "https://ha.orion.norseamerican.com"
+    - name: HOME_ASSISTANT_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: HOME_ASSISTANT_TOKEN
