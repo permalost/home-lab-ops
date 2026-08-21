@@ -28,6 +28,11 @@ configMapGenerator:
   - name: hermes-config
     files:
       - config.yaml=config/config.yaml
+  # Mounted as a directory (not subPath — see deploy-mount-skills.yaml) at
+  # skills.external_dirs; the loader walks <dir>/<category>/<name>/SKILL.md.
+  - name: hermes-skills
+    files:
+      - homebox-SKILL.md=skills/homebox/SKILL.md
 
 patches:
   - target:
@@ -50,6 +55,10 @@ patches:
       kind: Deployment
       name: deploy
     path: patches/deploy-mount-configmap.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-mount-skills.yaml
   - target:
       kind: Deployment
       name: deploy

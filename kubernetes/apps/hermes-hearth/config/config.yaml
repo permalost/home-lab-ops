@@ -1,6 +1,15 @@
 # See hermes-sage/config/config.yaml for the shared vllm-backend shape.
 # Home Assistant is wired up (see README "Home Assistant") — HASS_URL/
 # HASS_TOKEN env vars auto-activate the ha_* tools, no config here needed.
+
+# GitOps-delivered skill (see README "Skills") — mounted read-only from a
+# ConfigMap (patches/deploy-mount-skills.yaml), not written by skill_manage.
+# Absolute path: external_dirs resolves relative paths against HERMES_HOME,
+# not cwd. The skill loader is cached per session — a running session won't
+# see this until a new one starts.
+skills:
+  external_dirs: [/opt/skills-external]
+
 model:
   provider: custom
   base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
