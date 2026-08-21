@@ -50,6 +50,14 @@ in-memory at load, not stored hashed at rest).
 in-cluster via the Service's `http` port if anything ever needs it, just not
 externally routed.
 
+**The model picker (and in-chat `/model`) cannot persist a change here.**
+`set_model_assignment` (`hermes_cli/web_server.py:6637`) writes the new
+default via `os.replace()` onto `/opt/data/config.yaml` — a ConfigMap
+`subPath` bind mount, not a regular file — which always fails
+`OSError: [Errno 16] Device or resource busy`. Confirmed on both instances.
+Changing the default model is a `config.yaml` edit in git, not a runtime
+action.
+
 ## Ingress / Endpoints
 
 Exposed via the `httproute` component at `${subdomain}.${domain}`
