@@ -113,11 +113,12 @@ pattern's kept consistent).
   `SEED_VERSION` in `patches/deploy-add-config-init.yaml` to roll it out.
   `automations.yaml`/`scenes.yaml`/`scripts.yaml` are created empty only if
   missing, then left alone — HA's UI editors own them from then on. Current
-  git-owned automations do occupancy lighting (hall/kitchen/dining room):
-  no activation before sunset-1h, warm white sunset-1h→+30m, red-only after
-  sunset+30m (hall has no color-capable fixture, falls back to dim white),
-  auto-off 30s after motion clears — plus two `sensor.home_power`-based
-  energy alerts.
+  git-owned automations do occupancy lighting (hall/kitchen/dining room),
+  four windows per 24h cycle: no activation sunrise+30m→sunset-1h (daytime);
+  warm white sunset-1h→+30m (dusk); red-only sunset+30m→sunrise-30m (night,
+  hall falls back to dim white 25% — no color-capable fixture there); warm
+  white sunrise-30m→+30m (dawn). Auto-off 30s after motion clears — plus two
+  `sensor.home_power`-based energy alerts.
 
 ## Troubleshooting
 
