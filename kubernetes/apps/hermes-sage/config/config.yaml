@@ -5,7 +5,12 @@ model:
   provider: custom
   base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
   default: qwen3.6-27b
-  context_length: 64000
+  context_length: 65536
+  # Reserves output space out of context_length, leaving 57344 for input.
+  # Required: unset, the request goes out with max_tokens=65536 (the whole
+  # window), so vLLM 400s every call and Hermes misroutes that into
+  # compression. See hermes-hearth/README.md "Output cap".
+  max_tokens: 8192
 
 # Registers vllm-aux as a second user-selectable model (dashboard model
 # picker / `/model` in chat) — distinct from auxiliary_models below, which

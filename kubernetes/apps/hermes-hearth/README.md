@@ -65,6 +65,20 @@ Curator, so nothing rewrites them.
 - The skill loader is cached per session — a new skill (or an edit to one)
   needs a fresh session to show up, not just a pod restart.
 
+## Output cap
+
+`model.max_tokens` must be set. Unset, Hermes sends `max_tokens` equal to the
+server's full `--max-model-len` (65536), so `input + max_tokens` always
+exceeds the window and vLLM 400s **every** call. Hermes then misclassifies
+that 400 as input overflow — `is_output_cap_error()` requires the literal
+string `max_tokens`, and vLLM's wording says "output tokens" — and routes it
+into compression, which cannot help because the input already fits.
+
+Measured 20:50-22:28 on 2026-08-21 before the fix: 46 spurious 400s, 18
+compression runs totalling 20.8 min against 3.5 min of actual inference, none
+legitimately triggered (peak context 32,588 vs `threshold_tokens` 48000). Two
+runs hit the 120s ceiling and gave up; one cut `messages=16->8` mid-task.
+
 ## Compression
 
 `config.yaml`'s `compression:` block deviates from upstream defaults —
@@ -75,6 +89,9 @@ Measured before the fix: 63 attempts, 6,131s total, 34 ended
 `failure_class: no_progress`. See `agent.log` telemetry fields
 `middle_window_tokens`, `total_duration_ms`, `failure_class` if tuning
 further — `grep -i compress /opt/data/logs/agent.log` on the pod.
+
+Much of what that tuning was compensating for was the output-cap 400 above
+firing compression on every call. Re-measure before tuning it further.
 
 ## Ingress / Endpoints
 

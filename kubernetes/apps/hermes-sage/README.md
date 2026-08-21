@@ -17,6 +17,8 @@ keys, `model.provider: custom` in `config/config.yaml` routes to
 - PVC via the `pvc` component, mounted at `/opt/data` (sessions, memories,
   skills, logs) — size set in `clusters/orion/hermes-sage.yaml`
   `postBuild.substitute`.
+- `model.max_tokens` must be set — see `hermes-hearth/README.md` "Output cap"
+  for why unset means every call 400s.
 - `config/config.yaml` ships through git as a ConfigMap, projected via
   `subPath` onto `/opt/data/config.yaml` — not part of the PVC, so config
   changes are a normal PR, not a manual edit on the volume.
