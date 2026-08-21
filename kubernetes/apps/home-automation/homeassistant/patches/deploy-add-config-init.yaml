@@ -75,17 +75,28 @@
         #        Office bins (Bin 3-7). Learned from #142: bump
         #        SEED_VERSION in the same PR as the tag_map change, not a
         #        follow-up.
-        #   14 - esl_sync_labels: wrapped opendisplay.upload_image +
-        #        input_text.set_value in try/except. Observed live on #143's
-        #        rollout: a BLE upload failure on any one tag (connection
-        #        race or a flaky transfer) threw unhandled, aborting the
-        #        *whole* repeat — every tag after the failing one in
-        #        tag_map never even got attempted. except: [] swallows it
-        #        and moves to the next tag; set_value staying inside the
-        #        try means a failed push is never recorded as synced, so
-        #        it retries next run instead of getting silently skipped.
+        #   14 - BROKEN, superseded by 15 below: attempted to wrap
+        #        opendisplay.upload_image + input_text.set_value in
+        #        try/except for per-tag error isolation. HA has no
+        #        try/except action type -- automation failed validation
+        #        at load ("Unable to determine action") and was disabled
+        #        outright. Left in this history for the record; do not
+        #        reintroduce try/except in automations_gitops.yaml.
+        #   15 - Real fix for #14's intent: continue_on_error: true on
+        #        opendisplay.upload_image (the actual documented HA
+        #        mechanism, home-assistant.io/docs/scripts). Confirmed live
+        #        need: a BLE upload failure on any one tag (connection race
+        #        or a flaky transfer) throws unhandled, and without
+        #        continue_on_error that aborts the *whole* repeat -- every
+        #        tag after the failing one in tag_map never even gets
+        #        attempted (confirmed: 4 tags, 0 attempts, across 3 runs).
+        #        Known tradeoff: HA has no documented way to check whether
+        #        upload_image succeeded, so a failed push still gets
+        #        recorded as synced and won't auto-retry until that
+        #        location's content changes again -- accepted as far
+        #        better than blocking every tag behind it.
         [
-          "SEED_VERSION=14; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=15; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
