@@ -14,9 +14,28 @@ vLLM models, same as `hermes-sage`.
   pattern as `hermes-sage` — see that README for details, including the
   dashboard/terminal security note.
 - Size set in `clusters/orion/hermes-hearth.yaml` `postBuild.substitute`.
-- Default model is `qwen3.6-35b-a3b` on `vllm-aux`; `vllm-main`/`qwen3.6-27b`
-  is registered as a secondary picker option (see `providers:` in
-  `config.yaml`) — kept mainly for `hermes-sage`, which still defaults to it.
+- Default model is `qwen3.6-27b` on `vllm-main` — same default as
+  `hermes-sage` now. `vllm-aux`/`qwen3.6-35b-a3b` is registered as a
+  secondary picker option (see `providers:` in `config.yaml`) and still
+  handles every `auxiliary_models` role (title/compression/approval/
+  web_extraction) regardless of the main default — that split is
+  deliberate, see `apps/vllm/README.md` "Why these two models".
+
+## Model
+
+Switched from `qwen3.6-35b-a3b` (MoE) to `qwen3.6-27b` (dense) as the main
+loop's default — the smarter model per `apps/vllm/README.md` (8-11 points
+ahead on Terminal-Bench 2.0 / BenchLM agentic), at a measured cost of ~2.2x
+median latency, ~2.5x at p90, ~5x per output token (median 17.8s/6.5 tok/s
+vs 8.1s/33.5 tok/s across 143 logged calls on this deployment). TTFT is
+comparable — the gap is decode-bound, intrinsic to a dense 27B vs a
+3B-active MoE on GB10, not something tuning fixes. Revert: swap
+`model.base_url`/`default` back to the `vllm-aux` values and the
+`providers:` entry back to `vllm-main`.
+
+The dashboard model picker and in-chat `/model` cannot persist a change on
+either instance — see `hermes-sage/README.md` "Dashboard". Changing the
+default is a git change to `config.yaml`, not a runtime one.
 
 ## Home Assistant
 
