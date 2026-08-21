@@ -63,8 +63,15 @@
         #        shell_command.esl_fetch_label's own `mkdir -p /config/esl`
         #        only runs when the automation fires, too late for boot.
         #        Now created unconditionally, every boot, before HA starts.
+        #   12 - #141 fixed esl_fetch_label's bearer token (stray leading
+        #        'R' from the old REPLACE_ME edit) and added the
+        #        odbd0bb2->HomeLab Bin tag_map/input_text pair, but never
+        #        bumped SEED_VERSION — configuration.yaml (token fix, new
+        #        input_text) never got copied to the PVC, and even
+        #        automations_gitops.yaml's unconditional copy needs a pod
+        #        restart to actually load. This bump forces both.
         [
-          "SEED_VERSION=11; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=12; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
