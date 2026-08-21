@@ -75,8 +75,17 @@
         #        Office bins (Bin 3-7). Learned from #142: bump
         #        SEED_VERSION in the same PR as the tag_map change, not a
         #        follow-up.
+        #   14 - esl_sync_labels: wrapped opendisplay.upload_image +
+        #        input_text.set_value in try/except. Observed live on #143's
+        #        rollout: a BLE upload failure on any one tag (connection
+        #        race or a flaky transfer) threw unhandled, aborting the
+        #        *whole* repeat — every tag after the failing one in
+        #        tag_map never even got attempted. except: [] swallows it
+        #        and moves to the next tag; set_value staying inside the
+        #        try means a failed push is never recorded as synced, so
+        #        it retries next run instead of getting silently skipped.
         [
-          "SEED_VERSION=13; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=14; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
