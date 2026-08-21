@@ -54,8 +54,17 @@
         #        the core opendisplay integration, over an ESPHome BLE proxy
         #        (esphome/ble-proxy-01.yaml). Added homeassistant.media_dirs,
         #        shell_command.esl_fetch_label, input_text per-tag hash.
+        #   11 - BUGFIX (#10 broke boot, HA fell back to recovery_mode):
+        #        homeassistant.media_dirs.esl (/config/esl) must already
+        #        exist as a directory at config-check time or the
+        #        `homeassistant:` integration hard-fails — confirmed via
+        #        POST /api/config/core/check_config against the live pod
+        #        ("Not a directory for dictionary value 'media_dirs->esl'").
+        #        shell_command.esl_fetch_label's own `mkdir -p /config/esl`
+        #        only runs when the automation fires, too late for boot.
+        #        Now created unconditionally, every boot, before HA starts.
         [
-          "SEED_VERSION=10; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=11; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
