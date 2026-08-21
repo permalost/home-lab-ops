@@ -14,11 +14,12 @@ model:
   provider: custom
   base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
   default: qwen3.6-35b-a3b
-  # Server's real ceiling is 65536 (see providers.vllm-main below, same
-  # server). Understated here as the only available output-token headroom
-  # mechanism — Hermes has no max_tokens/output-reservation field.
-  # compression.threshold_tokens derives from this number.
-  context_length: 64000
+  context_length: 65536
+  # Reserves output space out of context_length, leaving 57344 for input.
+  # Required: unset, the request goes out with max_tokens=65536 (the whole
+  # window), so vLLM 400s every call and Hermes misroutes that into
+  # compression. Observed peak output is 1746 tokens.
+  max_tokens: 8192
 
 # Registers vllm-main as a second user-selectable model (dashboard model
 # picker / `/model` in chat) — distinct from auxiliary_models below, which
@@ -69,7 +70,9 @@ compression:
 
   # Deterministic tool-result pruning — no LLM call, so it can't stall.
   # Default min-thresholds were sized for large tool results; ha_* results
-  # are 82-605 chars post area-filtering (see hermes's own MEMORY.md).
+  # are 82-605 chars post area-filtering (see hermes's own MEMORY.md) —
+  # but an unfiltered ha_list_entities measured 90,794 chars, so the large
+  # case is real. Note: no prune event has ever appeared in agent.log.
   proactive_prune_tokens: 12000
   proactive_prune_min_result_chars: 3000
   proactive_prune_min_reclaim_tokens: 2048
