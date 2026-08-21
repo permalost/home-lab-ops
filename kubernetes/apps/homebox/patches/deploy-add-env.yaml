@@ -8,3 +8,12 @@
         secretKeyRef:
           name: homebox-auth
           key: apiKeyPepper
+    # Label geometry is instance-wide (no per-request query params on
+    # /api/v1/labelmaker/*), so this also sets paper label size. 360x184 is
+    # the Solum Newton ESL tags' effective canvas post-rotation (see
+    # ~/.claude/skills/flash-solum-newton) — HA fetches this same endpoint
+    # to push tag images, see home-automation/homeassistant configMap.
+    - name: HBOX_LABEL_MAKER_WIDTH
+      value: "360"
+    - name: HBOX_LABEL_MAKER_HEIGHT
+      value: "184"
