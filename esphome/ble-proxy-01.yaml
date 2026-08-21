@@ -7,9 +7,13 @@ esphome:
   friendly_name: ${friendly_name}
 
 esp32:
-  board: esp32dev
+  # Board on hand is an ESP32-C6 (RISC-V), not classic ESP32 (Xtensa) — first
+  # flash attempt failed with "This chip is ESP32-C6, not ESP32". C6's
+  # Arduino core support is limited; esp-idf is the framework ESPHome expects
+  # for it.
+  board: esp32-c6-devkitc-1
   framework:
-    type: arduino
+    type: esp-idf
 
 wifi:
   ssid: !secret wifi_ssid
