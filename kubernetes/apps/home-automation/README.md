@@ -114,9 +114,9 @@ pattern's kept consistent).
   `automations.yaml`/`scenes.yaml`/`scripts.yaml` are created empty only if
   missing, then left alone — HA's UI editors own them from then on. Current
   git-owned automations do occupancy lighting (hall/kitchen/dining room):
-  no activation before sunset, warm white sunset→+2h, red-only after (hall
-  has no color-capable fixture, falls back to dim white) — plus two
-  `sensor.home_power`-based energy alerts.
+  no activation before sunset-1h, warm white sunset-1h→+1h, red-only after
+  sunset+1h (hall has no color-capable fixture, falls back to dim white) —
+  plus two `sensor.home_power`-based energy alerts.
 
 ## Troubleshooting
 
