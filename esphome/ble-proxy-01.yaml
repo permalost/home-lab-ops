@@ -1,0 +1,34 @@
+substitutions:
+  name: ble-proxy-01
+  friendly_name: BLE Proxy 01
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+logger:
+
+# active: true is mandatory — Homebox/OpenDisplay label pushes need a sustained
+# BLE connection to upload an image, not just advertisement scanning. Shelly
+# proxies can't do this for the same reason: passive-only.
+bluetooth_proxy:
+  active: true
+
+esp32_ble_tracker:

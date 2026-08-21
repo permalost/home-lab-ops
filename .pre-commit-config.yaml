@@ -6,6 +6,10 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         args: [--allow-multiple-documents]
+        # esphome/*.yaml uses ESPHome's !secret/!include/!lambda tags, which
+        # generic PyYAML doesn't know — not a real syntax error (yq parses
+        # these fine; that's what CI's kubeconform/kustomize pipeline uses).
+        exclude: ^esphome/
       - id: check-added-large-files
       - id: detect-private-key
         exclude: secrets\.yaml\.example$
