@@ -41,6 +41,30 @@ tools (`ha_list_entities`, `ha_get_state`, `ha_list_services`,
   `hassio`/`rest_command` service calls from `ha_call_service` itself
   (upstream safety restriction, not something this deployment adds).
 
+## Skills
+
+First skill managed in git for either Hermes instance — skills otherwise
+live only on the PVC, seeded from the image. Delivered via
+`skills.external_dirs` (`config.yaml`), not `skill_manage`: a second
+`configMapGenerator` (`hermes-skills`) mounted as a **directory** (not
+`subPath` — that doesn't pick up live ConfigMap updates) at
+`/opt/skills-external`, with `items:` synthesizing the
+`<category>/<name>/SKILL.md` nesting the loader expects from a flat
+ConfigMap key. `external_dirs` entries are read-only and exempt from the
+Curator, so nothing rewrites them.
+
+- `skills/homebox/SKILL.md` — Homebox inventory REST API (curl + bearer
+  token), same shape as the bundled `productivity/airtable` skill. Needs
+  `HOMEBOX_URL`/`HOMEBOX_API_KEY` (`patches/deploy-add-env.yaml`,
+  `secret.yaml`) — placeholder key pending the manual Homebox UI step, see
+  `apps/homebox/README.md`.
+- Also the query/write half of the Homebox → HA → ESL tag sync (see
+  `apps/home-automation/homeassistant/`'s `esl_sync_labels` automation) —
+  the skill can look up a location's UUID and edit it; the automation is
+  what actually pushes to the physical tags.
+- The skill loader is cached per session — a new skill (or an edit to one)
+  needs a fresh session to show up, not just a pod restart.
+
 ## Compression
 
 `config.yaml`'s `compression:` block deviates from upstream defaults —

@@ -1,0 +1,19 @@
+# Directory mount (not subPath — subPath mounts don't pick up live
+# ConfigMap updates, see deploy-mount-configmap.yaml's config.yaml mount for
+# the case where that's fine). skills.external_dirs (config.yaml) expects
+# to walk <dir>/<category>/<name>/SKILL.md; items: synthesizes that nesting
+# from the flat ConfigMap key (ConfigMap keys can't contain "/").
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: skills-external
+    configMap:
+      name: hermes-skills
+      items:
+        - key: homebox-SKILL.md
+          path: productivity/homebox/SKILL.md
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: skills-external
+    mountPath: /opt/skills-external

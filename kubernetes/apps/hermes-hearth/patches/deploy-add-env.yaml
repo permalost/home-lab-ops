@@ -46,3 +46,14 @@
         secretKeyRef:
           name: hermes-secrets
           key: HASS_TOKEN
+    # Homebox integration (see skills/homebox/SKILL.md). Unlike HASS_TOKEN
+    # these aren't upstream-fixed names — just have to agree with the
+    # skill's prerequisites.env_vars. In-cluster URL, no Gateway round-trip
+    # (same choice as HA's Grocy/Neurio rest: sensors).
+    - name: HOMEBOX_URL
+      value: "http://homebox-svc.homebox.svc.cluster.local:8080"
+    - name: HOMEBOX_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: HOMEBOX_API_KEY
