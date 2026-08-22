@@ -95,8 +95,24 @@
         #        recorded as synced and won't auto-retry until that
         #        location's content changes again -- accepted as far
         #        better than blocking every tag behind it.
+        #   16 - Closes #15's known tradeoff + adds failure visibility.
+        #        continue_on_error moved off upload_image itself onto a
+        #        wrapping sequence (upload + both set_values); a failed
+        #        upload now throws out of that sequence before the hash
+        #        set_value runs, so a failed push no longer gets marked
+        #        synced -- it now naturally retries next poll instead of
+        #        waiting for the location's content to change again. Added
+        #        one input_number fail-streak counter per tag (reset to 0
+        #        on success, incremented otherwise) and a notify at streak
+        #        == 3: confirmed live 2026-08-22 that 3+ consecutive
+        #        upload failures with the fetch itself succeeding each
+        #        time (rules out a Homebox/config problem) is the signature
+        #        of a weak/dying coin cell, not generic BLE flakiness --
+        #        reproduced on ODE6C1FE/ODBE112B over both the ble-proxy
+        #        and a laptop's local Bluetooth, fixed instantly by fresh
+        #        CR2450s.
         [
-          "SEED_VERSION=15; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=16; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
