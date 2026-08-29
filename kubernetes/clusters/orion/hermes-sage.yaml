@@ -14,7 +14,6 @@ spec:
     - name: gateway
     - name: cert-manager-issuers
     - name: cluster-settings
-    - name: vllm
   sourceRef:
     kind: GitRepository
     name: flux-system
