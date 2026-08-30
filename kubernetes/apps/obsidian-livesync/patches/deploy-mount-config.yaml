@@ -1,0 +1,14 @@
+# Appends the configMapGenerator-produced local.ini as a second volume,
+# after the pvc component has already populated volumes[0]/volumeMounts[0].
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config
+    configMap:
+      name: config
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: config
+    mountPath: /opt/couchdb/etc/local.d/local.ini
+    subPath: local.ini

@@ -1,0 +1,15 @@
+# Official couchdb image creates the admin user from these on every boot
+# (idempotent) — see secret.yaml.
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: COUCHDB_USER
+      valueFrom:
+        secretKeyRef:
+          name: obsidian-livesync-auth
+          key: couchdbUser
+    - name: COUCHDB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: obsidian-livesync-auth
+          key: couchdbPassword

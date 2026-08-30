@@ -1,0 +1,11 @@
+# webapp/base's cpu: 10m default throttles anything heavier than a static
+# file server (see #90, #104). CouchDB compaction/indexing bursts CPU.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi

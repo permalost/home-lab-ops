@@ -1,0 +1,7 @@
+# Official couchdb image runs as the non-root `couchdb` user (uid/gid 5984).
+# fsGroup makes the CSI driver chown the PVC's mount to that gid so it can
+# write /opt/couchdb/data.
+- op: add
+  path: /spec/template/spec/securityContext
+  value:
+    fsGroup: 5984
