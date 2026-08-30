@@ -40,6 +40,29 @@ basic auth — treat the admin password as the only gate on the vault.
 3. Repeat on each additional device, pointing at the same URL/database so
    they converge on one vault.
 
+## Migrating an existing vault
+
+LiveSync's first sync is a blunt push or pull, not a merge — do any
+consolidation on disk first.
+
+1. Back up each existing vault folder.
+2. If merging notes from more than one vault, manually copy the unique
+   files from the non-primary vault(s) into whichever vault will be
+   primary, resolving any same-path conflicts by hand.
+3. On the primary device: install the plugin, choose **"I am setting this
+   up for the first time"** → the **new-device path** (rebuilds the remote
+   from local). Do this on LAN if the vault has a lot of attachments — the
+   initial chunk upload of a large vault over WAN can be slow/flaky. A
+   "Fetch Remote Configuration Failed" notice on this first run is
+   expected (empty DB) — skip it. Wait for the sync indicator to clear
+   before touching another device.
+4. On every other device: connect as the **existing-device path**
+   (fetches and *replaces* local content — only safe once step 2 is done).
+   Fastest way: run **"Copy settings as a new Setup URI"** on the primary,
+   then **"Use a Setup URI"** on the other device.
+5. Never run the new-device/rebuild path on more than one device — last
+   one to push wins and clobbers the other.
+
 ## Troubleshooting
 
 - **Mobile app can't connect / vague network error:** almost always the
