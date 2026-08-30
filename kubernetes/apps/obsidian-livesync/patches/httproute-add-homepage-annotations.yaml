@@ -1,0 +1,10 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: route
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Obsidian LiveSync"
+    gethomepage.dev/description: "CouchDB sync backend for Obsidian notes"
+    gethomepage.dev/group: "Productivity"
+    gethomepage.dev/icon: "obsidian.png"

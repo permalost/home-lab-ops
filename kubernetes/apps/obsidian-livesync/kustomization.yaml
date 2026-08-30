@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: obsidian-livesync
+
+resources:
+  - ../webapp/base
+  - namespace.yaml
+  - secret.yaml
+
+namePrefix: obsidian-livesync-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: obsidian-livesync
+      app.kubernetes.io/name: obsidian-livesync
+
+components:
+  - ../webapp/components/httproute
+  - ../webapp/components/pvc
+
+images:
+  - name: my-app
+    newName: couchdb
+    newTag: "3.5.0"
+
+configMapGenerator:
+  - name: config
+    files:
+      - files/local.ini
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-pvc-mountpath.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-mount-config.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-target-port.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml

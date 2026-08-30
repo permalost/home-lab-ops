@@ -1,0 +1,5 @@
+# pvc component mounts its volume at /data by default; couchdb's compiled-in
+# database_dir/view_index_dir default is /opt/couchdb/data.
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /opt/couchdb/data
