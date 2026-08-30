@@ -14,11 +14,16 @@ model:
   provider: custom
   base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
   default: deepseek-v4-flash-dspark
-  context_length: 65536
-  # Reserves output space out of context_length, leaving 57344 for input.
-  # Required: unset, the request goes out with max_tokens=65536 (the whole
-  # window), so vLLM 400s every call and Hermes misroutes that into
-  # compression. Observed peak output is 1746 tokens.
+  # DeepSeek's real ceiling (matches the server's --max-model-len exactly —
+  # see external-endpoints/deepseek/README.md). Retuned 2026-08-30 from the
+  # old Qwen-era 65536 — see "Compression" below, its threshold_tokens is
+  # scaled to match.
+  context_length: 1048576
+  # Reserves output space out of context_length. Required regardless of
+  # context_length's value: unset, the request goes out with
+  # max_tokens=<server's --max-model-len>, so vLLM 400s every call and
+  # Hermes misroutes that into compression. Observed peak output is 1746
+  # tokens. See "Output cap" below.
   max_tokens: 8192
 
 # vllm-aux retired along with the old in-cluster Qwen pair. No separate aux
@@ -33,7 +38,7 @@ providers:
     base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
     models:
       - deepseek-v4-flash-dspark
-    context_length: 65536
+    context_length: 1048576
 
 auxiliary_models:
   title:
@@ -61,10 +66,15 @@ compression:
   protect_last_n: 6
   protect_first_n: 1
 
-  # Sessions here peak ~31k of the 65k window; default 0.50 fired with
-  # ample headroom left.
+  # Sessions here peaked ~31k of the old 65k window; default 0.50 fired
+  # with ample headroom left. threshold_tokens scaled 2026-08-30 for the
+  # 1M context_length retune (0.75 x 1048576, was 48000 against 65536) —
+  # keeps the same 75%-of-window trigger point the fraction below already
+  # specifies. Re-measure actual peak-context telemetry before trusting
+  # this fires appropriately at the new scale; nothing here has been
+  # observed against real 1M-context sessions yet.
   threshold: 0.75
-  threshold_tokens: 48000
+  threshold_tokens: 786432
 
   # One attempt ran 718s despite the documented 600s ceiling. Past ~45s
   # with a non-empty middle window, abandon rather than stall the session.

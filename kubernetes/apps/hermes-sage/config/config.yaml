@@ -5,11 +5,17 @@ model:
   provider: custom
   base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
   default: deepseek-v4-flash-dspark
-  context_length: 65536
-  # Reserves output space out of context_length, leaving 57344 for input.
-  # Required: unset, the request goes out with max_tokens=65536 (the whole
-  # window), so vLLM 400s every call and Hermes misroutes that into
-  # compression. See hermes-hearth/README.md "Output cap".
+  # DeepSeek's real ceiling (matches the server's --max-model-len exactly —
+  # see external-endpoints/deepseek/README.md). Retuned 2026-08-30 from the
+  # old Qwen-era 65536; the output-cap fix below is independent of this
+  # value either way (Hermes' bug path was keying off the *server's*
+  # max-model-len, not this field).
+  context_length: 1048576
+  # Reserves output space out of context_length. Required regardless of
+  # context_length's value: unset, the request goes out with
+  # max_tokens=<server's --max-model-len>, so vLLM 400s every call and
+  # Hermes misroutes that into compression. See hermes-hearth/README.md
+  # "Output cap".
   max_tokens: 8192
 
 # vllm-aux retired along with the old in-cluster Qwen pair. No separate aux
@@ -22,7 +28,7 @@ providers:
     base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
     models:
       - deepseek-v4-flash-dspark
-    context_length: 65536
+    context_length: 1048576
 
 auxiliary_models:
   title:

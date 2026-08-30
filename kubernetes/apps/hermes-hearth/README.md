@@ -83,11 +83,13 @@ Curator, so nothing rewrites them.
 ## Output cap
 
 `model.max_tokens` must be set. Unset, Hermes sends `max_tokens` equal to the
-server's full `--max-model-len` (65536), so `input + max_tokens` always
-exceeds the window and vLLM 400s **every** call. Hermes then misclassifies
-that 400 as input overflow — `is_output_cap_error()` requires the literal
-string `max_tokens`, and vLLM's wording says "output tokens" — and routes it
-into compression, which cannot help because the input already fits.
+server's full `--max-model-len` (65536 on the old Qwen backend, 1048576 on
+today's DeepSeek one — the bug scales with whatever the server reports), so
+`input + max_tokens` always exceeds the window and vLLM 400s **every** call.
+Hermes then misclassifies that 400 as input overflow —
+`is_output_cap_error()` requires the literal string `max_tokens`, and vLLM's
+wording says "output tokens" — and routes it into compression, which cannot
+help because the input already fits.
 
 Measured 20:50-22:28 on 2026-08-21 before the fix: 46 spurious 400s, 18
 compression runs totalling 20.8 min against 3.5 min of actual inference, none
