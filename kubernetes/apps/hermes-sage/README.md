@@ -3,9 +3,11 @@
 General-purpose Hermes Agent instance — assistant duties and the instance
 used for testing/iterating on the local model stack. See also
 `hermes-hearth/` (Home Assistant integration; identical setup otherwise).
-Pointed at the local vLLM stack in `kubernetes/apps/vllm/` — no cloud API
-keys, `model.provider: custom` in `config/config.yaml` routes to
-`vllm-main`/`vllm-aux` over the cluster network.
+No cloud API keys — `model.provider: custom` in `config/config.yaml` routes
+to the cluster's external LLM model via the `deepseek` Service in
+`kubernetes/apps/external-endpoints/` (see that Service's README for which
+model is actually being served). The in-cluster `kubernetes/apps/vllm/`
+stack this used to point at is retired.
 
 ## Configuration
 
@@ -68,8 +70,10 @@ to vLLM over in-cluster DNS.
 
 ## Troubleshooting
 
-- **Tool calls failing / malformed:** check `vllm-main`/`vllm-aux` logs first —
-  wrong `--tool-call-parser` there is the most likely cause, not this app.
+- **Tool calls failing / malformed:** check the external LLM model's own
+  server logs first (see `kubernetes/apps/external-endpoints/deepseek/README.md`
+  for where it runs) — a mismatched `--tool-call-parser` there is the most
+  likely cause, not this app.
 - **Config not taking effect:** confirm the ConfigMap regenerated (kustomize
   content-hashes it) and the pod actually restarted — `kubectl rollout restart
   deploy/hermes-sage-deploy -n hermes-sage`.

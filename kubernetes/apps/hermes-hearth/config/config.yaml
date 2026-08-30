@@ -12,8 +12,8 @@ skills:
 
 model:
   provider: custom
-  base_url: http://vllm-main.vllm.svc.cluster.local:8000/v1
-  default: qwen3.6-27b
+  base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+  default: deepseek-v4-flash-dspark
   context_length: 65536
   # Reserves output space out of context_length, leaving 57344 for input.
   # Required: unset, the request goes out with max_tokens=65536 (the whole
@@ -21,35 +21,37 @@ model:
   # compression. Observed peak output is 1746 tokens.
   max_tokens: 8192
 
-# Registers vllm-aux as a second user-selectable model (dashboard model
-# picker / `/model` in chat) — distinct from auxiliary_models below, which
-# only routes specific internal tasks and doesn't make it selectable on its
-# own. Picker changes don't persist here — see README "Model" — but the
-# entry is kept for parity with hermes-sage and for manual /model use.
+# vllm-aux retired along with the old in-cluster Qwen pair. No separate aux
+# model — everything points at the same external LLM endpoint as `model`
+# above (see kubernetes/apps/external-endpoints/deepseek/README.md for which
+# model that is). Registered here, not deleted, so it stays selectable in
+# the dashboard picker, same as before. Picker changes don't persist here —
+# see README "Model" — but the entry is kept for parity with hermes-sage and
+# for manual /model use.
 providers:
   vllm-aux:
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
+    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
     models:
-      - qwen3.6-35b-a3b
+      - deepseek-v4-flash-dspark
     context_length: 65536
 
 auxiliary_models:
   title:
     provider: custom
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
-    model: qwen3.6-35b-a3b
+    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    model: deepseek-v4-flash-dspark
   compression:
     provider: custom
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
-    model: qwen3.6-35b-a3b
+    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    model: deepseek-v4-flash-dspark
   approval:
     provider: custom
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
-    model: qwen3.6-35b-a3b
+    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    model: deepseek-v4-flash-dspark
   web_extraction:
     provider: custom
-    base_url: http://vllm-aux.vllm.svc.cluster.local:8000/v1
-    model: qwen3.6-35b-a3b
+    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    model: deepseek-v4-flash-dspark
 
 # Defaults protect first_n(3)+last_n(20)=23 messages against 8-16 message
 # sessions here — the compressible middle window was empty, so compression
