@@ -12,10 +12,10 @@ skills:
 
 model:
   provider: custom
-  base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+  base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
   default: deepseek-v4-flash-dspark
   # DeepSeek's real ceiling (matches the server's --max-model-len exactly —
-  # see external-endpoints/deepseek/README.md). Retuned 2026-08-30 from the
+  # see external-endpoints/main/README.md). Retuned 2026-08-30 from the
   # old Qwen-era 65536 — see "Compression" below, its threshold_tokens is
   # scaled to match.
   context_length: 1048576
@@ -28,14 +28,14 @@ model:
 
 # vllm-aux retired along with the old in-cluster Qwen pair. No separate aux
 # model — everything points at the same external LLM endpoint as `model`
-# above (see kubernetes/apps/external-endpoints/deepseek/README.md for which
+# above (see kubernetes/apps/external-endpoints/main/README.md for which
 # model that is). Registered here, not deleted, so it stays selectable in
 # the dashboard picker, same as before. Picker changes don't persist here —
 # see README "Model" — but the entry is kept for parity with hermes-sage and
 # for manual /model use.
 providers:
   vllm-aux:
-    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     models:
       - deepseek-v4-flash-dspark
     context_length: 1048576
@@ -43,19 +43,19 @@ providers:
 auxiliary_models:
   title:
     provider: custom
-    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     model: deepseek-v4-flash-dspark
   compression:
     provider: custom
-    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     model: deepseek-v4-flash-dspark
   approval:
     provider: custom
-    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     model: deepseek-v4-flash-dspark
   web_extraction:
     provider: custom
-    base_url: http://deepseek.external-endpoints.svc.cluster.local:8888/v1
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     model: deepseek-v4-flash-dspark
 
 # Defaults protect first_n(3)+last_n(20)=23 messages against 8-16 message

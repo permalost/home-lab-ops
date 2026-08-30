@@ -5,7 +5,8 @@ namespace: external-endpoints
 
 resources:
   - namespace.yaml
-  - deepseek
+  - main
+  - aux
   - opensprinkler
   - slzb-06
   - truenas

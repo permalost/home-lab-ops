@@ -3,9 +3,9 @@
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
 metadata:
-  name: deepseek
+  name: main
   labels:
-    kubernetes.io/service-name: deepseek
+    kubernetes.io/service-name: main
 addressType: IPv4
 ports:
   - name: http

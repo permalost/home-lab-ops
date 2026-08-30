@@ -22,7 +22,7 @@ external LLM model as `hermes-sage`.
 ## Model
 
 Both the main loop and every auxiliary role point at the cluster's external
-LLM model — see `kubernetes/apps/external-endpoints/deepseek/README.md` for
+LLM model — see `kubernetes/apps/external-endpoints/main/README.md` for
 which model that actually is and why. This replaced the prior in-cluster
 Qwen3.6-27B/35B-A3B pair (`kubernetes/apps/vllm/`, since deleted); that
 history — including the measured dense-vs-MoE latency tradeoff, which no
