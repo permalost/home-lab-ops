@@ -1,5 +1,5 @@
 # Hermes itself is a lightweight orchestrator — the actual inference load runs
-# on the external LLM model (see kubernetes/apps/external-endpoints/deepseek/
+# on the external LLM model (see kubernetes/apps/external-endpoints/main/
 # README.md). webapp/base's 10m/500Mi default is too tight for a long-running
 # agent with session/memory state, but this doesn't need GPU-scale sizing.
 - op: replace

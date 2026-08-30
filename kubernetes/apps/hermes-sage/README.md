@@ -71,7 +71,7 @@ to vLLM over in-cluster DNS.
 ## Troubleshooting
 
 - **Tool calls failing / malformed:** check the external LLM model's own
-  server logs first (see `kubernetes/apps/external-endpoints/deepseek/README.md`
+  server logs first (see `kubernetes/apps/external-endpoints/main/README.md`
   for where it runs) — a mismatched `--tool-call-parser` there is the most
   likely cause, not this app.
 - **Config not taking effect:** confirm the ConfigMap regenerated (kustomize
