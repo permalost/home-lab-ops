@@ -12,6 +12,8 @@
       items:
         - key: homebox-SKILL.md
           path: productivity/homebox/SKILL.md
+        - key: unifi-SKILL.md
+          path: network/unifi/SKILL.md
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
