@@ -1,0 +1,14 @@
+- op: replace
+  path: /spec/type
+  value: LoadBalancer
+- op: replace
+  path: /spec/ports
+  value:
+    - port: 2055
+      protocol: UDP
+      name: netflow
+      targetPort: 2055
+- op: add
+  path: /metadata/annotations
+  value:
+    io.cilium/lb-ipam-ips: "10.50.0.233"

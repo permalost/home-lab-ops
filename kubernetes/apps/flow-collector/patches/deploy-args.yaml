@@ -1,0 +1,7 @@
+- op: add
+  path: /spec/template/spec/containers/0/args
+  value:
+    - -format=json
+    - -listen=netflow://0.0.0.0:2055
+    - -transport=file
+    - -transport.file=/data/flows.json
