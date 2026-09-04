@@ -4,13 +4,13 @@
 model:
   provider: custom
   base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
-  default: deepseek-v4-flash-dspark
-  # DeepSeek's real ceiling (matches the server's --max-model-len exactly —
-  # see external-endpoints/main/README.md). Retuned 2026-08-30 from the
-  # old Qwen-era 65536; the output-cap fix below is independent of this
-  # value either way (Hermes' bug path was keying off the *server's*
-  # max-model-len, not this field).
-  context_length: 1048576
+  default: GLM-5.3-Flash-EXL3
+  # Matches the server's --max-model-len exactly — see
+  # external-endpoints/main/README.md. Retuned 2026-09-04 for the
+  # DeepSeek->GLM swap (was 1048576); the output-cap fix below is
+  # independent of this value either way (Hermes' bug path was keying off
+  # the *server's* max-model-len, not this field).
+  context_length: 1000000
   # Reserves output space out of context_length. Required regardless of
   # context_length's value: unset, the request goes out with
   # max_tokens=<server's --max-model-len>, so vLLM 400s every call and
@@ -27,23 +27,23 @@ providers:
   vllm-aux:
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     models:
-      - deepseek-v4-flash-dspark
-    context_length: 1048576
+      - GLM-5.3-Flash-EXL3
+    context_length: 1000000
 
 auxiliary_models:
   title:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   compression:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   approval:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   web_extraction:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3

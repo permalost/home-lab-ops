@@ -13,12 +13,12 @@ skills:
 model:
   provider: custom
   base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
-  default: deepseek-v4-flash-dspark
-  # DeepSeek's real ceiling (matches the server's --max-model-len exactly —
-  # see external-endpoints/main/README.md). Retuned 2026-08-30 from the
-  # old Qwen-era 65536 — see "Compression" below, its threshold_tokens is
-  # scaled to match.
-  context_length: 1048576
+  default: GLM-5.3-Flash-EXL3
+  # Matches the server's --max-model-len exactly — see
+  # external-endpoints/main/README.md. Retuned 2026-09-04 for the
+  # DeepSeek->GLM swap (was 1048576) — see "Compression" below, its
+  # threshold_tokens is scaled to match.
+  context_length: 1000000
   # Reserves output space out of context_length. Required regardless of
   # context_length's value: unset, the request goes out with
   # max_tokens=<server's --max-model-len>, so vLLM 400s every call and
@@ -37,26 +37,26 @@ providers:
   vllm-aux:
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
     models:
-      - deepseek-v4-flash-dspark
-    context_length: 1048576
+      - GLM-5.3-Flash-EXL3
+    context_length: 1000000
 
 auxiliary_models:
   title:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   compression:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   approval:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
   web_extraction:
     provider: custom
     base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
-    model: deepseek-v4-flash-dspark
+    model: GLM-5.3-Flash-EXL3
 
 # Defaults protect first_n(3)+last_n(20)=23 messages against 8-16 message
 # sessions here — the compressible middle window was empty, so compression
@@ -67,14 +67,13 @@ compression:
   protect_first_n: 1
 
   # Sessions here peaked ~31k of the old 65k window; default 0.50 fired
-  # with ample headroom left. threshold_tokens scaled 2026-08-30 for the
-  # 1M context_length retune (0.75 x 1048576, was 48000 against 65536) —
+  # with ample headroom left. threshold_tokens scaled for context_length —
   # keeps the same 75%-of-window trigger point the fraction below already
   # specifies. Re-measure actual peak-context telemetry before trusting
   # this fires appropriately at the new scale; nothing here has been
   # observed against real 1M-context sessions yet.
   threshold: 0.75
-  threshold_tokens: 786432
+  threshold_tokens: 750000
 
   # One attempt ran 718s despite the documented 600s ceiling. Past ~45s
   # with a non-empty middle window, abandon rather than stall the session.
