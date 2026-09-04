@@ -33,6 +33,7 @@ configMapGenerator:
   - name: hermes-skills
     files:
       - homebox-SKILL.md=skills/homebox/SKILL.md
+      - unifi-SKILL.md=skills/unifi/SKILL.md
 
 patches:
   - target:

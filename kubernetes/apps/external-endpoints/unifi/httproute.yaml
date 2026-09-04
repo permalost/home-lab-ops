@@ -18,4 +18,4 @@ spec:
   rules:
     - backendRefs:
         - name: unifi
-          port: 8443
+          port: 443

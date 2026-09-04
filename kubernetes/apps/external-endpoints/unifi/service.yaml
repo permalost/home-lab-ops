@@ -7,6 +7,6 @@ metadata:
   name: unifi
 spec:
   ports:
-    - port: 8443
+    - port: 443
       protocol: TCP
       name: https

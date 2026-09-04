@@ -57,3 +57,22 @@
         secretKeyRef:
           name: hermes-secrets
           key: HOMEBOX_API_KEY
+    # UniFi network integration (see skills/unifi/SKILL.md). Goes through
+    # the Gateway (apps/external-endpoints/unifi/), not a cluster-local
+    # Service — the controller itself is a physical device on the LAN, not
+    # something running in-cluster. verify=true works here (unlike the
+    # audit.py tool on the Mac, which talks to 10.20.0.1 directly and has
+    # to bypass the self-signed cert) because BackendTLSPolicy already
+    # validated the hop using unifi-ca's pinned cert.
+    - name: UNIFI_URL
+      value: "https://unifi.orion.norseamerican.com"
+    - name: UNIFI_USER
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: UNIFI_USER
+    - name: UNIFI_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: UNIFI_PASSWORD
