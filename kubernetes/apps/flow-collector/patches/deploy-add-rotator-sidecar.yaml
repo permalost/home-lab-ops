@@ -1,0 +1,40 @@
+# Sidecar rather than a separate CronJob: the PVC is rook-ceph-block (RWO),
+# so a second pod on another node could fail to mount it, or contend with
+# the running goflow2 pod for the same volume. A sidecar in the same Pod
+# shares the volume for free.
+#
+# Copy-truncate rotation, not a signal/reopen — goflow2 isn't known to
+# reopen its output file on SIGHUP, but truncating a file a process holds
+# open (with the fd still valid) is always safe: the process just keeps
+# appending from the now-empty file, no restart needed.
+#
+# `$ts` not `${ts}` in the script below deliberately — flux-build.sh's
+# unresolved-postBuild-substitute detector greps for `${...}` and doesn't
+# distinguish a Flux variable from a shell one inside an embedded script.
+- op: add
+  path: /spec/template/spec/containers/-
+  value:
+    name: rotator
+    image: alpine:3.20
+    command:
+      - sh
+      - -c
+      - |
+        set -eu
+        while true; do
+          sleep 86400
+          if [ -s /data/flows.json ]; then
+            ts=$(date +%Y%m%d-%H%M%S)
+            cp /data/flows.json "/data/flows-$ts.json"
+            gzip "/data/flows-$ts.json"
+            : > /data/flows.json
+          fi
+          find /data -name 'flows-*.json.gz' -mtime +30 -delete
+        done
+    resources:
+      limits:
+        cpu: 10m
+        memory: 32Mi
+    volumeMounts:
+      - mountPath: /data
+        name: data

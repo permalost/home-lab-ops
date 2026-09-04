@@ -32,6 +32,14 @@ patches:
       name: deploy
     path: patches/deploy-args.yaml
   - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-rotator-sidecar.yaml
+  - target:
       kind: Service
       name: svc
     path: patches/svc-loadbalancer.yaml

@@ -24,7 +24,7 @@ spec:
     substitute:
       appName: flow-collector
       storageClass: rook-ceph-block
-      storageSize: 4Gi
+      storageSize: 8Gi
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
