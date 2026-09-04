@@ -18,12 +18,16 @@ should say "the external LLM model" and link here rather than naming it
 themselves.
 
 **Currently serving (both `main` and `aux`, same backend today):**
-DeepSeek-V4-Flash-0731 (`deepseek-v4-flash-dspark`), NVFP4, TP=2 across a
-dual-Spark pair (`spark-5a0c` + a second Spark), standalone outside
-Talos/Flux, at `10.50.0.126:8888`. DSpark speculative decoding, 1M-token
-context ceiling. Tool-call parser `deepseek_v4`. Retired the prior
-in-cluster Qwen3.6-27B/35B-A3B pair (`kubernetes/apps/vllm/`, deleted) — see
-the dual-Spark migration plan
+GLM-5.3-Flash-EXL3 (`GLM-5.3-Flash-EXL3`, EXL3 4bpw via
+`MiaAI-Lab/GLM-5.3-Flash-EXL3-2x-DGX-Sparks`), TP=2 across the same
+dual-Spark pair (`spark-5a0c` + `spark-b`), standalone outside Talos/Flux,
+at `10.50.0.126:8888`. DFlash2 speculative decoding, 1M-token context
+ceiling (`--max-model-len 1000000`). Swapped 2026-09-04 from
+DeepSeek-V4-Flash-0731 (`deepseek-v4-flash-dspark`) — DeepSeek's
+containers are stopped but its weights/image are kept in place on both
+nodes for revert (`~/dspark-repo/start-deepseek-v4-flash-dspark.sh`).
+Retired the prior in-cluster Qwen3.6-27B/35B-A3B pair
+(`kubernetes/apps/vllm/`, deleted) — see the dual-Spark migration plan
 (`please-run-through-preparations-wobbly-hellman.md`) for the
 memory/architecture rationale.
 
