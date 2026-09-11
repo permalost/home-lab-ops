@@ -80,8 +80,10 @@ SHELL_CONTENT=$(sed \
   "$SHELL_TMPL")
 
 if [[ -n "$DEPENDS_ON" ]]; then
+  # Match the template's 4-space list-item indent, or the emitted line sits
+  # one level shallower than `- name: cluster-settings` and breaks the YAML.
   SHELL_CONTENT=$(echo "$SHELL_CONTENT" | sed \
-    -e "s|# - name: __DEPENDS_ON__.*|  - name: ${DEPENDS_ON}|")
+    -e "s|# - name: __DEPENDS_ON__.*|    - name: ${DEPENDS_ON}|")
 else
   SHELL_CONTENT=$(echo "$SHELL_CONTENT" | grep -v "# - name: __DEPENDS_ON__")
 fi

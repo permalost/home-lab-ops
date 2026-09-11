@@ -1,0 +1,20 @@
+# Generous delays — vite preview serves once the (large, Cesium-heavy)
+# build is loaded, which can take a while on first pod start.
+- op: add
+  path: /spec/template/spec/containers/0/readinessProbe
+  value:
+    httpGet:
+      path: /
+      port: 4173
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 6
+- op: add
+  path: /spec/template/spec/containers/0/livenessProbe
+  value:
+    httpGet:
+      path: /
+      port: 4173
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3

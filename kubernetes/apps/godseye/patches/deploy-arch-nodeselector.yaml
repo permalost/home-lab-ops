@@ -1,0 +1,8 @@
+# Image is single-arch amd64 only (fork's docker-publish.yml doesn't build
+# multi-arch). All orion nodes are amd64 today, but pin this so a future
+# arm64 node (see project_dgx_spark_talos memory) can't get scheduled a pod
+# that fails to pull instead of failing to schedule.
+- op: add
+  path: /spec/template/spec/nodeSelector
+  value:
+    kubernetes.io/arch: amd64

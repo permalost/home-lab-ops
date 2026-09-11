@@ -1,0 +1,11 @@
+# webapp/base's cpu: 10m default doesn't cover a Cesium bundle plus a dozen
+# in-memory proxy caches (OpenSky, adsb.lol, AIS, CCTV, TLEs).
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
