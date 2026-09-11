@@ -36,10 +36,6 @@ patches:
       name: deploy
     path: patches/deploy-probes.yaml
   - target:
-      kind: Deployment
-      name: deploy
-    path: patches/deploy-arch-nodeselector.yaml
-  - target:
       kind: Service
       name: svc
     path: patches/svc-target-port.yaml
