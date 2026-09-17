@@ -76,3 +76,18 @@
         secretKeyRef:
           name: hermes-secrets
           key: UNIFI_PASSWORD
+    # Telegram gateway platform — two-way notification/chat channel.
+    # TELEGRAM_ALLOWED_USERS is load-bearing, not optional: with no
+    # allowlist set, the gateway's authz falls back to an open "pair" mode
+    # rather than default-deny (confirmed in gateway/authz_mixin.py).
+    # HOME_CHANNEL is the same numeric ID so bare `hermes send --to
+    # telegram` reaches Jon's DM.
+    - name: TELEGRAM_BOT_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: TELEGRAM_BOT_TOKEN
+    - name: TELEGRAM_ALLOWED_USERS
+      value: "8852997015"
+    - name: TELEGRAM_HOME_CHANNEL
+      value: "8852997015"
