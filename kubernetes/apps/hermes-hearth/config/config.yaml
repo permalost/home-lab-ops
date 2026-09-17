@@ -16,9 +16,9 @@ mcp_servers:
   k8s:
     url: http://k8s-mcp.hermes-hearth.svc.cluster.local:8080/mcp
 
-# Fires the maintenance skill on a firing alert (see vkms-alerting's
-# webhook-hermes receiver). HMAC secret comes from WEBHOOK_SECRET env —
-# this file lands in a plain ConfigMap, no secrets inline.
+# Fires the maintenance skill on a firing alert (see vkms's
+# alertmanager.config webhook-hermes receiver — not a VMAlertmanagerConfig,
+# the operator prunes unknown http_config keys from those).
 platforms:
   webhook:
     enabled: true
@@ -26,6 +26,13 @@ platforms:
       port: 8644
       routes:
         cluster-alert:
+          # webhook.py reads `secret` from this file only — never from
+          # WEBHOOK_SECRET directly. Hermes's own loader expands ${VAR} from
+          # env (patches/deploy-add-env.yaml); Flux must not expand it first
+          # (kustomization.yaml: substitute: disabled).
+          secret: ${WEBHOOK_SECRET}
+          # Alertmanager's payload has no event_type/type key, so this only
+          # passes because the receiver sends X-Gitlab-Event: alert.
           events: ["alert"]
           skills: ["maintenance"]
           deliver: telegram

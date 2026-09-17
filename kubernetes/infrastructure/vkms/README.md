@@ -26,6 +26,25 @@ Cilium must be running (provides the ingress class). cert-manager is optional bu
 | vmalert | `vmalert.${domain}` |
 | vmsingle | `vmsingle.${domain}` |
 
+## Alerting
+
+Two receivers match every `warning`/`critical` alert independently
+(`continue: true`, neither depends on the other):
+
+- **telegram-hermes** (`alerting/alertmanagerconfig.yaml`, a
+  `VMAlertmanagerConfig`) — human paging.
+- **webhook-hermes** (`values.yaml`, `alertmanager.config`) — fires
+  hermes-hearth's `maintenance` skill. Lives in the base config rather than a
+  CR because the operator drops unknown `http_config` keys (e.g.
+  `http_headers`) when re-marshaling a CR receiver — an auth header set on a
+  `VMAlertmanagerConfig` never goes out. Alertmanager can't compute an HMAC
+  either, so auth is a plain `X-Gitlab-Token` header, sourced from
+  `alertmanager-hermes` (mounted by `alertmanager.spec.secrets` at
+  `/etc/vm/secrets/alertmanager-hermes/token`). That token must stay
+  byte-identical to hermes-hearth's `hermesWebhookSecret`
+  (`apps/hermes-hearth/secret.yaml`) — see the comment in
+  `alertmanager-hermes.sops.yaml` for how to keep them in sync.
+
 ## Troubleshooting
 
 - **HelmRelease not re-reconciling after values change:** Check that the ConfigMap hash changed (the ConfigMap name should have a new suffix). If not, the kustomizeconfig.yaml `nameReference` transformer may not be applied.

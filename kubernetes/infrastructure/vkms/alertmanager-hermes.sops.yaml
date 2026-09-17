@@ -1,0 +1,25 @@
+# Must stay byte-identical to hermes-secrets' hermesWebhookSecret
+# (apps/hermes-hearth/secret.yaml) — Alertmanager sends this as
+# X-Gitlab-Token; webhook.py compares it to the route's `secret`.
+apiVersion: v1
+kind: Secret
+metadata:
+    name: alertmanager-hermes
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:XwxRK6yfFa2hO4fpCcDgpk4wB2k/skes/D25noiXMcnSLaSbBbk/HIKdAdAKAQ4taSdRZ4qvro0ebR1sJnjHQw==,iv:Us9B4NyeK+inNZe81spfZq7c1Ye+naZlWyvlcqPL4CU=,tag:AJF3c0NAh+7tiHHiawBP4g==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGajBocFoyUHhxTEFTOGwx
+            bGRXV1U5QWs4QjFmQXVUWTVELzR6b2hDeUVJCm0yaFY2STRRSE01R1ZRUFF6QTRF
+            RnhOdGZmcjJiQ1BXNkJUQmxtV3hxVHcKLS0tIFlCRnkxZkkzNEhnaXR1MDRET0My
+            bDQwWE9PMTNNY3hCNjFVRlQ0QVg1T3cKM0D4p5K9m1jSD9uoTAAMaPE6XI0yAbXA
+            7kt4Dut2wyFfbobS7gj0EiVrG4vEW2g50D2j4yb/yMmw81Agi9j8og==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-17T19:54:49Z"
+    mac: ENC[AES256_GCM,data:n1A4aP07DvjTWTtJetUk4uG89872CvXQCykffMh3Wi6F2IFjApNPc+BNW6WSsQmGsFuOfeU0tiz8X/tanz9aNrzjGfD1+7CC8WwbP/PY51bhw08f3wp62PUJ/cZDt9Oaibq21ZTRFIbph0TPqoxniu2EPuLvOVj1fOxJ76hduhw=,iv:p8EdAGxGPrmVVqlqByniO67x3+zmrJeEJHrGq/tKaQo=,tag:hcIHDIp5ngkoPnCzia9q1g==,type:str]
+    version: 3.13.3
