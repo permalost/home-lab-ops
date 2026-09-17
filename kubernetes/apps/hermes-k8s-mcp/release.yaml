@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hermes-k8s-mcp
+spec:
+  interval: 30m
+  releaseName: hermes-k8s-mcp
+  upgrade:
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: kubernetes-mcp-server
+      version: "*"
+      sourceRef:
+        kind: HelmRepository
+        name: hermes-k8s-mcp
+      interval: 12h
+  valuesFrom:
+    - kind: ConfigMap
+      name: hermes-k8s-mcp-helm-chart-values
+      valuesKey: values.yaml

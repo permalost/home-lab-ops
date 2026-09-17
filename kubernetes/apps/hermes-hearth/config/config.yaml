@@ -10,6 +10,12 @@
 skills:
   external_dirs: [/opt/skills-external]
 
+# Read-only cluster visibility (see kubernetes/apps/hermes-k8s-mcp) — no
+# auth header, traffic never leaves the namespace.
+mcp_servers:
+  k8s:
+    url: http://k8s-mcp.hermes-hearth.svc.cluster.local:8080/mcp
+
 model:
   provider: custom
   base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
