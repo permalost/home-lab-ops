@@ -1,0 +1,8 @@
+# Webhook platform port (config/config.yaml platforms.webhook), alongside
+# the API and dashboard ports.
+- op: add
+  path: /spec/template/spec/containers/0/ports/-
+  value:
+    name: webhook
+    containerPort: 8644
+    protocol: TCP

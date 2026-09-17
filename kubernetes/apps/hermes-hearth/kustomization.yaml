@@ -48,6 +48,10 @@ patches:
   - target:
       kind: Deployment
       name: deploy
+    path: patches/deploy-webhook-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
     path: patches/deploy-args.yaml
   - target:
       kind: Deployment
@@ -77,6 +81,10 @@ patches:
       kind: Service
       name: svc
     path: patches/svc-dashboard-port.yaml
+  - target:
+      kind: Service
+      name: svc
+    path: patches/svc-webhook-port.yaml
   - target:
       kind: HTTPRoute
       name: route
