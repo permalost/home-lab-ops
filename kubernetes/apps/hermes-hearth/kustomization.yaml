@@ -28,6 +28,12 @@ configMapGenerator:
   - name: hermes-config
     files:
       - config.yaml=config/config.yaml
+    # config.yaml holds a ${WEBHOOK_SECRET} ref meant for Hermes's own env-var
+    # expansion. This Kustomization has postBuild.substituteFrom, and Flux
+    # blanks undefined ${VAR}s to "" — without this, the secret arrives empty.
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
   # Mounted as a directory (not subPath — see deploy-mount-skills.yaml) at
   # skills.external_dirs; the loader walks <dir>/<category>/<name>/SKILL.md.
   - name: hermes-skills

@@ -6,6 +6,7 @@ resources:
   - repository.yaml
   - release.yaml
   - secret.yaml
+  - alertmanager-hermes.sops.yaml
 
 configMapGenerator:
 - name: vkms-helm-chart-values

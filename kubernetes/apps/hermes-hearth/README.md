@@ -110,6 +110,19 @@ further — `grep -i compress /opt/data/logs/agent.log` on the pod.
 Much of what that tuning was compensating for was the output-cap 400 above
 firing compression on every call. Re-measure before tuning it further.
 
+## Alert webhook
+
+Alertmanager POSTs to `/webhooks/cluster-alert` (port 8644,
+`platforms.webhook` in `config.yaml`) on any firing `warning`/`critical`
+alert, firing the `maintenance` skill — see
+`infrastructure/vkms/README.md` "Alerting" for the receiver side.
+
+The route's `secret: ${WEBHOOK_SECRET}` is expanded by Hermes's own config
+loader from the env var (`patches/deploy-add-env.yaml`), never by Flux — the
+`hermes-config` ConfigMap generator carries
+`kustomize.toolkit.fluxcd.io/substitute: disabled` so Flux's
+`postBuild.substituteFrom` doesn't blank the reference to `""` first.
+
 ## Ingress / Endpoints
 
 Exposed via the `httproute` component at `hermes-hearth.${domain}`.

@@ -4,6 +4,41 @@ alertmanager:
     # is already the chart default; set explicitly to survive a chart bump.
     selectAllByDefault: true
     disableNamespaceMatcher: true
+    # Mounted by the operator at /etc/vm/secrets/<name>/<key> — read by the
+    # webhook-hermes receiver below.
+    secrets:
+      - alertmanager-hermes
+  # webhook-hermes lives in the base config, not a VMAlertmanagerConfig: the
+  # operator drops unknown http_config keys (e.g. http_headers) from CR
+  # receivers. telegram-hermes (alerting/alertmanagerconfig.yaml) stays a CR
+  # since it needs no custom headers.
+  config:
+    route:
+      receiver: blackhole
+      routes:
+        - receiver: webhook-hermes
+          continue: true
+          group_by: ["alertname"]
+          matchers:
+            - severity=~"warning|critical"
+    receivers:
+      - name: blackhole
+      - name: webhook-hermes
+        webhook_configs:
+          - url: http://hermes-hearth-svc.hermes-hearth.svc.cluster.local:8644/webhooks/cluster-alert
+            http_config:
+              http_headers:
+                # Hermes's only auth mode Alertmanager can satisfy — it
+                # can't compute an HMAC. Must equal hermes-secrets'
+                # hermesWebhookSecret byte-for-byte (see README).
+                X-Gitlab-Token:
+                  files:
+                    - /etc/vm/secrets/alertmanager-hermes/token
+                # Alertmanager's payload has no event_type/type key; without
+                # this the route's events:["alert"] filter drops every
+                # delivery and still returns 200.
+                X-Gitlab-Event:
+                  values: ["alert"]
   ingress:
     enabled: true
     ingressClassName: cilium
