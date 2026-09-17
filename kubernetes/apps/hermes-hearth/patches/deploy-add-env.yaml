@@ -97,3 +97,11 @@
         secretKeyRef:
           name: hermes-secrets
           key: hermesWebhookSecret
+    # Fine-grained PAT, home-lab-ops only, Contents+PRs read/write — see
+    # skills/maintenance/SKILL.md "Opening a fix". main itself is what
+    # actually blocks a direct landing, not this scope.
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: GITHUB_TOKEN
