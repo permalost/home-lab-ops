@@ -1,11 +1,17 @@
 # webapp/base's cpu: 10m default throttles anything heavier than a static
-# file server (see #90, #104). CouchDB compaction/indexing bursts CPU.
+# file server (see #90, #104). Even the 500m/100m first bump (matching those
+# fixes) wasn't enough here: CouchDB's Erlang/BEAM VM spins up many scheduler
+# processes concurrently at boot, and CFS bandwidth throttling that delays
+# a supervisor's child past its own startup timeout crashes the whole VM
+# rather than just running slow — observed as instant, silent exit 1 in a
+# permanent crash loop from first deploy, confirmed via an ephemeral debug
+# container (no resource limits) running clean against the same PVC/secret.
 - op: replace
   path: /spec/template/spec/containers/0/resources
   value:
     limits:
-      cpu: 500m
+      cpu: 2000m
       memory: 512Mi
     requests:
-      cpu: 100m
+      cpu: 500m
       memory: 256Mi
