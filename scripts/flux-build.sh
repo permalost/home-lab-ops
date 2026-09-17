@@ -65,6 +65,13 @@ if [[ -f "$SECRETS_FILE" ]]; then
   fi
 fi
 
+# Flux skips substitution on resources annotated/labelled
+# kustomize.toolkit.fluxcd.io/substitute: disabled — filter those out before
+# substituting so runtime-only ${VAR} refs (e.g. hermes-hearth's
+# ${WEBHOOK_SECRET}, expanded by Hermes itself, not Flux) aren't reported as
+# unresolved.
+SUBST_SCOPE='select((.metadata.annotations."kustomize.toolkit.fluxcd.io/substitute" // .metadata.labels."kustomize.toolkit.fluxcd.io/substitute" // "") != "disabled")'
+
 # Python-based ${VAR} substitution (cross-platform, no envsubst dependency).
 # Matches ${VAR} and ${VAR:=default} — resolves from env, keeps original if missing.
 ENVSUBST_PY='
@@ -115,7 +122,7 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
       done
     fi
 
-    if RENDERED="$(kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" | python3 -c "$ENVSUBST_PY")"; then
+    if RENDERED="$(kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" | yq eval "$SUBST_SCOPE" - | python3 -c "$ENVSUBST_PY")"; then
       # a successful build doesn't mean substitution succeeded — check for leftovers
       UNRESOLVED="$(printf '%s' "$RENDERED" | grep -oE '\$\{[A-Za-z_][A-Za-z0-9_]*(:[^}]*)?\}' | sort -u || true)"
       if [[ -n "$UNRESOLVED" ]]; then
@@ -128,6 +135,7 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
     else
       echo "  ✗ $name — FAILED (re-running to show error):"
       kustomize build "$BUILD_PATH" "${KUSTOMIZE_FLAGS[@]}" \
+        | yq eval "$SUBST_SCOPE" - \
         | python3 -c "$ENVSUBST_PY" \
         >&2 || true
       FAILED=$((FAILED + 1))
