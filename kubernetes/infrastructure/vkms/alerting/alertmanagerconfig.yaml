@@ -1,0 +1,23 @@
+# Additive alerting config, merged by the operator into the chart's default
+# `blackhole`-only config (alertmanager.spec.config in values.yaml) — that
+# base config, its receivers, and its default route are untouched.
+# Needs alertmanager.spec.disableNamespaceMatcher: true (values.yaml) since
+# VMAlertmanagerConfig is namespace-scoped by default and alerts span every
+# app namespace, not just `monitoring`.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlertmanagerConfig
+metadata:
+  name: telegram-hermes
+spec:
+  route:
+    receiver: telegram-hermes
+    continue: true
+    matchers:
+      - severity=~"warning|critical"
+  receivers:
+    - name: telegram-hermes
+      telegram_configs:
+        - bot_token:
+            name: alertmanager-telegram
+            key: botToken
+          chat_id: 8852997015
