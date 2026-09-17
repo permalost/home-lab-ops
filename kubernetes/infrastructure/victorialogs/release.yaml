@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victorialogs
+spec:
+  interval: 30m
+  releaseName: victorialogs
+  upgrade:
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: victoria-logs-single
+      version: "*"
+      sourceRef:
+        kind: HelmRepository
+        name: victorialogs
+      interval: 12h
+  valuesFrom:
+    - kind: ConfigMap
+      name: victorialogs-helm-chart-values
+      valuesKey: values.yaml
