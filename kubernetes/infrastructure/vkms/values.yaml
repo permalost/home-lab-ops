@@ -1,9 +1,7 @@
 alertmanager:
   spec:
-    # VMAlertmanagerConfig (alertmanagerconfig.yaml) is namespace-scoped by
-    # default — this makes it match alerts from every namespace, not just
-    # `monitoring`. selectAllByDefault is already the chart default; set
-    # explicitly so this doesn't silently break on a future chart bump.
+    # Alerts span every namespace, not just monitoring. selectAllByDefault
+    # is already the chart default; set explicitly to survive a chart bump.
     selectAllByDefault: true
     disableNamespaceMatcher: true
   ingress:
@@ -12,6 +10,9 @@ alertmanager:
     hosts:
       - "alertmanager.${domain}"
 grafana:
+  # Needs internet access to install (see infrastructure/victorialogs).
+  plugins:
+    - victoriametrics-logs-datasource
   ingress:
     enabled: true
     ingressClassName: cilium

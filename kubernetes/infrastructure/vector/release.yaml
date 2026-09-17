@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vector
+spec:
+  interval: 30m
+  releaseName: vector
+  upgrade:
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: vector
+      version: "*"
+      sourceRef:
+        kind: HelmRepository
+        name: vector
+      interval: 12h
+  valuesFrom:
+    - kind: ConfigMap
+      name: vector-helm-chart-values
+      valuesKey: values.yaml
