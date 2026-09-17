@@ -1,4 +1,11 @@
 alertmanager:
+  spec:
+    # VMAlertmanagerConfig (alertmanagerconfig.yaml) is namespace-scoped by
+    # default — this makes it match alerts from every namespace, not just
+    # `monitoring`. selectAllByDefault is already the chart default; set
+    # explicitly so this doesn't silently break on a future chart bump.
+    selectAllByDefault: true
+    disableNamespaceMatcher: true
   ingress:
     enabled: true
     ingressClassName: cilium
