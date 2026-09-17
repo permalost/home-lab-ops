@@ -91,3 +91,9 @@
       value: "8852997015"
     - name: TELEGRAM_HOME_CHANNEL
       value: "8852997015"
+    # Webhook platform HMAC secret — see config/config.yaml platforms.webhook.
+    - name: WEBHOOK_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: hermesWebhookSecret

@@ -16,6 +16,26 @@ mcp_servers:
   k8s:
     url: http://k8s-mcp.hermes-hearth.svc.cluster.local:8080/mcp
 
+# Fires the maintenance skill on a firing alert (see vkms-alerting's
+# webhook-hermes receiver). HMAC secret comes from WEBHOOK_SECRET env —
+# this file lands in a plain ConfigMap, no secrets inline.
+platforms:
+  webhook:
+    enabled: true
+    extra:
+      port: 8644
+      routes:
+        cluster-alert:
+          events: ["alert"]
+          skills: ["maintenance"]
+          deliver: telegram
+          prompt: |
+            Alert: {commonLabels.alertname} ({status})
+            Namespace: {commonLabels.namespace}
+            Severity: {commonLabels.severity}
+            {commonAnnotations.description}
+            Investigate using the k8s tools and report what you find.
+
 model:
   provider: custom
   base_url: http://main.external-endpoints.svc.cluster.local:8888/v1

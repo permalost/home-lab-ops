@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - alertmanagerconfig.yaml
+  - webhook-hermes.yaml

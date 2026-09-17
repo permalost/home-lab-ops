@@ -1,0 +1,18 @@
+# Separate from telegram-hermes so Hermes's investigation is additive,
+# never a dependency of the human page — both match the same alerts and
+# fire independently.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlertmanagerConfig
+metadata:
+  name: webhook-hermes
+spec:
+  route:
+    receiver: webhook-hermes
+    continue: true
+    matchers:
+      - severity=~"warning|critical"
+    group_by: ["alertname"]
+  receivers:
+    - name: webhook-hermes
+      webhook_configs:
+        - url: http://hermes-hearth-svc.hermes-hearth.svc.cluster.local:8644/webhooks/cluster-alert

@@ -1,0 +1,9 @@
+# Second Service port for the webhook platform — in-cluster only
+# (Alertmanager reaches it via Service DNS), no httproute for this one.
+- op: add
+  path: /spec/ports/-
+  value:
+    name: webhook
+    port: 8644
+    protocol: TCP
+    targetPort: 8644
