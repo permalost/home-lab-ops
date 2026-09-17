@@ -91,7 +91,14 @@
       value: "8852997015"
     - name: TELEGRAM_HOME_CHANNEL
       value: "8852997015"
-    # Webhook platform HMAC secret — see config/config.yaml platforms.webhook.
+    # Webhook platform. WEBHOOK_ENABLED is load-bearing, not redundant with
+    # config.yaml's platforms.webhook.enabled: true — only the env-var path
+    # (gateway/config.py) populates the platform-wide secret from
+    # WEBHOOK_SECRET; the YAML-only enable path never reads that var, and
+    # writing the secret as a value in config.yaml isn't expanded (confirmed
+    # live — see config/config.yaml's route comment).
+    - name: WEBHOOK_ENABLED
+      value: "true"
     - name: WEBHOOK_SECRET
       valueFrom:
         secretKeyRef:

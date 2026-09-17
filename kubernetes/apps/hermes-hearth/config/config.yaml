@@ -26,11 +26,16 @@ platforms:
       port: 8644
       routes:
         cluster-alert:
-          # webhook.py reads `secret` from this file only — never from
-          # WEBHOOK_SECRET directly. Hermes's own loader expands ${VAR} from
-          # env (patches/deploy-add-env.yaml); Flux must not expand it first
-          # (kustomization.yaml: substitute: disabled).
-          secret: ${WEBHOOK_SECRET}
+          # No secret key here on purpose — confirmed live that a var
+          # reference in this gateway config path is NOT expanded
+          # (gateway/config.py builds PlatformConfig.extra straight from
+          # YAML; the generic config-expansion loader in hermes_cli/config.py
+          # is CLI-only and never runs here). Writing the reference literally
+          # compared requests against that literal text, rejecting every real
+          # one. Omitting `secret` falls back to the platform-wide value,
+          # which gateway/config.py populates correctly from the webhook
+          # secret env var — but only when webhook is also enabled via env,
+          # not just via `enabled: true` above (patches/deploy-add-env.yaml).
           # Alertmanager's payload has no event_type/type key, so this only
           # passes because the receiver sends X-Gitlab-Event: alert.
           events: ["alert"]
