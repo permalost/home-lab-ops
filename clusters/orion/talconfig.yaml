@@ -35,6 +35,7 @@ controlPlane:
     - "@./patches/controlplane/00-etcd.yaml"
     - "@./patches/controlplane/10-apiserver.yaml"
     - "@./patches/controlplane/20-allow-scheduling.yaml"
+    - "@./patches/controlplane/30-controlplane-metrics.yaml"
 
 nodes:
   # ── Control Plane ─────────────────────────────────────────────────────────
