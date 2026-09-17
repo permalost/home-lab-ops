@@ -117,11 +117,14 @@ Alertmanager POSTs to `/webhooks/cluster-alert` (port 8644,
 alert, firing the `maintenance` skill — see
 `infrastructure/vkms/README.md` "Alerting" for the receiver side.
 
-The route's `secret: ${WEBHOOK_SECRET}` is expanded by Hermes's own config
-loader from the env var (`patches/deploy-add-env.yaml`), never by Flux — the
-`hermes-config` ConfigMap generator carries
-`kustomize.toolkit.fluxcd.io/substitute: disabled` so Flux's
-`postBuild.substituteFrom` doesn't blank the reference to `""` first.
+The route has no `secret` key of its own — it falls back to the
+platform-wide secret. Confirmed live: a config-file var reference in this
+gateway config path is never expanded, so writing the secret that way just
+compares every request against the literal, un-expanded text. The
+platform-wide secret only gets populated correctly via the env-var enable
+path (`WEBHOOK_ENABLED`+`WEBHOOK_SECRET`, both in
+`patches/deploy-add-env.yaml`) — `platforms.webhook.enabled: true` in
+`config.yaml` alone isn't enough to wire up the secret, only the listener.
 
 ## Ingress / Endpoints
 
