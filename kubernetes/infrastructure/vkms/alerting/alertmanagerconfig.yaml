@@ -14,6 +14,10 @@ spec:
     continue: true
     matchers:
       - severity=~"warning|critical"
+    # Without this, every matching alert lands in one undifferentiated
+    # group — 19 alerts at once blew past Telegram's 4096-char limit and
+    # got silently dropped ("message too long").
+    group_by: ["alertname"]
   receivers:
     - name: telegram-hermes
       telegram_configs:
@@ -21,3 +25,12 @@ spec:
             name: alertmanager-telegram
             key: botToken
           chat_id: 8852997015
+          # parse_mode: "" silently reverts to HTML (confirmed live) — no
+          # way to force plain text, so escaping the dynamic field instead.
+          # Bounded to 10 alerts: still needed even with group_by, since
+          # the default template's per-alert dump can still overflow 4096
+          # chars if enough share one alertname.
+          message: |
+            {{ .CommonLabels.alertname }} ({{ .Status }}) — {{ len .Alerts }} alert(s), showing up to 10:
+            {{ range $i, $a := .Alerts }}{{ if lt $i 10 }}• {{ $a.Labels.namespace }}: {{ reReplaceAll ">" "&gt;" (reReplaceAll "<" "&lt;" (reReplaceAll "&" "&amp;" $a.Annotations.description)) }}
+            {{ end }}{{ end }}
