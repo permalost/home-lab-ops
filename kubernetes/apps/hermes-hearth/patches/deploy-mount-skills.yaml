@@ -14,6 +14,8 @@
           path: productivity/homebox/SKILL.md
         - key: unifi-SKILL.md
           path: network/unifi/SKILL.md
+        - key: maintenance-SKILL.md
+          path: kubernetes/maintenance/SKILL.md
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
