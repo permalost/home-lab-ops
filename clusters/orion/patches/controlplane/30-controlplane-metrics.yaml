@@ -1,0 +1,10 @@
+# Talos defaults both to 127.0.0.1, so vkms's scrape targets resolve but
+# every connection is refused (KubeSchedulerInstanceUnreachable et al.).
+# Secure ports (10259/10257) still require authn/authz.
+cluster:
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0
+  scheduler:
+    extraArgs:
+      bind-address: 0.0.0.0
