@@ -1,0 +1,29 @@
+fullnameOverride: k8s-mcp
+
+ingress:
+  enabled: false
+
+rbac:
+  extraClusterRoleBindings:
+    - name: view
+      roleRef:
+        name: view
+        external: true
+
+extraArgs:
+  - --read-only
+  - --disable-destructive
+
+config:
+  denied_resources:
+    - group: ""
+      version: v1
+      kind: Secret
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 25m
+    memory: 64Mi

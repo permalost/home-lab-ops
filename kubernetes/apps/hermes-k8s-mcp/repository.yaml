@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: hermes-k8s-mcp
+spec:
+  type: oci
+  url: oci://ghcr.io/containers/charts
+  interval: 30m
