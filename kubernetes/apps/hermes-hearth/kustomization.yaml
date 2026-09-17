@@ -34,6 +34,7 @@ configMapGenerator:
     files:
       - homebox-SKILL.md=skills/homebox/SKILL.md
       - unifi-SKILL.md=skills/unifi/SKILL.md
+      - maintenance-SKILL.md=skills/maintenance/SKILL.md
 
 patches:
   - target:
