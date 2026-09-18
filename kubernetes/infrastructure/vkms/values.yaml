@@ -19,6 +19,12 @@ alertmanager:
         - receiver: webhook-hermes
           continue: true
           group_by: ["alertname"]
+          # Coalesce cascades before fanout. repeat_interval up from 4h:
+          # Alertmanager sends no delivery-id header, so Hermes's webhook
+          # idempotency never hits and every repeat re-investigates.
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 24h
           matchers:
             - severity=~"warning|critical"
     receivers:
@@ -26,6 +32,8 @@ alertmanager:
       - name: webhook-hermes
         webhook_configs:
           - url: http://hermes-hearth-svc.hermes-hearth.svc.cluster.local:8644/webhooks/cluster-alert
+            send_resolved: false # don't investigate already-fixed alerts
+            max_alerts: 2 # keeps payload under the prompt's {__raw__} truncation cap
             http_config:
               http_headers:
                 # Hermes's only auth mode Alertmanager can satisfy — it
@@ -39,6 +47,23 @@ alertmanager:
                 # delivery and still returns 200.
                 X-Gitlab-Event:
                   values: ["alert"]
+    # Chart ships no inhibit rules; one root cause was firing 3 alerts/pod.
+    inhibit_rules:
+      - source_matchers:
+          - severity="critical"
+        target_matchers:
+          - severity="warning"
+        equal: [alertname, namespace]
+      - source_matchers:
+          - alertname="KubePodCrashLooping"
+        target_matchers:
+          - alertname=~"KubePodNotReady|KubeDeploymentReplicasMismatch"
+        equal: [namespace]
+      - source_matchers:
+          - alertname="TargetDown"
+        target_matchers:
+          - alertname=~".*InstanceUnreachable|ScrapePoolHasNoTargets"
+        equal: [namespace]
   ingress:
     enabled: true
     ingressClassName: cilium
