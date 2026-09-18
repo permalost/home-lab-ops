@@ -24,6 +24,7 @@ platforms:
     enabled: true
     extra:
       port: 8644
+      rate_limit: 4 # default 30/min; backend serializes 1 inference at a time
       routes:
         cluster-alert:
           # No secret key here on purpose — confirmed live that a var
@@ -41,12 +42,21 @@ platforms:
           events: ["alert"]
           skills: ["maintenance"]
           deliver: telegram
+          # _render_prompt can't loop over `alerts`, only substitute
+          # {dotted.path}s — and commonLabels/commonAnnotations are empty
+          # once a group spans namespaces (group_by is alertname-only), so
+          # the old template leaked its own placeholder text. {__raw__}
+          # dumps the full payload instead.
           prompt: |
-            Alert: {commonLabels.alertname} ({status})
-            Namespace: {commonLabels.namespace}
-            Severity: {commonLabels.severity}
-            {commonAnnotations.description}
-            Investigate using the k8s tools and report what you find.
+            Alertmanager group {groupLabels.alertname} — status {status}.
+            {truncatedAlerts} further alert(s) were omitted from this payload.
+
+            {__raw__}
+
+            Each entry under `alerts` carries its own labels.namespace,
+            labels.pod and annotations.description — this group may span
+            several namespaces, so do not assume a shared one. Investigate
+            using the k8s tools and report what you find.
 
 model:
   provider: custom

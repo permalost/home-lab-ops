@@ -77,3 +77,6 @@ kube-linter lint ./kubernetes/ --config .kube-linter.yaml \
 echo "INFO - Validating Talos talconfig schema"
 talhelper validate talconfig clusters/orion/talconfig.yaml
 # Full render + talosctl validate requires the age key; run locally with: task talos:validate
+
+echo "INFO - Checking hermes-hearth/vkms webhook secret parity"
+bash scripts/check-webhook-secret-parity.sh

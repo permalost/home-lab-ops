@@ -42,8 +42,8 @@ Two receivers match every `warning`/`critical` alert independently
   `alertmanager-hermes` (mounted by `alertmanager.spec.secrets` at
   `/etc/vm/secrets/alertmanager-hermes/token`). That token must stay
   byte-identical to hermes-hearth's `hermesWebhookSecret`
-  (`apps/hermes-hearth/secret.yaml`) — see the comment in
-  `alertmanager-hermes.sops.yaml` for how to keep them in sync.
+  (`apps/hermes-hearth/secret.yaml`) — checked by
+  `scripts/check-webhook-secret-parity.sh`, part of `task gen:validate`.
 
 ## Troubleshooting
 
