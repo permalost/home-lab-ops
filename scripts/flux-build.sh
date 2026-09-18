@@ -67,9 +67,9 @@ fi
 
 # Flux skips substitution on resources annotated/labelled
 # kustomize.toolkit.fluxcd.io/substitute: disabled — filter those out before
-# substituting so runtime-only ${VAR} refs (e.g. hermes-hearth's
-# ${WEBHOOK_SECRET}, expanded by Hermes itself, not Flux) aren't reported as
-# unresolved.
+# substituting so any runtime-only ${VAR} ref left in a resource isn't
+# reported as unresolved. (hermes-hearth's WEBHOOK_SECRET no longer needs
+# this — see #175 — but other apps may still opt out this way.)
 SUBST_SCOPE='select((.metadata.annotations."kustomize.toolkit.fluxcd.io/substitute" // .metadata.labels."kustomize.toolkit.fluxcd.io/substitute" // "") != "disabled")'
 
 # Python-based ${VAR} substitution (cross-platform, no envsubst dependency).
