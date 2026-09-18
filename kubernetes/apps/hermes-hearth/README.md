@@ -135,3 +135,37 @@ gethomepage.dev annotations surface it under "AI".
 
 See `hermes-sage/README.md` — identical failure modes (both talk to the
 same external LLM model).
+
+### Alertmanager "connection refused" to the webhook port
+
+`AlertmanagerFailedToSendAlerts` / `AlertmanagerClusterFailedToSendAlerts`
+firing with `connection refused` on `10.141.57.198:8644` (2026-09-17): the
+git state was correct (config.yaml, Service, deployment all agreed on 8644)
+— the gateway process inside the pod predated the config change and was
+still listening on the old port, so nothing answered on 8644. Alertmanager
+only sends when an alert actually fires, so the dead path stays invisible
+until a real alert surfaces it via the FailedToSend meta-alerts.
+
+Diagnosis from inside the pod (`kubectl exec -n hermes-hearth deploy/... --`):
+
+    # What the config says the webhook port is:
+    grep -B2 -A3 'port: 8644' /opt/data/config.yaml
+
+    # What is actually listening (no ss/lsof in the image — parse
+    # /proc/net/tcp directly; 0A = LISTEN, port is hex):
+    python3 -c "print(sorted({int(l.split()[1].split(':')[1],16) \\
+        for f in ('/proc/net/tcp','/proc/net/tcp6') \\
+        for l in open(f).read().splitlines()[1:] \\
+        if l.split()[3]=='0A'}))"
+
+If the configured port is missing from the listener set, the process is
+stale relative to config.yaml. Restart the gateway service so s6 respawns
+it with a fresh process that re-reads config (dashboard sessions run under
+a separate service and are unaffected):
+
+    s6-svc -t /run/service/gateway-default
+
+Verify with the listener one-liner above — the configured port must appear.
+Alertmanager's retries then succeed on their own and the FailedToSend
+alerts resolve. (Verified live 2026-09-17: pre-restart listeners were
+8642+9119, post-restart 8642+8644+9119.)
