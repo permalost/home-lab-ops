@@ -69,6 +69,31 @@ alertmanager:
     ingressClassName: cilium
     hosts:
       - "alertmanager.${domain}"
+# Talos issues these static pods' serving certs for localhost/127.0.0.1
+# only, so TLS verification fails once bind-address is opened up to scrape
+# by node IP (see clusters/orion/patches/controlplane). Overriding the full
+# endpoints list, not just tlsConfig, because Helm replaces lists wholesale
+# rather than merging by index.
+kubeControllerManager:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true
+kubeScheduler:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true
 grafana:
   # Needs internet access to install (see infrastructure/victorialogs).
   plugins:
