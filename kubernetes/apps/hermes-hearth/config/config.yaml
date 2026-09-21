@@ -56,7 +56,9 @@ platforms:
             Each entry under `alerts` carries its own labels.namespace,
             labels.pod and annotations.description — this group may span
             several namespaces, so do not assume a shared one. Investigate
-            using the k8s tools and report what you find.
+            using the k8s tools and report what you find. Never quote a
+            credential, token, or password you find into your reply or a
+            PR — name where it is, not what it is.
 
 model:
   provider: custom
