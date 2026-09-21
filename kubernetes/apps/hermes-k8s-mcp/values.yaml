@@ -17,15 +17,13 @@ rbac:
         name: view
         external: true
 
-extraArgs:
-  - --read-only
-  - --disable-destructive
-
 config:
-  # core-only: drops the `config` toolset, which is where
-  # configuration_view lives — it returns this server's own live
-  # ServiceAccount bearer token to whatever calls it. Nothing the
-  # maintenance skill uses is outside `core`.
+  # TOML keys, not CLI flags — this image dropped --read-only/
+  # --disable-destructive; --config/--config-dir is all that's left.
+  read_only: true
+  disable_destructive: true
+  # core-only: drops configuration_view, which leaks this server's own
+  # live ServiceAccount token.
   toolsets: [core]
   denied_resources:
     - group: ""
