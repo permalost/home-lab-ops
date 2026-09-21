@@ -3,3 +3,10 @@
   value:
     - name: TZ
       value: America/Boise
+    # esl_fetch_label's --oauth2-bearer arg; expanded by sh, not HA, so
+    # the token never appears in HA's own logged command line.
+    - name: HOMEBOX_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: api-keys
+          key: homeboxApiKey
