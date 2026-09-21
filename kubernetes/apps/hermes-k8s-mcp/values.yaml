@@ -18,17 +18,12 @@ rbac:
         external: true
 
 config:
-  # read_only/disable_destructive used to be --read-only/--disable-destructive
-  # CLI flags; the image at this pin only accepts --config/--config-dir now
-  # (confirmed live: --read-only crash-looped the pod with "unknown flag").
-  # Verified these TOML keys against the actual binary — it rejects unknown
-  # config keys outright, so a typo here fails loud, not silent.
+  # TOML keys, not CLI flags — this image dropped --read-only/
+  # --disable-destructive; --config/--config-dir is all that's left.
   read_only: true
   disable_destructive: true
-  # core-only: drops the `config` toolset, which is where
-  # configuration_view lives — it returns this server's own live
-  # ServiceAccount bearer token to whatever calls it. Nothing the
-  # maintenance skill uses is outside `core`.
+  # core-only: drops configuration_view, which leaks this server's own
+  # live ServiceAccount token.
   toolsets: [core]
   denied_resources:
     - group: ""
