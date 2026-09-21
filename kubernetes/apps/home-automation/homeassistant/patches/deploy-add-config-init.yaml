@@ -10,6 +10,15 @@
     configMap:
       name: settings
 - op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: secrets-src
+    secret:
+      secretName: api-keys
+      items:
+        - key: secrets.yaml
+          path: secrets.yaml
+- op: add
   path: /spec/template/spec/initContainers
   value:
     - name: init-config
@@ -111,11 +120,19 @@
         #        reproduced on ODE6C1FE/ODBE112B over both the ble-proxy
         #        and a laptop's local Bluetooth, fixed instantly by fresh
         #        CR2450s.
+        #   17 - GROCY-API-KEY and the Homebox bearer token moved out of
+        #        configuration.yaml into a Secret (api-keys), referenced via
+        #        !secret grocy_api_key and $HOMEBOX_API_KEY — ConfigMaps
+        #        aren't blocked from hermes-hearth's read-only cluster
+        #        access, Secrets are. Also dropped the never-paired
+        #        od4540e4 placeholder tag_map entry.
         [
-          "SEED_VERSION=16; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
+          "SEED_VERSION=17; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp /src/configuration.yaml /dest/configuration.yaml && chmod +w /dest/configuration.yaml && mkdir -p /dest/.storage && cp /src/http-storage.json /dest/.storage/http && chmod +w /dest/.storage/http && echo \"$SEED_VERSION\" > /dest/.seed-version; fi; cp /src/automations_gitops.yaml /dest/automations_gitops.yaml && chmod +w /dest/automations_gitops.yaml; cp /secrets-src/secrets.yaml /dest/secrets.yaml && chmod +w /dest/secrets.yaml; mkdir -p /dest/esl; for f in automations.yaml scenes.yaml scripts.yaml; do [ -f \"/dest/$f\" ] || { echo '[]' > \"/dest/$f\" && chmod +w \"/dest/$f\"; }; done",
         ]
       volumeMounts:
         - name: config-src
           mountPath: /src
+        - name: secrets-src
+          mountPath: /secrets-src
         - name: data
           mountPath: /dest

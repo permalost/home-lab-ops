@@ -1,5 +1,12 @@
 fullnameOverride: k8s-mcp
 
+# No numbered tags are ever published for this image (quay.io only ships
+# "latest"), so pin by digest instead — image.version accepts either and
+# the chart renders a `@sha256:...` ref when given one. Digest of `latest`
+# as of 2026-09-20; bump deliberately, don't drop back to a bare tag.
+image:
+  version: "sha256:71d2cf69429874fc972388284e337fd892eabdbaea632ca6dcab3b3bdeb2fec4"
+
 ingress:
   enabled: false
 
@@ -15,6 +22,11 @@ extraArgs:
   - --disable-destructive
 
 config:
+  # core-only: drops the `config` toolset, which is where
+  # configuration_view lives — it returns this server's own live
+  # ServiceAccount bearer token to whatever calls it. Nothing the
+  # maintenance skill uses is outside `core`.
+  toolsets: [core]
   denied_resources:
     - group: ""
       version: v1
