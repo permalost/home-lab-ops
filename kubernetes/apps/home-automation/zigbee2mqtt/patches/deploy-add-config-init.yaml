@@ -45,13 +45,8 @@
       value: America/Boise
     - name: ZIGBEE2MQTT_DATA
       value: /data
-    # mqtt.password was in configuration.yaml in plaintext at runtime —
-    # Secrets are the one resource kind hermes-hearth's k8s-mcp can't read
-    # (ConfigMaps, which held it before, aren't blocked). Z2M applies env
-    # overrides over the loaded file; if a Z2M-triggered config rewrite
-    # ever persists this back to disk, switch to Z2M's `!secret.yaml
-    # password` file-reference form instead (same init-container-copy
-    # mechanic as hermes-hearth's own skills ConfigMap mount).
+    # Moved out of configuration.yaml — ConfigMaps aren't secret-protected
+    # from hermes-hearth's k8s-mcp read access, Secrets are.
     - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
       valueFrom:
         secretKeyRef:
