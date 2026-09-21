@@ -17,11 +17,14 @@ rbac:
         name: view
         external: true
 
-extraArgs:
-  - --read-only
-  - --disable-destructive
-
 config:
+  # read_only/disable_destructive used to be --read-only/--disable-destructive
+  # CLI flags; the image at this pin only accepts --config/--config-dir now
+  # (confirmed live: --read-only crash-looped the pod with "unknown flag").
+  # Verified these TOML keys against the actual binary — it rejects unknown
+  # config keys outright, so a typo here fails loud, not silent.
+  read_only: true
+  disable_destructive: true
   # core-only: drops the `config` toolset, which is where
   # configuration_view lives — it returns this server's own live
   # ServiceAccount bearer token to whatever calls it. Nothing the
