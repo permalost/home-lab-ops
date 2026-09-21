@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: kubernetes-mcp-server
-      version: "*"
+      version: "0.1.0" # only version ever published — see values.yaml for why the image is digest-pinned instead of tag-pinned
       sourceRef:
         kind: HelmRepository
         name: hermes-k8s-mcp
