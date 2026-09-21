@@ -1,7 +1,7 @@
 ---
 name: homebox
 description: "Homebox inventory API via curl. Items, locations, labels."
-version: 0.1.0
+version: 0.2.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -135,6 +135,14 @@ Don't wait for the hourly poll — trigger the automation directly with the
 - A 401 usually means `HOMEBOX_API_KEY` is wrong/unset; a connection error
   usually means `HOMEBOX_URL` or in-cluster DNS is wrong — check which
   before assuming the other.
+
+## Handling sensitive data
+
+This repo is public — anything in a PR body, commit message, or chat
+reply is permanent and indexable. Never quote `$HOMEBOX_API_KEY` or any
+other credential-shaped string verbatim. Item/location data describes the
+contents of a private home; summarize what's asked for, don't dump full
+inventories into chat.
 
 ## Verification
 
