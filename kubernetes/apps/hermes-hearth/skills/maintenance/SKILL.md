@@ -6,7 +6,10 @@ author: community
 license: MIT
 platforms: [linux, macos, windows]
 prerequisites:
-  env_vars: [GITHUB_TOKEN]
+  # Not GITHUB_TOKEN: that name is reserved by Hermes itself and gets
+  # unconditionally stripped from terminal subprocesses — see
+  # patches/deploy-add-env.yaml for why.
+  env_vars: [MAINTENANCE_GITHUB_TOKEN]
   commands: [git, curl]
 metadata:
   hermes:
@@ -96,7 +99,7 @@ rewritten after the fact.
 1. **Clone once, reuse after.** `/opt/data/repos/home-lab-ops` persists
    across restarts (it's on the PVC). If it's not there yet:
    ```bash
-   git clone https://x-access-token:$GITHUB_TOKEN@github.com/permalost/home-lab-ops.git /opt/data/repos/home-lab-ops
+   git clone https://x-access-token:$MAINTENANCE_GITHUB_TOKEN@github.com/permalost/home-lab-ops.git /opt/data/repos/home-lab-ops
    ```
    Otherwise `cd` into it and `git fetch origin && git checkout main && git pull`.
 2. **Branch.** `git checkout -b fix/<short-slug> origin/main` — name it
@@ -110,7 +113,7 @@ rewritten after the fact.
    ```
 5. **Open the PR** via the REST API (no `gh` CLI in this image):
    ```bash
-   curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" \
+   curl -X POST -H "Authorization: Bearer $MAINTENANCE_GITHUB_TOKEN" \
      -H "Accept: application/vnd.github+json" \
      https://api.github.com/repos/permalost/home-lab-ops/pulls \
      -d '{"title":"fix: ...","head":"fix/<short-slug>","base":"main","body":"..."}'
