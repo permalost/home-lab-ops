@@ -107,7 +107,16 @@
     # Fine-grained PAT, home-lab-ops only, Contents+PRs read/write — see
     # skills/maintenance/SKILL.md "Opening a fix". main itself is what
     # actually blocks a direct landing, not this scope.
-    - name: GITHUB_TOKEN
+    #
+    # NOT named GITHUB_TOKEN: that name is reserved by Hermes itself (its
+    # Skills Hub feature) and gets unconditionally stripped from every
+    # terminal-tool subprocess by tools/env_passthrough.py's provider-
+    # credential blocklist (GHSA-rhgp-j443-p4rf) — no skill declaration or
+    # config.yaml override can pass it through. Confirmed live: every
+    # maintenance-skill session since #172 logged "refusing to register
+    # Hermes provider credential 'GITHUB_TOKEN'" and every git push/PR
+    # curl ran with an empty token. Renaming, not the value, fixes it.
+    - name: MAINTENANCE_GITHUB_TOKEN
       valueFrom:
         secretKeyRef:
           name: hermes-secrets
