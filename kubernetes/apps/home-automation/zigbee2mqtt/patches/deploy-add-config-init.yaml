@@ -29,7 +29,9 @@
           #   2 - 2.x schema migration (homeassistant object, frontend.enabled, etc.)
           #   3 - serial.adapter: zstack (zigbee-herdsman 10.x can't
           #       auto-discover the adapter type over tcp:// anymore)
-          "SEED_VERSION=3; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.z2m-seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && echo \"$SEED_VERSION\" > /dest/.z2m-seed-version; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
+          #   4 - mqtt.password removed from configuration.yaml (moved to
+          #       a Secret, see ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD below)
+          "SEED_VERSION=4; if [ ! -f /dest/configuration.yaml ] || [ \"$(cat /dest/.z2m-seed-version 2>/dev/null)\" != \"$SEED_VERSION\" ]; then cp -Lr /src/* /dest/ && chmod -R +w /dest/ && echo \"$SEED_VERSION\" > /dest/.z2m-seed-version; fi; rm -f /dest/devices.yaml /dest/groups.yaml",
         ]
       volumeMounts:
         - name: config-src
@@ -43,3 +45,10 @@
       value: America/Boise
     - name: ZIGBEE2MQTT_DATA
       value: /data
+    # Moved out of configuration.yaml — ConfigMaps aren't secret-protected
+    # from hermes-hearth's k8s-mcp read access, Secrets are.
+    - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mqtt
+          key: password
