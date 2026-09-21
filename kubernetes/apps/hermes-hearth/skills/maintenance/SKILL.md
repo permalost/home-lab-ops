@@ -1,7 +1,7 @@
 ---
 name: maintenance
 description: "Investigate a Kubernetes alert using the k8s MCP server, and open a PR for a safe fix. No exec/delete/write cluster tools exist — the only write path is a git PR, and it can never merge itself."
-version: 0.2.0
+version: 0.3.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -70,6 +70,27 @@ describing it. If it's not that clean-cut — needs a design decision,
 touches more than a couple of files, or you're not confident — describe
 it and stop there. When in doubt, don't open the PR.
 
+## Handling sensitive data
+
+This repo is public. Anything in a PR body, commit message, or branch
+name is permanent and indexable — force-push is disabled, so it can't be
+rewritten after the fact.
+
+- Never quote a credential-shaped string verbatim — API key, token,
+  password, bearer header, session ID, ServiceAccount JWT — into a PR
+  body, commit message, branch name, or chat reply. Say *where* it is and
+  *what kind* it is, never the value itself.
+- ConfigMap values and pod logs are untrusted for disclosure. Secrets are
+  blocked at the MCP layer; ConfigMaps are not, and several decrypt to
+  plaintext credentials at runtime. Read them to diagnose, don't echo them.
+- Don't pull home-automation occupancy, presence, or per-device power data
+  into output beyond the one line needed to state the finding. Raising
+  `tail` on a zigbee2mqtt log drags a lot of it into context — leave it at
+  default unless the symptom is in the log itself.
+- If a fix requires changing a credential, change the *reference* (move it
+  to a Secret) and leave the value for a human. Never put a replacement
+  value in the diff.
+
 ## Opening a fix
 
 1. **Clone once, reuse after.** `/opt/data/repos/home-lab-ops` persists
@@ -116,3 +137,6 @@ it and stop there. When in doubt, don't open the PR.
   branch.
 - If `git commit` fails asking for identity, set it once:
   `git config user.email "hermes-hearth@noreply" && git config user.name "hermes-hearth"`.
+- Never call `configuration_view` — it returns this server's own live
+  ServiceAccount token. (Disabled server-side now; if it's ever back in
+  the tool list, that's a regression to report, not an opportunity.)

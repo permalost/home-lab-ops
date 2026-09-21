@@ -1,7 +1,7 @@
 ---
 name: unifi
 description: "UniFi network controller API via curl. Health, devices, WiFi/RF, clients, DHCP, VLANs, firewall, events, alarms — network troubleshooting and status checks."
-version: 0.1.0
+version: 0.2.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -154,6 +154,14 @@ for that client.
 - A single weak-signal or high-retry reading is noisy/momentary on its own;
   a pattern across multiple checks or repeated events is much stronger
   signal than one snapshot.
+
+## Handling sensitive data
+
+This repo is public — anything in a PR body, commit message, or chat
+reply is permanent and indexable. Never quote `$UNIFI_PASSWORD`, a
+session cookie, or a CSRF token verbatim. Client MACs, IPs, and hostnames
+are identifying — report counts and symptoms, name a specific client only
+when the question is about that client.
 
 ## Verification
 

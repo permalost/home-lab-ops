@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ../../webapp/base
   - configMap.yaml
+  - secret.yaml
 
 namePrefix: zigbee2mqtt-
 
