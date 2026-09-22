@@ -23,7 +23,7 @@ components:
 images:
   - name: my-app
     newName: couchdb
-    newTag: "3.5.0"
+    newTag: "3.5.2"
 
 configMapGenerator:
   - name: config
