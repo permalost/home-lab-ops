@@ -1,7 +1,19 @@
-# Official couchdb image runs as the non-root `couchdb` user (uid/gid 5984).
-# fsGroup makes the CSI driver chown the PVC's mount to that gid so it can
-# write /opt/couchdb/data.
+# Official couchdb image runs as the non-root `couchdb` user (uid/gid 5984)
+# by default, but only if told to — with no runAsUser, the container starts
+# as root instead. The entrypoint then chown -Rs /opt/couchdb to couchdb:
+# couchdb, which includes the ConfigMap-mounted local.ini — ConfigMap
+# volumes are always read-only, so that chown fails. `-f` only silences the
+# message, not find -exec's exit code, so `set -e` kills the entrypoint
+# before it prints anything. Confirmed live: running the entrypoint as uid
+# 5984 (skipping the chown block entirely, per its own root-vs-non-root
+# branch) boots cleanly.
+#
+# runAsUser/runAsNonRoot skip that chown pass altogether. fsGroup still
+# makes the CSI driver chown the PVC's mount to that gid so it can write
+# /opt/couchdb/data.
 - op: add
   path: /spec/template/spec/securityContext
   value:
+    runAsUser: 5984
+    runAsNonRoot: true
     fsGroup: 5984
