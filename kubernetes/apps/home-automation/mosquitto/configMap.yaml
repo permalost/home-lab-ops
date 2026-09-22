@@ -4,7 +4,7 @@ metadata:
     name: mosquitto-base-config
 data:
     mosquitto.conf: ENC[AES256_GCM,data:RhpKY+ETwbgEKqdC5AW5VnCEzZFrTvU7ATQjz3+Aa8k9bPFmSsKvPoSEgGM3W4VS62KHKUOQkxw70j0eL6lU4bduvBFIQYgthNmnhRkeOX+YMl2ANgioUPWurdPsh2R5+X69rnLvsmTPBBJxNyWu/een4uSRIgKAtd8tEbO9T2+EZG/fYGWFOm8=,iv:MbE7Gsm4r1Cqtkxi6JfxF01ztTjv3Aw5vnzs7vhbDAw=,tag:fY/s7H6+z+7KL0QZxSUiOA==,type:str]
-    password_file: ENC[AES256_GCM,data:HIbFGw/tmNws0X7dWi5jshH7yBdlXHqvlwXpJA3jiWo4lcRA2zwogd3kTezdNK+2c5394FVo75TXQ3sSi0tQrLNmKnWPZXkm+Gb8NoItec7Xk9zS0KshCSR6ipYNb2IBZBRu06fIkC0lpXbzq8y02aCgfZh9zzOlT/rxwE7H1T4Tz3NNvMnKWErGoeHXn9uKaLyfwpxf96aogyjHWiStEtWur6ZeGvNSXBTGmB5qHgxnQkRvH8GybeYiWAG/1GRu6+WNDU7xUoIpqt9p6u2MaK/uQz5GX71p88q/Dg1JS/MDXHqrJsBJmI9Ulr7yVv5l6qVIY29/6lY8knWrk2gg7S7ljVezUjfbAGbwRLeAOGpIMAf1+MrinFcuNXKwL3aDLCDXbuxRrpKK8H5Xyk4mZdqz1qNBhsJz9yAIIMwFrYlo9ixzKcmmUQ==,iv:IwrVoaNBAiQB0YQZuLdByrhb96bokAJ/tB1wWjN1sQI=,tag:q7EHS9+5sNRKSaqcBwBttg==,type:str]
+    password_file: ENC[AES256_GCM,data:G0KjoTo1aHh+yYiHMBH5aUxzQWlhaqPHCU6CGanmdj8olTJ7qQQiPP+LrqPuNf+5bYb/M8xwU9Gv/nBc9eTjdUqfsU883bJOU41vAHpgzOKUO55pdgShVSj8GBYkaFOBj67mtsCujZrxq/uIcBAUZQ0zEfot1UolDl0O0pFYFLFQfgo/4KRLH9uv1mOzsFKodPEktWRQgRSj0cXIjbhdt/UHxlrMbUq+XPb+8CywvulcW3RWA4IxGe+E8cZIwr8ETlsVrZmU3lh1OZ5yoC9cknU6ydcLzPBEr6BKoZZcwZbfWnn9TEXOD/t1zRitDdcnP9N7DUlWRYUdvCUGFaA=,iv:c7ViXyaez/up7t6Oc6eSJX7+3gGznE9UAAFa8QeC2mM=,tag:Np+RtJJ2rQmFsa7pC1NwrQ==,type:str]
 sops:
     age:
         - enc: |
@@ -17,6 +17,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-09-21T02:05:08Z"
-    mac: ENC[AES256_GCM,data:OhkpNSePNGAsa8KmhkkDsmzQT2Z9Wq+MIyLeSjTnxT17TIjyRqOQpVRgEAZtCnn6pme1gTmT3IOpOi/nF5Q2EmIpsKnxaJiiYWX3v+tSVYIY2hBuwyIShBGc81G9+x5YaWlH5kBXvz8PmKyv0j53rzKHUDvqWM0cuRi5p/Dm9PQ=,iv:PEO4oQb9kLcajMkg7Sjm8Mm5rrBYZqCK8VkBdKAPy+o=,tag:IPICOoMGF1FFAhZJngCcGw==,type:str]
+    lastmodified: "2026-09-22T16:45:39Z"
+    mac: ENC[AES256_GCM,data:h0fK9rw+b4KZC5HEEeZThYyPvNtL+7xDrLfYeTw0Vb06ym2RCJiRSVPoQ1WP4h+JInUANDWySNleYbtgswr7ilUR9dRGx7IYPjJ33KQvtJZoP4GVVbsz2rHev9J2w5zlM1nKIMmXlYtiLkNk8x0lBd6M6J1IRaSxrCPeq9tyCGI=,iv:WKLxqVKyqbeDCsQ5IfqtsfzWyC22gl+7v8/SOXHIss8=,tag:F+aVjvha88aYK28J9Qj8LA==,type:str]
     version: 3.13.3
