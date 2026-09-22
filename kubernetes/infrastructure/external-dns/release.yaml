@@ -32,7 +32,6 @@ spec:
     policy: upsert-only
     extraArgs:
       - --pihole-server=http://pihole-svc.pihole.svc.cluster.local
-      - --pihole-api-version=6
     env:
       - name: EXTERNAL_DNS_PIHOLE_PASSWORD
         valueFrom:
