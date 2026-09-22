@@ -40,6 +40,10 @@ patches:
       name: deploy
     path: patches/deploy-add-rotator-sidecar.yaml
   - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
       kind: Service
       name: svc
     path: patches/svc-loadbalancer.yaml
