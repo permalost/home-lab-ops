@@ -1,0 +1,7 @@
+# TEMPORARY — diagnosing the silent instant-exit crash loop (exit code 1,
+# zero log output, both couchdb:3.5.0 and 3.5.2). Overrides the entrypoint
+# so the pod stays up for a live `kubectl exec` look instead of crashing,
+# without guessing at a fix blind. Revert once diagnosed.
+- op: add
+  path: /spec/template/spec/containers/0/command
+  value: ["sh", "-c", "sleep infinity"]
