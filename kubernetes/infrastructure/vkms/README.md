@@ -10,7 +10,7 @@ Full observability stack: VictoriaMetrics for metrics storage, vmagent for scrap
 
 Values are managed in `values.yaml` (plain YAML, not inline in the HelmRelease). Kustomize generates a hashed ConfigMap from it so that changing values triggers automatic HelmRelease re-reconciliation.
 
-All five components expose ingress on the `cilium` ingressClass at `<component>.${domain}`. Hostnames are injected at reconciliation time from `cluster-settings.yaml`.
+All five components expose ingress on the `cilium` ingressClass at `<component>.${domain}`. Hostnames are injected at reconciliation time from `cluster-settings.yaml`. Grafana and Alertmanager are homepage-listed under "Cluster" via `gethomepage.dev/*` annotations; the other three aren't.
 
 ## Dependencies
 

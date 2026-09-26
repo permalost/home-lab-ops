@@ -126,6 +126,19 @@ path (`WEBHOOK_ENABLED`+`WEBHOOK_SECRET`, both in
 `patches/deploy-add-env.yaml`) — `platforms.webhook.enabled: true` in
 `config.yaml` alone isn't enough to wire up the secret, only the listener.
 
+## TokenTelemetry
+
+Sidecars (`deploy-add-tokentelemetry.yaml`) run
+[TokenTelemetry](https://github.com/VasiHemanth/tokentelemetry) read-only
+against this pod's own `/opt/data` — no aggregation with `hermes-sage`.
+`tt-data` is an emptyDir; the tool's own config resets on restart.
+
+UI at `tt-hearth.${domain}` (`sectionName: https`). API gets its own
+HTTPRoute on a second Gateway listener, `https-tt`:18000
+(`infrastructure/gateway/gateway.yaml`) — the upstream frontend calls
+`window.location.hostname:18000` directly, not a relative path. No auth
+(`TT_AUTH_TOKEN` unset), matching Grafana/Headlamp/Ceph.
+
 ## Ingress / Endpoints
 
 Exposed via the `httproute` component at `hermes-hearth.${domain}`.

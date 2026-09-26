@@ -1,0 +1,16 @@
+# TokenTelemetry UI + API ports, alongside the API port (svc-target-port.yaml),
+# dashboard port (svc-dashboard-port.yaml) and webhook port (svc-webhook-port.yaml).
+- op: add
+  path: /spec/ports/-
+  value:
+    name: tt-ui
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+- op: add
+  path: /spec/ports/-
+  value:
+    name: tt-api
+    port: 8000
+    protocol: TCP
+    targetPort: 8000

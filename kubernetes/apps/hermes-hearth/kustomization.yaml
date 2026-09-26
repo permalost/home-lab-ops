@@ -5,6 +5,8 @@ resources:
   - ../webapp/base
   - namespace.yaml
   - secret.yaml
+  - tokentelemetry-httproute.yaml
+  - tokentelemetry-api-httproute.yaml
 
 components:
   - ../webapp/components/httproute      # optional external access (dashboard) — see README
@@ -86,6 +88,10 @@ patches:
       name: svc
     path: patches/svc-webhook-port.yaml
   - target:
+      kind: Service
+      name: svc
+    path: patches/svc-tokentelemetry-ports.yaml
+  - target:
       kind: HTTPRoute
       name: route
     path: patches/httproute-add-homepage-annotations.yaml
@@ -93,3 +99,7 @@ patches:
       kind: HTTPRoute
       name: route
     path: patches/httproute-dashboard-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-tokentelemetry.yaml
