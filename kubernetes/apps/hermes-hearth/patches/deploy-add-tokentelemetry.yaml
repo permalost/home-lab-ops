@@ -1,0 +1,83 @@
+# TokenTelemetry sidecars, reading /opt/data read-only (see README.md
+# "TokenTelemetry"). HOME is required — the base image has no passwd entry
+# for uid 1000 and Path.home() would raise. tt-data (emptyDir) is scratch,
+# not persisted.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: tt-data
+    emptyDir: {}
+- op: add
+  path: /spec/template/spec/containers/-
+  value:
+    name: tokentelemetry-api
+    image: ghcr.io/vasihemanth/tokentelemetry-backend:sha-665f136
+    env:
+      - name: TT_HOST
+        value: "0.0.0.0"
+      - name: TT_API_PORT
+        value: "8000"
+      - name: HERMES_HOME
+        value: /opt/data
+      - name: HOME
+        value: /tt-data
+      - name: TOKENTELEMETRY_DATA_DIR
+        value: /tt-data
+      - name: TOKENTELEMETRY_HOME
+        value: /tt-data
+      - name: TT_ALLOWED_ORIGINS
+        value: "https://tt-hearth.${domain}"
+      - name: TT_NO_TELEMETRY
+        value: "1"
+      - name: TT_NO_UPDATE_CHECK
+        value: "1"
+    ports:
+      - name: tt-api
+        containerPort: 8000
+        protocol: TCP
+    volumeMounts:
+      - name: data
+        mountPath: /opt/data
+        readOnly: true
+      - name: tt-data
+        mountPath: /tt-data
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+- op: add
+  path: /spec/template/spec/containers/-
+  value:
+    name: tokentelemetry-ui
+    image: ghcr.io/vasihemanth/tokentelemetry-frontend:sha-665f136
+    env:
+      - name: PORT
+        value: "3000"
+      - name: HOSTNAME
+        value: "0.0.0.0"
+    ports:
+      - name: tt-ui
+        containerPort: 3000
+        protocol: TCP
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
