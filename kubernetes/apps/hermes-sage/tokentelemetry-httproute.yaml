@@ -1,0 +1,23 @@
+# TokenTelemetry UI — see README.md "TokenTelemetry". API route is
+# tokentelemetry-api-httproute.yaml.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: tokentelemetry-ui
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Tokens (Sage)"
+    gethomepage.dev/description: "Token usage, sessions, cron & gateway health"
+    gethomepage.dev/group: "AI"
+    gethomepage.dev/icon: "mdi-chart-timeline-variant"
+spec:
+  parentRefs:
+    - name: ${gatewayName}
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - "tt-sage.${domain}"
+  rules:
+    - backendRefs:
+        - name: svc
+          port: 3000

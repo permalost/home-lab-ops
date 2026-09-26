@@ -67,6 +67,12 @@ alertmanager:
   ingress:
     enabled: true
     ingressClassName: cilium
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/name: "Alertmanager"
+      gethomepage.dev/description: "Cluster alert routing"
+      gethomepage.dev/group: "Cluster"
+      gethomepage.dev/icon: "alertmanager.png"
     hosts:
       - "alertmanager.${domain}"
 # Talos issues these static pods' serving certs for localhost/127.0.0.1
@@ -103,6 +109,11 @@ grafana:
     ingressClassName: cilium
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/name: "Grafana"
+      gethomepage.dev/description: "Metrics & logs dashboards"
+      gethomepage.dev/group: "Cluster"
+      gethomepage.dev/icon: "grafana.png"
     hosts:
       - "grafana.${domain}"
     tls:

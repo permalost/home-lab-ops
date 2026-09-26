@@ -33,3 +33,22 @@ spec:
           selector:
             matchLabels:
               gateway.networking.k8s.io/access: "true"
+    # TokenTelemetry's frontend calls its API at window.location.hostname on
+    # this fixed port (baked into the upstream image) — cross-origin from 443,
+    # so it needs its own listener rather than a path route.
+    - name: https-tt
+      protocol: HTTPS
+      port: 18000
+      hostname: "*.${domain}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: wildcard-orion-tls
+            namespace: cilium
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.networking.k8s.io/access: "true"
