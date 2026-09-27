@@ -6,7 +6,6 @@ resources:
   - namespace.yaml
   - secret.yaml
   - tokentelemetry-httproute.yaml
-  - tokentelemetry-api-httproute.yaml
 
 components:
   - ../webapp/components/httproute      # optional external access (dashboard) — see README
