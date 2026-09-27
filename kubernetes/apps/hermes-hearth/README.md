@@ -133,11 +133,17 @@ Sidecars (`deploy-add-tokentelemetry.yaml`) run
 against this pod's own `/opt/data` — no aggregation with `hermes-sage`.
 `tt-data` is an emptyDir; the tool's own config resets on restart.
 
-UI at `tt-hearth.${domain}` (`sectionName: https`). API gets its own
-HTTPRoute on a second Gateway listener, `https-tt`:18000
-(`infrastructure/gateway/gateway.yaml`) — the upstream frontend calls
-`window.location.hostname:18000` directly, not a relative path. No auth
-(`TT_AUTH_TOKEN` unset), matching Grafana/Headlamp/Ceph.
+UI at `tt-hearth.${domain}` (`sectionName: https`), but currently shows no
+data — the API has no external route. A second Gateway listener
+(`https-tt:18000`, needed because the upstream frontend calls
+`window.location.hostname:18000` directly, not a relative path) broke the
+whole Gateway: Cilium multiplexes every listener onto one internal Envoy
+listener keyed by SNI, and two listeners sharing the same wildcard hostname
+produced overlapping filter chains that got NACK'd, taking down every route
+on the Gateway — reverted (see git log). Fix pending: fork tokentelemetry
+with a `/api` build-arg and path-route it on the existing `https` listener
+instead of adding a second one. No auth planned (`TT_AUTH_TOKEN` unset),
+matching Grafana/Headlamp/Ceph.
 
 ## Ingress / Endpoints
 
