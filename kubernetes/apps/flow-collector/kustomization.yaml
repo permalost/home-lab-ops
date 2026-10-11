@@ -20,7 +20,7 @@ components:
 images:
   - name: my-app
     newName: netsampler/goflow2
-    newTag: v2.2.6
+    newTag: v2.2.7
 
 patches:
   - target:
