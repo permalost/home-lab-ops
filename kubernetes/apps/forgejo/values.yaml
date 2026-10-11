@@ -1,0 +1,45 @@
+# TLS terminates at Gateway/orion. HTTPS git only; SSH is not exposed.
+gitea:
+  admin:
+    existingSecret: forgejo-admin
+    email: admin@git.${domain}
+  config:
+    APP_NAME: Forgejo
+    server:
+      DOMAIN: git.${domain}
+      ROOT_URL: https://git.${domain}/
+      DISABLE_SSH: true
+    database:
+      DB_TYPE: postgres
+      HOST: forgejo-db-rw.forgejo.svc:5432
+    service:
+      DISABLE_REGISTRATION: true
+    actions:
+      ENABLED: true
+  additionalConfigFromEnvs:
+    - name: FORGEJO__database__NAME
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-db-app
+          key: dbname
+    - name: FORGEJO__database__USER
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-db-app
+          key: user
+    - name: FORGEJO__database__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-db-app
+          key: password
+persistence:
+  size: 20Gi
+  storageClass: rook-ceph-block
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: ${gatewayName}
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - git.${domain}
