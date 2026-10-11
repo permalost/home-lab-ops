@@ -1,0 +1,19 @@
+---
+version: "3"
+
+# Talks to the live Forgejo API (admin creds from kubernetes/apps/forgejo/secret.yaml).
+tasks:
+  bootstrap:
+    desc: Create the wdo org, agents team and bot users (idempotent)
+    cmds:
+      - bash scripts/forgejo.sh bootstrap
+  tokens:
+    desc: "(Re)mint bot tokens into a sops secret. Optional: OUT=<path>"
+    cmds:
+      - bash scripts/forgejo.sh tokens {{if .OUT}}OUT={{.OUT}}{{end}}
+  protect:
+    desc: "Protect a repo's main branch. Required: REPO, TIER (auto|human)"
+    requires:
+      vars: [REPO, TIER]
+    cmds:
+      - bash scripts/forgejo.sh protect REPO={{.REPO}} TIER={{.TIER}}

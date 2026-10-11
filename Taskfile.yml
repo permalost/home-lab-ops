@@ -16,6 +16,7 @@ includes:
   flux: .taskfiles/Flux/Tasks.yml
   talos: .taskfiles/Talos/Tasks.yml
   test: .taskfiles/LocalTest/Tasks.yml
+  forgejo: .taskfiles/Forgejo/Tasks.yml
 
 tasks:
   default:
