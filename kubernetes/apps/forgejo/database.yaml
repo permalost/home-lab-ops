@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: forgejo-db
+spec:
+  instances: 1
+  storage:
+    size: 10Gi
+    storageClass: rook-ceph-block
+  # Creates Secret forgejo-db-app (host, dbname, user, password) for the chart.
+  bootstrap:
+    initdb:
+      database: forgejo
+      owner: forgejo
