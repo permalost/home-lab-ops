@@ -37,6 +37,12 @@ persistence:
   storageClass: rook-ceph-block
 httpRoute:
   enabled: true
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Forgejo"
+    gethomepage.dev/description: "Git forge"
+    gethomepage.dev/group: "Platform"
+    gethomepage.dev/icon: "forgejo.png"
   parentRefs:
     - name: ${gatewayName}
       namespace: gateway
