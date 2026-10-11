@@ -1,0 +1,2 @@
+# Single operator replica; clusters it manages carry their own HA.
+replicaCount: 1
