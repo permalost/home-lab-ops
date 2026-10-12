@@ -5,8 +5,8 @@
 #
 # Usage:
 #   forgejo.sh bootstrap            # org + team + bot users (idempotent)
-#   forgejo.sh tokens [OUT=<path>]  # (re)mint bot tokens into a sops secret
-#   forgejo.sh protect REPO=<name> TIER=auto|human
+#   forgejo.sh tokens [BOT=<agent-...>] [OUT=<path>]  # mint all bot tokens, or rotate one, in the sops secret
+#   forgejo.sh protect REPO=<name> TIER=auto|gated|human [CHECKS=<ctx,ctx>]
 #   forgejo.sh runner-token         # org runner registration token -> sops secret
 #   forgejo.sh token-copy BOT=<agent-...>  # copy a bot token to the clipboard (never printed)
 #   forgejo.sh migrate PROJECT=<dir under ~/code> [TIER=auto|human] [DRY_RUN=1]
@@ -27,8 +27,7 @@ ADMIN_PW="$(sops -d --extract '["stringData"]["password"]' "$SECRET")"
 BOTS="agent-dev agent-review agent-docs agent-chief"
 scopes() {
   case "$1" in
-    agent-chief) echo "read:repository,write:issue,read:organization,read:user" ;;
-    *)           echo "write:repository,write:issue,read:organization,read:user" ;;
+    *) echo "write:repository,write:issue,read:organization,read:user" ;;
   esac
 }
 
@@ -64,19 +63,34 @@ bootstrap() {
   done
 }
 
+# Mint (replace) a bot's "paperclip" token; prints it. Uses a throwaway password for the bot.
+mint_token() {
+  local bot="$1" pw tok
+  pw="$(rand)"
+  admin PATCH "/admin/users/$bot" "{\"login_name\":\"$bot\",\"source_id\":0,\"password\":\"$pw\",\"must_change_password\":false}" >/dev/null
+  api "$bot" "$pw" DELETE "/users/$bot/tokens/paperclip" >/dev/null 2>&1 || true
+  tok="$(api "$bot" "$pw" POST "/users/$bot/tokens" \
+    "{\"name\":\"paperclip\",\"scopes\":[\"$(scopes "$bot" | sed 's/,/","/g')\"]}" | jq -r .sha1)"
+  admin PATCH "/admin/users/$bot" "{\"login_name\":\"$bot\",\"source_id\":0,\"password\":\"$(rand)\",\"must_change_password\":false}" >/dev/null
+  printf '%s' "$tok"
+}
+
+# With BOT=<name>: rotate only that bot's token inside the existing sops file (others untouched).
+# Without: mint all bots and write a fresh file (revokes every previous token).
 tokens() {
-  local out="${OUT:-$REPO_ROOT/kubernetes/apps/paperclip/forgejo-tokens.sops.yaml}" tmp bot pw tok
+  local out="${OUT:-$REPO_ROOT/kubernetes/apps/paperclip/forgejo-tokens.sops.yaml}" tmp bot tok key
+  if [ -n "${BOT:-}" ]; then
+    [ -f "$out" ] || { echo "$out does not exist; run tokens without BOT first" >&2; exit 1; }
+    key="$(echo "$BOT" | tr a-z- A-Z_)_TOKEN"
+    mint_token "$BOT" | jq -Rs . | sops set --value-stdin "$out" "[\"stringData\"][\"$key\"]"
+    echo "rotated $BOT in $out (other tokens unchanged; update any Paperclip secret that used it)"
+    return
+  fi
   tmp="$(mktemp)"
   printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: forgejo-bot-tokens\ntype: Opaque\nstringData:\n' > "$tmp"
   for bot in $BOTS; do
-    # Fresh throwaway password per run: token creation needs the bot's own basic auth.
-    pw="$(rand)"
-    admin PATCH "/admin/users/$bot" "{\"login_name\":\"$bot\",\"source_id\":0,\"password\":\"$pw\",\"must_change_password\":false}" >/dev/null
-    api "$bot" "$pw" DELETE "/users/$bot/tokens/paperclip" >/dev/null 2>&1 || true
-    tok="$(api "$bot" "$pw" POST "/users/$bot/tokens" \
-      "{\"name\":\"paperclip\",\"scopes\":[\"$(scopes "$bot" | sed 's/,/","/g')\"]}" | jq -r .sha1)"
+    tok="$(mint_token "$bot")"
     printf '  %s: %s\n' "$(echo "$bot" | tr a-z- A-Z_)_TOKEN" "$tok" >> "$tmp"
-    admin PATCH "/admin/users/$bot" "{\"login_name\":\"$bot\",\"source_id\":0,\"password\":\"$(rand)\",\"must_change_password\":false}" >/dev/null
     echo "token $bot minted"
   done
   mkdir -p "$(dirname "$out")"
@@ -100,12 +114,20 @@ protect() {
   local repo="$1" tier="$2" body
   case "$tier" in
     auto)  body='{"approvals_whitelist_username":["agent-review"],"merge_whitelist_usernames":["'"$ADMIN"'","agent-chief"]}' ;;
+    # gated: needs agent-review (lgtm) AND the admin (approve). agent-dev, the author, schedules the
+    # auto-merge when it opens the PR; Forgejo only runs it once both approvals exist.
+    gated) body='{"approvals_whitelist_username":["agent-review","'"$ADMIN"'"],"merge_whitelist_usernames":["agent-dev"],"required_approvals":2}' ;;
     human) body='{"approvals_whitelist_username":["'"$ADMIN"'"],"merge_whitelist_usernames":["'"$ADMIN"'"]}' ;;
-    *) echo "TIER must be auto or human" >&2; exit 1 ;;
+    *) echo "TIER must be auto, gated or human" >&2; exit 1 ;;
   esac
-  body="$(jq -c '. + {rule_name:"main",enable_push:false,enable_approvals_whitelist:true,required_approvals:1,enable_merge_whitelist:true,block_on_rejected_reviews:true,dismiss_stale_approvals:true}' <<<"$body")"
+  body="$(jq -c '{required_approvals:1} + . + {rule_name:"main",enable_push:false,enable_approvals_whitelist:true,enable_merge_whitelist:true,block_on_rejected_reviews:true,dismiss_stale_approvals:true}' <<<"$body")"
+  if [ -n "${CHECKS:-}" ]; then
+    body="$(jq -c --arg c "$CHECKS" '. + {enable_status_check:true, status_check_contexts:($c|split(","))}' <<<"$body")"
+  fi
   admin DELETE "/repos/$ORG/$repo/branch_protections/main" >/dev/null 2>&1 || true
   admin POST "/repos/$ORG/$repo/branch_protections" "$body" >/dev/null
+  # Squash only, so each merge commit is the PR title (conventional commits).
+  admin PATCH "/repos/$ORG/$repo" '{"default_merge_style":"squash","allow_squash_merge":true,"allow_merge_commits":false,"allow_rebase":false,"allow_rebase_explicit":false,"default_delete_branch_after_merge":true}' >/dev/null
   echo "$ORG/$repo main protected (tier/$tier)"
 }
 
@@ -153,11 +175,12 @@ migrate() {
 }
 
 cmd="${1:-}"; shift || true
-REPO=""; BOT=""; TIER=""; OUT=""; PROJECT=""; SRC=""; DRY_RUN=""
+REPO=""; BOT=""; TIER=""; CHECKS=""; OUT=""; PROJECT=""; SRC=""; DRY_RUN=""
 for arg in "$@"; do
   case "$arg" in
     REPO=*) REPO="${arg#REPO=}" ;;
     BOT=*)  BOT="${arg#BOT=}" ;;
+    CHECKS=*) CHECKS="${arg#CHECKS=}" ;;
     TIER=*) TIER="${arg#TIER=}" ;;
     OUT=*)  OUT="${arg#OUT=}" ;;
     PROJECT=*) PROJECT="${arg#PROJECT=}" ;;
