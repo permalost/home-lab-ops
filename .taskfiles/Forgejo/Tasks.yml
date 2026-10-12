@@ -21,3 +21,9 @@ tasks:
     desc: Write the wdo org runner registration token into the runner's sops secret
     cmds:
       - bash scripts/forgejo.sh runner-token
+  migrate:
+    desc: "Import ~/code/<PROJECT> into wdo/<PROJECT> (deny-list + gitleaks). Optional: TIER=auto|human, DRY_RUN=1"
+    requires:
+      vars: [PROJECT]
+    cmds:
+      - bash scripts/forgejo.sh migrate PROJECT={{.PROJECT}} {{if .TIER}}TIER={{.TIER}}{{end}} {{if .DRY_RUN}}DRY_RUN={{.DRY_RUN}}{{end}}

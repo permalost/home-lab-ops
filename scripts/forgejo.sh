@@ -8,6 +8,7 @@
 #   forgejo.sh tokens [OUT=<path>]  # (re)mint bot tokens into a sops secret
 #   forgejo.sh protect REPO=<name> TIER=auto|human
 #   forgejo.sh runner-token         # org runner registration token -> sops secret
+#   forgejo.sh migrate PROJECT=<dir under ~/code> [TIER=auto|human] [DRY_RUN=1]
 
 set -o errexit
 set -o nounset
@@ -107,13 +108,50 @@ protect() {
   echo "$ORG/$repo main protected (tier/$tier)"
 }
 
+# Copy ~/code/<project> through a deny-list, secret-scan it, push it to wdo/<project>,
+# then protect main. Refuses to touch a repo that already exists.
+migrate() {
+  local project="$1" tier="$2" src="${SRC:-$HOME/code/$1}" stage askpass size
+  [ -d "$src" ] || { echo "no such directory: $src" >&2; exit 1; }
+  stage="$(mktemp -d)"; askpass="$(mktemp)"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$stage' '$askpass'" EXIT
+  rsync -a --filter=':- .gitignore' \
+    --exclude='.git/' --exclude='.env*' --exclude='secrets/' --exclude='*.pem' --exclude='*.key' \
+    --exclude='*.crt' --exclude='auth.json' --exclude='*.sops.*' --exclude='.venv/' --exclude='venv/' \
+    --exclude='env/' --exclude='node_modules/' --exclude='__pycache__/' --exclude='.claude/' \
+    --exclude='reports/' --exclude='data/' --exclude='*.log' --exclude='.DS_Store' "$src/" "$stage/"
+  size="$(du -sk "$stage" | cut -f1)"
+  [ "$size" -lt 51200 ] || { echo "staged copy is ${size}K (>50M); aborting" >&2; exit 1; }
+  echo "files to push ($size K):"; (cd "$stage" && find . -type f | sort | sed 's/^/  /')
+  docker run --rm -v "$stage:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.28.0 dir /repo --no-banner --redact \
+    || { echo "gitleaks found secrets; nothing pushed" >&2; exit 1; }
+  if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run: nothing pushed"; return; fi
+  ! exists "/repos/$ORG/$project" || { echo "$ORG/$project already exists; use the PR flow" >&2; exit 1; }
+
+  admin POST "/orgs/$ORG/repos" "{\"name\":\"$project\",\"private\":true,\"default_branch\":\"main\"}" >/dev/null
+  printf '#!/bin/sh\ncase "$1" in Username*) echo "$FORGEJO_GIT_USER";; *) echo "$FORGEJO_GIT_PW";; esac\n' > "$askpass"
+  chmod +x "$askpass"
+  git -C "$stage" init -q -b main
+  git -C "$stage" add -A
+  git -C "$stage" commit -q -m "Import $project from local"
+  git -C "$stage" remote add origin "${BASE%/api/v1}/$ORG/$project.git"
+  FORGEJO_GIT_USER="$ADMIN" FORGEJO_GIT_PW="$ADMIN_PW" GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 \
+    git -C "$stage" push -q -u origin main
+  echo "pushed $ORG/$project"
+  protect "$project" "$tier"
+}
+
 cmd="${1:-}"; shift || true
-REPO=""; TIER=""; OUT=""
+REPO=""; TIER=""; OUT=""; PROJECT=""; SRC=""; DRY_RUN=""
 for arg in "$@"; do
   case "$arg" in
     REPO=*) REPO="${arg#REPO=}" ;;
     TIER=*) TIER="${arg#TIER=}" ;;
     OUT=*)  OUT="${arg#OUT=}" ;;
+    PROJECT=*) PROJECT="${arg#PROJECT=}" ;;
+    SRC=*)  SRC="${arg#SRC=}" ;;
+    DRY_RUN=*) DRY_RUN="${arg#DRY_RUN=}" ;;
     *) echo "Unknown argument: $arg" >&2; exit 1 ;;
   esac
 done
@@ -121,6 +159,7 @@ case "$cmd" in
   bootstrap) bootstrap ;;
   tokens)    tokens ;;
   runner-token) runner_token ;;
+  migrate)   migrate "${PROJECT:?PROJECT required}" "${TIER:-auto}" ;;
   protect)   protect "${REPO:?REPO required}" "${TIER:?TIER required}" ;;
   *) sed -n '2,10p' "${BASH_SOURCE[0]}"; exit 1 ;;
 esac
