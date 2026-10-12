@@ -8,6 +8,7 @@
 #   forgejo.sh tokens [OUT=<path>]  # (re)mint bot tokens into a sops secret
 #   forgejo.sh protect REPO=<name> TIER=auto|human
 #   forgejo.sh runner-token         # org runner registration token -> sops secret
+#   forgejo.sh token-copy BOT=<agent-...>  # copy a bot token to the clipboard (never printed)
 #   forgejo.sh migrate PROJECT=<dir under ~/code> [TIER=auto|human] [DRY_RUN=1]
 
 set -o errexit
@@ -108,6 +109,15 @@ protect() {
   echo "$ORG/$repo main protected (tier/$tier)"
 }
 
+# Put one bot's token on the clipboard, to paste into that agent's secret in Paperclip.
+token_copy() {
+  local bot="$1" key tok
+  key="$(echo "$bot" | tr a-z- A-Z_)_TOKEN"
+  tok="$(sops -d --extract "[\"stringData\"][\"$key\"]" "$REPO_ROOT/kubernetes/apps/paperclip/forgejo-tokens.sops.yaml")"
+  printf '%s' "$tok" | pbcopy
+  echo "$bot token copied to clipboard (${#tok} characters)"
+}
+
 # Copy ~/code/<project> through a deny-list, secret-scan it, push it to wdo/<project>,
 # then protect main. Refuses to touch a repo that already exists.
 migrate() {
@@ -143,10 +153,11 @@ migrate() {
 }
 
 cmd="${1:-}"; shift || true
-REPO=""; TIER=""; OUT=""; PROJECT=""; SRC=""; DRY_RUN=""
+REPO=""; BOT=""; TIER=""; OUT=""; PROJECT=""; SRC=""; DRY_RUN=""
 for arg in "$@"; do
   case "$arg" in
     REPO=*) REPO="${arg#REPO=}" ;;
+    BOT=*)  BOT="${arg#BOT=}" ;;
     TIER=*) TIER="${arg#TIER=}" ;;
     OUT=*)  OUT="${arg#OUT=}" ;;
     PROJECT=*) PROJECT="${arg#PROJECT=}" ;;
@@ -159,6 +170,7 @@ case "$cmd" in
   bootstrap) bootstrap ;;
   tokens)    tokens ;;
   runner-token) runner_token ;;
+  token-copy) token_copy "${BOT:?BOT required}" ;;
   migrate)   migrate "${PROJECT:?PROJECT required}" "${TIER:-auto}" ;;
   protect)   protect "${REPO:?REPO required}" "${TIER:?TIER required}" ;;
   *) sed -n '2,10p' "${BASH_SOURCE[0]}"; exit 1 ;;

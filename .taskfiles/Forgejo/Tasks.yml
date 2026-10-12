@@ -27,3 +27,9 @@ tasks:
       vars: [PROJECT]
     cmds:
       - bash scripts/forgejo.sh migrate PROJECT={{.PROJECT}} {{if .TIER}}TIER={{.TIER}}{{end}} {{if .DRY_RUN}}DRY_RUN={{.DRY_RUN}}{{end}}
+  token-copy:
+    desc: "Copy a bot's token to the clipboard (never printed). Required: BOT (e.g. agent-dev)"
+    requires:
+      vars: [BOT]
+    cmds:
+      - bash scripts/forgejo.sh token-copy BOT={{.BOT}}
