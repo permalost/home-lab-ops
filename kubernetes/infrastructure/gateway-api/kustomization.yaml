@@ -7,3 +7,4 @@ resources:
   - grpcroutes.yaml
   - backendtlspolicies.yaml
   - referencegrants.yaml
+  - tlsroutes.yaml

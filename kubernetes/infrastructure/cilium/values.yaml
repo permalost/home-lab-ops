@@ -26,8 +26,10 @@ cgroup:
 k8sServiceHost: localhost
 k8sServicePort: 7445
 # Gateway API CRDs are NOT bundled with Cilium ≥1.16.
-# They are installed separately via kubernetes/infrastructure/gateway-api/
-# and must exist before this HelmRelease runs (gateway-api Kustomization has no deps).
+# They are installed separately via kubernetes/infrastructure/gateway-api/ and must exist before
+# the operator starts (the cilium Kustomization depends on gateway-api). Cilium 1.20 needs the
+# v1.6.x standard CRDs, all seven including tlsroutes (see Cilium's Gateway API docs for the
+# required version when bumping Cilium).
 gatewayAPI:
   enabled: true
   enableAlpn: true
@@ -40,6 +42,11 @@ gatewayAPI:
 operator:
   replicas: 1
   rollOutPods: true
+  # The operator checks the Gateway API CRDs only at startup and disables its Gateway controller if
+  # they are missing or too old. Changing this value rolls the operator (and only the operator) so it
+  # re-checks: bump it whenever the CRD version in infrastructure/gateway-api changes.
+  podAnnotations:
+    gateway-api-crds: v1.6.3
 hubble:
   enabled: true
   relay:
