@@ -24,27 +24,17 @@ The UI's "Connect a model" step only accepts a real `claude auth login` or an An
 
 ## Local-model agents (OpenCode on the Spark GLM)
 
-The "New agent" form cannot create these: it presets an OpenRouter connection for OpenCode, which is
-only compatible with `openrouter/...` models ("Select an AI connection compatible with this harness
-and model"), has no "no connection" option and no env editor. The server has no such rule, so:
+The "New agent" form cannot create these (it forces an OpenRouter connection for OpenCode), so
+agents are hired through the API with `task agent` in the **`wdo/agent-playbook`** repo on Forgejo,
+which also has the full explanation and the roster. What lives here is the server side:
 
-1. **Provider:** `PAPERCLIP_OPENCODE_PROVIDERS` in `deployment.yaml` defines provider `spark`
-   (OpenAI-compatible, `main.external-endpoints`, `limit.output: 8192` because the endpoint needs a
-   `max_tokens` cap). The adapter reads it from the server env as well as the agent env; models are
-   `spark/<model-id>`. Model discovery does not see it, but the image sets
-   `OPENCODE_ALLOW_ALL_MODELS=true`, so a typed model is accepted.
-2. **Hire through the API:** `npx paperclipai auth login --api-base https://paperclip.${domain}` once,
-   then `task paperclip:agent` (`scripts/paperclip-agent.sh`). It posts to `/agent-hires` (approval
-   on: lands in Approvals; direct `/agents` is refused with 409), binds the bot's Forgejo token as a
-   secret, and sets instructions from the `agent-playbook` repo.
-3. **Check without creating anything:** `POST /api/companies/{id}/adapters/opencode_local/test-environment`
-   with `{"adapterConfig":{"model":"spark/GLM-5.3-Flash-EXL3"}}` runs the real probe
-   (`opencode_hello_probe_passed`).
-
-```sh
-task paperclip:agent NAME=Hobbes ROLE=engineer ADAPTER=opencode_local MODEL=spark/GLM-5.3-Flash-EXL3 \
-  BOT=agent-dev PLAYBOOK_FILE=agents/developer.md REPORTS_TO=Spiff TITLE=Developer BUDGET_CENTS=10000
-```
+- `PAPERCLIP_OPENCODE_PROVIDERS` in `deployment.yaml` defines provider `spark` (OpenAI-compatible,
+  `main.external-endpoints`, `limit.output: 8192` because the endpoint needs a `max_tokens` cap).
+  The adapter reads it from the server env as well as the agent env; models are `spark/<model-id>`.
+- Model discovery does not see it, but the image sets `OPENCODE_ALLOW_ALL_MODELS=true`, so a typed
+  model is accepted.
+- Check a config without creating anything: `POST /api/companies/{id}/adapters/opencode_local/test-environment`
+  with `{"adapterConfig":{"model":"spark/GLM-5.3-Flash-EXL3"}}` (look for `opencode_hello_probe_passed`).
 
 ## Keep in mind
 
