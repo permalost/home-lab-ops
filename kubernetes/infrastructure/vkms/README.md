@@ -50,3 +50,13 @@ Two receivers match every `warning`/`critical` alert independently
 - **HelmRelease not re-reconciling after values change:** Check that the ConfigMap hash changed (the ConfigMap name should have a new suffix). If not, the kustomizeconfig.yaml `nameReference` transformer may not be applied.
 - **Grafana dashboards empty:** vmagent may not be scraping. Check `kubectl -n monitoring logs -l app=vmagent`.
 - **Alertmanager not firing:** Verify alert routing config and that vmalert is connecting to vmsingle.
+
+## Gateway HTTPS probe
+
+`alerting/blackbox-exporter.yaml` + `probes/gateway-probes.yaml` probe `https://{git,paperclip,homepage}.${domain}`
+from inside the cluster every 30 s (the path the runner and agents use). `alerting/gateway-rules.yaml`:
+`GatewayHTTPSDown` (critical, 2 m), `GatewayHTTPSCertExpiringSoon` (warning, served cert < 14 d),
+`GatewayProbeMissing` (warning, the probe itself stopped reporting). Critical/warning alerts reach Hearth
+and Telegram; the `GatewayHTTPSDown` description is a runbook for Hearth. The probe lives in its own
+Kustomization (`vkms-probes`) because it needs `${domain}` substitution, which would mangle the `$labels`
+templates in `alerting/`. To add a hostname, add it to `probes/gateway-probes.yaml`.

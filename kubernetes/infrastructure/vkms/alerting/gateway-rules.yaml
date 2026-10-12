@@ -1,0 +1,46 @@
+# Alerts on the gateway probe (../probes/gateway-probes.yaml). severity=critical/warning routes to
+# Hearth (webhook-hermes) and Telegram. The description doubles as a runbook for Hearth's maintenance skill.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: gateway-https
+spec:
+  groups:
+    - name: gateway-https
+      rules:
+        - alert: GatewayHTTPSDown
+          expr: probe_success{job="gateway-https"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "HTTPS through the orion gateway is failing for {{ $labels.instance }}"
+            description: |-
+              A client cannot complete HTTPS to {{ $labels.instance }} (probed from inside the cluster).
+              Likely causes: the Cilium operator's Gateway API controller is not running (Gateway API CRDs
+              too old/missing for the Cilium release), the synced TLS secret is missing, DNS (Pi-hole,
+              CoreDNS) or Envoy. Read-only checks:
+              kubectl -n cilium logs deploy/cilium-operator | grep -i gateway (look for "Required GatewayAPI
+              resources are not found"); kubectl -n cilium-secrets get secrets; kubectl get gatewayclass,gateway -A;
+              Pi-hole and CoreDNS pods. History: 2026-10-12 Cilium 1.20 needed Gateway API CRDs v1.6.3
+              (kubernetes/infrastructure/gateway-api/README.md). Fixes go through git and Flux.
+        - alert: GatewayHTTPSCertExpiringSoon
+          expr: (probe_ssl_earliest_cert_expiry{job="gateway-https"} - time()) < 14 * 24 * 3600
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "The certificate served for {{ $labels.instance }} expires in under 14 days"
+            description: >-
+              cert-manager should have renewed it by now. Check certificates and certificaterequests, the
+              ClusterIssuers, and that the Gateway controller synced the renewed secret to cilium-secrets.
+        - alert: GatewayProbeMissing
+          expr: absent(probe_success{job="gateway-https"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "The gateway HTTPS probe is not reporting"
+            description: >-
+              No probe_success series for job gateway-https: the blackbox exporter (monitoring/blackbox-exporter),
+              the VMProbe, or vmagent is broken, so a gateway outage would go unnoticed.
