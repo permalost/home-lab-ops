@@ -11,6 +11,8 @@ spec:
   wait: true
   dependsOn:
     - name: cluster-settings
+    # Cilium's Gateway API controller needs these CRDs (v1.6.x for Cilium 1.20) before it starts.
+    - name: gateway-api
   sourceRef:
     kind: GitRepository
     name: flux-system
