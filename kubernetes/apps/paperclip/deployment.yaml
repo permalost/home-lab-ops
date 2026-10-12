@@ -55,11 +55,12 @@ spec:
                 secretKeyRef:
                   name: paperclip-secrets
                   key: PAPERCLIP_AGENT_JWT_SECRET
-            # From `claude setup-token`; claude_local agents stay unauthenticated until it is set.
+            # From `claude setup-token` via `task paperclip:claude-token`; claude_local
+            # agents stay unauthenticated until it is set.
             - name: CLAUDE_CODE_OAUTH_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: paperclip-claude
+                  name: paperclip-secrets
                   key: CLAUDE_CODE_OAUTH_TOKEN
                   optional: true
           # The hostname guard 403s the kubelet's default Host (pod IP).
