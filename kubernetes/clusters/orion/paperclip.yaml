@@ -1,0 +1,28 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: paperclip
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cilium
+    - name: gateway
+    - name: cnpg
+    - name: cluster-settings
+  interval: 1h
+  retryInterval: 1m
+  timeout: 10m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/paperclip
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

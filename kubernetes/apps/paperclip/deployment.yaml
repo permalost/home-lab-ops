@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperclip
+  annotations:
+    ignore-check.kube-linter.io/env-value-from: "paperclip-db-app is created by CNPG at runtime"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paperclip
+  template:
+    metadata:
+      labels:
+        app: paperclip
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: paperclip
+          image: ghcr.io/paperclipai/paperclip:2026.1005.0
+          ports:
+            - name: http
+              containerPort: 3100
+          env:
+            - name: PAPERCLIP_CONFIG
+              value: /config/config.json
+            - name: PAPERCLIP_DEPLOYMENT_MODE
+              value: authenticated
+            - name: PAPERCLIP_DEPLOYMENT_EXPOSURE
+              value: private
+            - name: PAPERCLIP_PUBLIC_URL
+              value: https://paperclip.${domain}
+            - name: BETTER_AUTH_URL
+              value: https://paperclip.${domain}
+            - name: PAPERCLIP_TELEMETRY_DISABLED
+              value: "true"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-db-app
+                  key: uri
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: PAPERCLIP_AGENT_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-secrets
+                  key: PAPERCLIP_AGENT_JWT_SECRET
+            # From `claude setup-token`; claude_local agents stay unauthenticated until it is set.
+            - name: CLAUDE_CODE_OAUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-claude
+                  key: CLAUDE_CODE_OAUTH_TOKEN
+                  optional: true
+          # The hostname guard 403s the kubelet's default Host (pod IP).
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders: [{name: Host, value: "paperclip.${domain}"}]
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders: [{name: Host, value: "paperclip.${domain}"}]
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {memory: 4Gi}
+          volumeMounts:
+            - {name: data, mountPath: /paperclip}
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperclip-data
+        - name: config
+          configMap:
+            name: paperclip-config
+        - name: tmp
+          emptyDir: {}

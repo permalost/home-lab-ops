@@ -1,0 +1,63 @@
+# Mints the one-time first-admin invite; read the URL from this Job's logs
+# (`kubectl -n paperclip logs job/paperclip-bootstrap-ceo`). A no-op once an admin exists.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: paperclip-bootstrap-ceo
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+    ignore-check.kube-linter.io/env-value-from: "paperclip-db-app is created by CNPG at runtime"
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 604800
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: bootstrap
+          image: ghcr.io/paperclipai/paperclip:2026.1005.0
+          workingDir: /app
+          # The CLI exits 0 even when it fails, so wait for the server (migrations
+          # applied) and fail on its error line.
+          command: ["sh", "-c"]
+          args:
+            - |
+              until curl -fs -H "Host: paperclip.${domain}" http://paperclip:3100/api/health >/dev/null; do sleep 5; done
+              node cli/node_modules/tsx/dist/cli.mjs cli/src/index.ts auth bootstrap-ceo \
+                --base-url https://paperclip.${domain} | tee /tmp/out
+              ! grep -q "Could not create" /tmp/out
+          env:
+            - name: HOME
+              value: /tmp
+            - name: PAPERCLIP_CONFIG
+              value: /config/config.json
+            - name: PAPERCLIP_DEPLOYMENT_MODE
+              value: authenticated
+            - name: PAPERCLIP_DEPLOYMENT_EXPOSURE
+              value: private
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: paperclip-db-app
+                  key: uri
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          configMap:
+            name: paperclip-config
+        - name: tmp
+          emptyDir: {}
