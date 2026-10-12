@@ -17,3 +17,7 @@ tasks:
       vars: [REPO, TIER]
     cmds:
       - bash scripts/forgejo.sh protect REPO={{.REPO}} TIER={{.TIER}}
+  runner-token:
+    desc: Write the wdo org runner registration token into the runner's sops secret
+    cmds:
+      - bash scripts/forgejo.sh runner-token

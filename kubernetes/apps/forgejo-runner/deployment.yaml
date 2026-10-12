@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forgejo-runner
+  annotations:
+    ignore-check.kube-linter.io/privileged-container: "dind sidecar; namespace is isolated by egress policy"
+    ignore-check.kube-linter.io/run-as-non-root: "dind sidecar runs as root"
+    ignore-check.kube-linter.io/no-read-only-root-fs: "docker daemon writes its own root"
+    ignore-check.kube-linter.io/privilege-escalation-container: "dind sidecar"
+    ignore-check.kube-linter.io/docker-sock: "socket is the pod-private dind socket, not the host's"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: forgejo-runner
+  template:
+    metadata:
+      labels:
+        app: forgejo-runner
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: runner
+          image: code.forgejo.org/forgejo/runner:13.2.0
+          command: ["sh", "-ec"]
+          # Register once (state persists in /data), then serve jobs.
+          args:
+            - |
+              [ -f /data/.runner ] || forgejo-runner register --no-interactive \
+                --instance "$FORGEJO_URL" --token "$REGISTRATION_TOKEN" \
+                --name "$RUNNER_NAME" -c /config/config.yaml
+              exec forgejo-runner daemon -c /config/config.yaml
+          env:
+            - name: FORGEJO_URL
+              value: http://forgejo-http.forgejo.svc.cluster.local:3000
+            - name: RUNNER_NAME
+              value: orion-runner
+            - name: DOCKER_HOST
+              value: unix:///var/run/docker.sock
+            - name: REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: runner-registration
+                  key: token
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: docker-sock, mountPath: /var/run}
+        - name: dind
+          image: docker:28-dind
+          # Unix socket only (a leading flag makes the entrypoint add tcp:2375), readable by the runner gid.
+          args: ["dockerd", "--host=unix:///var/run/docker.sock", "--group=1000"]
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          securityContext:
+            privileged: true
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {memory: 6Gi}
+          volumeMounts:
+            - {name: docker-sock, mountPath: /var/run}
+            - {name: docker-data, mountPath: /var/lib/docker}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: runner-data
+        - name: config
+          configMap:
+            name: runner-config
+        - name: docker-sock
+          emptyDir: {}
+        - name: docker-data
+          emptyDir:
+            sizeLimit: 30Gi

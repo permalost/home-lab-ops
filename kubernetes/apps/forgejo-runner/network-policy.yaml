@@ -1,0 +1,39 @@
+# Jobs run agent-written code: allow DNS, Forgejo and the internet; block the rest
+# of the cluster and LAN.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: runner-egress
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - {port: "53", protocol: ANY}
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: forgejo
+      toPorts:
+        - ports:
+            - {port: "3000", protocol: TCP}
+    # git.${domain} resolves to the Gateway LB IP; Cilium may match it as the ingress entity.
+    - toCIDR:
+        - ${externalIp}/32
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    - toEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
