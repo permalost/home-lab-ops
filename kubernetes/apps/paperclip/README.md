@@ -42,3 +42,5 @@ which also has the full explanation and the roster. What lives here is the serve
   in the database. Back both up together (no backups are configured yet).
 - A subscription sign-in refreshes itself but can expire; Paperclip then shows a reconnect card.
 - The Spark server handles one request at a time; keep concurrent GLM agent runs low.
+
+Upgrading: see `UPGRADING.md` (workarounds to re-test after a version bump).

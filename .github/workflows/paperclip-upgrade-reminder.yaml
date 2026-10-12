@@ -1,0 +1,43 @@
+---
+name: Paperclip upgrade reminder
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - kubernetes/apps/paperclip/deployment.yaml
+      - kubernetes/apps/paperclip/bootstrap-job.yaml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  remind:
+    name: Remind to re-test the workarounds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment if the image tag changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if ! gh pr diff "$PR" | grep -qE '^[+-].*ghcr\.io/paperclipai/paperclip:'; then
+            echo "Paperclip image tag unchanged; nothing to remind."
+            exit 0
+          fi
+          cat > /tmp/body.md <<'MSG'
+          **Paperclip version change: re-test the workarounds before merging or soon after.**
+
+          This repo carries workarounds for gaps in the Paperclip version we run. See
+          [`kubernetes/apps/paperclip/UPGRADING.md`](https://github.com/REPO/blob/main/kubernetes/apps/paperclip/UPGRADING.md):
+
+          - [ ] Read the release notes for breaking changes
+          - [ ] After deploy: `task upgrade-check HANDOFF=1` in the `wdo/agent-playbook` checkout
+          - [ ] Manual checks from the table (New agent form, connect step)
+          - [ ] Run one real task through Developer and Reviewer
+          - [ ] Remove the workarounds that are no longer needed and update "Validated against"
+          MSG
+          sed -i "s#REPO#$GH_REPO#" /tmp/body.md
+          gh pr comment "$PR" --edit-last --create-if-none --body-file /tmp/body.md
