@@ -1,0 +1,8 @@
+---
+version: "3"
+
+tasks:
+  claude-token:
+    desc: Store the clipboard (from `claude setup-token`) in the Paperclip sops secret
+    cmds:
+      - bash scripts/paperclip-claude-token.sh
