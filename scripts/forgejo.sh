@@ -7,6 +7,7 @@
 #   forgejo.sh bootstrap            # org + team + bot users (idempotent)
 #   forgejo.sh tokens [OUT=<path>]  # (re)mint bot tokens into a sops secret
 #   forgejo.sh protect REPO=<name> TIER=auto|human
+#   forgejo.sh runner-token         # org runner registration token -> sops secret
 
 set -o errexit
 set -o nounset
@@ -82,6 +83,16 @@ tokens() {
   echo "wrote $out (sops-encrypted)"
 }
 
+runner_token() {
+  local out="$REPO_ROOT/kubernetes/apps/forgejo-runner/secret.yaml" tmp tok
+  tok="$(admin GET "/orgs/$ORG/actions/runners/registration-token" | jq -r .token)"
+  tmp="$(mktemp)"
+  printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: runner-registration\ntype: Opaque\nstringData:\n  token: %s\n' "$tok" > "$tmp"
+  sops --encrypt --filename-override "$out" --input-type yaml --output-type yaml "$tmp" > "$out"
+  rm -f "$tmp"
+  echo "wrote $out (sops-encrypted)"
+}
+
 # tier/auto: agent-review approval merges; tier/human: only the admin approves and merges.
 protect() {
   local repo="$1" tier="$2" body
@@ -109,6 +120,7 @@ done
 case "$cmd" in
   bootstrap) bootstrap ;;
   tokens)    tokens ;;
+  runner-token) runner_token ;;
   protect)   protect "${REPO:?REPO required}" "${TIER:?TIER required}" ;;
   *) sed -n '2,10p' "${BASH_SOURCE[0]}"; exit 1 ;;
 esac

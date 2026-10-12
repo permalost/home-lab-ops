@@ -1,0 +1,13 @@
+log:
+  level: info
+runner:
+  file: /data/.runner
+  capacity: 1
+  timeout: 3h
+  labels:
+    - ubuntu-latest:docker://node:22-bookworm
+    - docker:docker://node:22-bookworm
+container:
+  # Mount the dind socket into job containers so workflows can build images.
+  docker_host: automount
+  privileged: false
