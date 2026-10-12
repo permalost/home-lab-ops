@@ -1,0 +1,23 @@
+{
+  "$meta": {"version": 1, "updatedAt": "2026-10-12T00:00:00.000Z", "source": "onboard"},
+  "database": {"mode": "postgres", "backup": {"enabled": false}},
+  "logging": {"mode": "file", "logDir": "/paperclip/instances/default/logs"},
+  "server": {
+    "deploymentMode": "authenticated",
+    "exposure": "private",
+    "bind": "lan",
+    "host": "0.0.0.0",
+    "port": 3100,
+    "allowedHostnames": ["paperclip.${domain}"],
+    "serveUi": true
+  },
+  "telemetry": {"enabled": false},
+  "updates": {"checkEnabled": false},
+  "auth": {"baseUrlMode": "auto", "disableSignUp": false},
+  "storage": {"provider": "local_disk", "localDisk": {"baseDir": "/paperclip/instances/default/data/storage"}},
+  "secrets": {
+    "provider": "local_encrypted",
+    "strictMode": false,
+    "localEncrypted": {"keyFilePath": "/paperclip/instances/default/secrets/master.key"}
+  }
+}

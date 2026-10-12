@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: paperclip-db
+spec:
+  instances: 1
+  storage:
+    size: 10Gi
+    storageClass: rook-ceph-block
+  # Creates Secret paperclip-db-app (uri, user, password, ...).
+  bootstrap:
+    initdb:
+      database: paperclip
+      owner: paperclip
