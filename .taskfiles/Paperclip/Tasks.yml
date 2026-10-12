@@ -1,0 +1,19 @@
+---
+version: "3"
+
+tasks:
+  claude-token:
+    desc: Store the clipboard (from `claude setup-token`) in the Paperclip sops secret
+    cmds:
+      - bash scripts/paperclip-claude-token.sh
+  agent:
+    desc: "Hire an agent via the API. Required: NAME ROLE ADAPTER BOT PLAYBOOK_FILE. Optional: MODEL TITLE REPORTS_TO BUDGET_CENTS ROTATE=1 DRY_RUN=1"
+    requires:
+      vars: [NAME, ROLE, ADAPTER, BOT, PLAYBOOK_FILE]
+    cmds:
+      - >-
+        bash scripts/paperclip-agent.sh create NAME='{{.NAME}}' ROLE={{.ROLE}} ADAPTER={{.ADAPTER}}
+        BOT={{.BOT}} PLAYBOOK_FILE={{.PLAYBOOK_FILE}}
+        {{if .MODEL}}MODEL={{.MODEL}}{{end}} {{if .TITLE}}TITLE='{{.TITLE}}'{{end}}
+        {{if .REPORTS_TO}}REPORTS_TO='{{.REPORTS_TO}}'{{end}} {{if .BUDGET_CENTS}}BUDGET_CENTS={{.BUDGET_CENTS}}{{end}}
+        {{if .ROTATE}}ROTATE={{.ROTATE}}{{end}} {{if .DRY_RUN}}DRY_RUN={{.DRY_RUN}}{{end}}

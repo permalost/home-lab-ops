@@ -45,6 +45,10 @@ spec:
                 secretKeyRef:
                   name: paperclip-db-app
                   key: uri
+            # Custom OpenCode provider for the local GLM (agents use model spark/GLM-5.3-Flash-EXL3).
+            # output=8192: the server rejects requests without a max_tokens cap (see external-endpoints/main).
+            - name: PAPERCLIP_OPENCODE_PROVIDERS
+              value: '{"spark":{"npm":"@ai-sdk/openai-compatible","name":"Spark GLM","options":{"baseURL":"http://main.external-endpoints.svc.cluster.local:8888/v1"},"models":{"GLM-5.3-Flash-EXL3":{"name":"GLM 5.3 Flash","limit":{"context":1000000,"output":8192}}}}}'
             - name: BETTER_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
@@ -55,11 +59,12 @@ spec:
                 secretKeyRef:
                   name: paperclip-secrets
                   key: PAPERCLIP_AGENT_JWT_SECRET
-            # From `claude setup-token`; claude_local agents stay unauthenticated until it is set.
+            # From `claude setup-token` via `task paperclip:claude-token`; claude_local
+            # agents stay unauthenticated until it is set.
             - name: CLAUDE_CODE_OAUTH_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: paperclip-claude
+                  name: paperclip-secrets
                   key: CLAUDE_CODE_OAUTH_TOKEN
                   optional: true
           # The hostname guard 403s the kubelet's default Host (pod IP).
