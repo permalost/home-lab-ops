@@ -1,0 +1,19 @@
+# Own Kustomization (vkms-probes) because it needs ${domain} substitution, which would also mangle the
+# `$labels` templates in ../alerting. Targets are hostnames served by Gateway/orion.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMProbe
+metadata:
+  name: gateway-https
+spec:
+  jobName: gateway-https
+  module: https_2xx
+  interval: 30s
+  scrapeTimeout: 15s
+  vmProberSpec:
+    url: blackbox-exporter.monitoring.svc:9115
+  targets:
+    staticConfig:
+      targets:
+        - https://git.${domain}/api/healthz
+        - https://paperclip.${domain}/api/health
+        - https://homepage.${domain}/

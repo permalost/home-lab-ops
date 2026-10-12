@@ -1,0 +1,84 @@
+# HTTPS prober for the VMProbe in ../probes. Probes run from inside the cluster, the same path the
+# runner and agents use (CoreDNS -> Pi-hole -> gateway LB IP -> TLS).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-exporter
+data:
+  config.yml: |
+    modules:
+      https_2xx:
+        prober: http
+        timeout: 10s
+        http:
+          method: GET
+          fail_if_not_ssl: true
+          follow_redirects: true
+          preferred_ip_protocol: ip4
+          ip_protocol_fallback: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+  labels:
+    app: blackbox-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+  template:
+    metadata:
+      labels:
+        app: blackbox-exporter
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: blackbox-exporter
+          image: quay.io/prometheus/blackbox-exporter:v0.28.0
+          args: ["--config.file=/etc/blackbox_exporter/config.yml"]
+          ports:
+            - name: http
+              containerPort: 9115
+          readinessProbe:
+            httpGet: {path: /-/healthy, port: http}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /-/healthy, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+          volumeMounts:
+            - {name: config, mountPath: /etc/blackbox_exporter, readOnly: true}
+      volumes:
+        - name: config
+          configMap:
+            name: blackbox-exporter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blackbox-exporter
+  labels:
+    app: blackbox-exporter
+spec:
+  selector:
+    app: blackbox-exporter
+  ports:
+    - name: http
+      port: 9115
+      targetPort: http

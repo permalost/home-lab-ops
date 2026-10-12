@@ -46,3 +46,28 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/infrastructure/vkms/alerting
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: vkms-probes
+  namespace: flux-system
+spec:
+  # VMProbe's CRD comes from vkms; the exporter it targets comes from vkms-alerting.
+  dependsOn:
+    - name: vkms
+    - name: vkms-alerting
+    - name: cluster-settings
+  interval: 10m
+  retryInterval: 30s
+  timeout: 1m30s
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/infrastructure/vkms/probes
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
