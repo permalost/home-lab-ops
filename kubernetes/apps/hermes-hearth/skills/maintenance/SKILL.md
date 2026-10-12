@@ -1,7 +1,7 @@
 ---
 name: maintenance
 description: "Investigate a Kubernetes alert using the k8s MCP server, and open a PR for a safe fix. No exec/delete/write cluster tools exist — the only write path is a git PR, and it can never merge itself."
-version: 0.3.0
+version: 0.4.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -9,7 +9,7 @@ prerequisites:
   # Not GITHUB_TOKEN: that name is reserved by Hermes itself and gets
   # unconditionally stripped from terminal subprocesses — see
   # patches/deploy-add-env.yaml for why.
-  env_vars: [MAINTENANCE_GITHUB_TOKEN]
+  env_vars: [MAINTENANCE_GITHUB_TOKEN, PAPERCLIP_API_KEY]
   commands: [git, curl]
 metadata:
   hermes:
@@ -122,6 +122,66 @@ rewritten after the fact.
    what you found, why this is the fix.
 6. **Report the PR URL** (from the API response's `html_url`) in your
    answer. That's the deliverable — not "fixed," a link to review.
+
+## Filing the finding in Paperclip
+
+Every investigation ends with exactly one Paperclip issue, so the work is tracked and a developer agent
+can pick it up later. You are the "Tracer Bullet" agent there (company W.D.O.). Paperclip is private, so
+the issue may carry more detail than a PR, but the credential rules above still apply.
+
+**One issue per alert group per day.** The idempotency key is `alert:<alertname>:<UTC date>`. A repeat of
+the same alert on the same day returns the existing issue (HTTP 200) instead of creating another; say so
+in your reply and don't file a second one.
+
+**Step 1: build the body with Python** (this image has no `jq`). Put all free text inside the quoted
+heredoc so nothing from alert text or pod logs is interpreted by the shell, keep the lines flush left
+(no leading spaces), and summarize rather than pasting raw log lines:
+
+```bash
+python3 - <<'PY' > /tmp/paperclip-issue.json
+import json, datetime
+alertname = "<alertname>"
+day = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+description = """## What's wrong
+<the underlying cause>
+
+## Evidence
+<one or two specific findings>
+
+## Suggested fix
+<enough detail that a human or developer agent can act on it>
+
+## Affected
+<namespace / workload>
+
+<PR link, if you opened one>
+
+Filed by Hearth from alert <alertname> (<severity>).
+"""
+print(json.dumps({
+    "title": "[alert] " + alertname + ": <one-line diagnosis>",
+    "description": description,
+    "status": "backlog",
+    "priority": "high",  # critical -> high, warning -> medium
+    "idempotencyKey": "alert:" + alertname + ":" + day,
+}))
+PY
+```
+
+**Step 2: post it.** The `Host` header is required (Paperclip's hostname guard rejects the in-cluster name):
+
+```bash
+curl -sS -X POST "$PAPERCLIP_API_URL/api/companies/$PAPERCLIP_COMPANY_ID/issues" \
+  -H "Host: $PAPERCLIP_HOST" -H "Authorization: Bearer $PAPERCLIP_API_KEY" \
+  -H "Content-Type: application/json" --data @/tmp/paperclip-issue.json
+```
+
+The response's `identifier` (e.g. `WDO-12`) is the issue to cite.
+
+**Rules.** Never assign the issue and never use a status other than `backlog`: a human or the CEO agent
+decides who works on it. Report the identifier next to the diagnosis (and the PR link, if any). If filing
+fails (non-2xx or a connection error), say so plainly with the HTTP status and retry at most once; the
+investigation still stands, so don't hide it behind the failure.
 
 ## Pitfalls
 

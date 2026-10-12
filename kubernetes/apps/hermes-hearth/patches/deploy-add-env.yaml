@@ -121,3 +121,19 @@
         secretKeyRef:
           name: hermes-secrets
           key: GITHUB_TOKEN
+    #
+    # Paperclip (company W.D.O.): the maintenance skill files each alert investigation there as a
+    # backlog issue, as the "Tracer Bullet" agent (skills/maintenance/SKILL.md, "Filing the finding in
+    # Paperclip"). The in-cluster URL keeps filing working when the gateway is down; Paperclip's hostname
+    # guard rejects the in-cluster Host, so requests send PAPERCLIP_HOST.
+    - name: PAPERCLIP_API_URL
+      value: "http://paperclip.paperclip.svc.cluster.local:3100"
+    - name: PAPERCLIP_HOST
+      value: "paperclip.orion.norseamerican.com"
+    - name: PAPERCLIP_COMPANY_ID
+      value: "9adf9ab3-e240-4ec5-9f9a-8eb53ca1a952"
+    - name: PAPERCLIP_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: PAPERCLIP_API_KEY

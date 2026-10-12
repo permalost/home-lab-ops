@@ -188,3 +188,13 @@ Verify with the listener one-liner above — the configured port must appear.
 Alertmanager's retries then succeed on their own and the FailedToSend
 alerts resolve. (Verified live 2026-09-17: pre-restart listeners were
 8642+9119, post-restart 8642+8644+9119.)
+
+## Paperclip
+
+Hearth is also a Paperclip agent ("Tracer Bullet", company W.D.O., adapter `http`, no wake triggers).
+After investigating an alert, the `maintenance` skill files one backlog issue there (idempotency key
+`alert:<alertname>:<UTC date>`, so repeats replay the same issue). Env: `PAPERCLIP_API_URL` (in-cluster, so
+filing works if the gateway is down), `PAPERCLIP_HOST` (Paperclip's hostname guard needs the public Host),
+`PAPERCLIP_COMPANY_ID`, and `PAPERCLIP_API_KEY` (an agent key, in `secret.yaml`; revoke or rotate it under
+the agent in Paperclip). Paperclip cannot call Hearth yet: its `http` adapter refuses private addresses
+unless the exact origin is in `PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST`.
