@@ -8,9 +8,9 @@ tasks:
     cmds:
       - bash scripts/forgejo.sh bootstrap
   tokens:
-    desc: "(Re)mint bot tokens into a sops secret. Optional: OUT=<path>"
+    desc: "Mint all bot tokens into the sops secret, or rotate just one with BOT=agent-... Optional: OUT=<path>"
     cmds:
-      - bash scripts/forgejo.sh tokens {{if .OUT}}OUT={{.OUT}}{{end}}
+      - bash scripts/forgejo.sh tokens {{if .OUT}}OUT={{.OUT}}{{end}} {{if .BOT}}BOT={{.BOT}}{{end}}
   protect:
     desc: "Protect a repo's main branch. Required: REPO, TIER (auto|human)"
     requires:
