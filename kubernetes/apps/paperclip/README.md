@@ -7,6 +7,8 @@ Agent orchestrator at `paperclip.${domain}` (company W.D.O.). Postgres via CNPG
 - **First login:** read the invite URL from `kubectl -n paperclip logs job/paperclip-bootstrap-ceo`.
   Copy the whole URL (a wrapped terminal line truncates the token).
 - `forgejo-tokens.sops.yaml`: bot tokens from `task forgejo:tokens`.
+- `github-tokens.sops.yaml`: PAT for Hobbes's GitHub fork account (`public_repo`, no write on this repo);
+  wired into the agent by `task agent:github` in `wdo/agent-playbook`.
 - Hire approval is **off by default** in Paperclip; turn on "require board approval for new
   agents" in Company Settings, or the CEO can hire on its own.
 
