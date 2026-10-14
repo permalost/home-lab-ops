@@ -4,7 +4,7 @@ metadata:
     name: github-bot-tokens
 type: Opaque
 stringData:
-    AGENT_DEV_GITHUB_TOKEN: ENC[AES256_GCM,data:yX73bdKGV+yw6Q==,iv:PT4fd17MPMG2H87+2pNOlvlVZMEMKT5aUjQj9hLbSdo=,tag:0vwD7FQPyLm4gfwoHNeLEQ==,type:str]
+    AGENT_DEV_GITHUB_TOKEN: ENC[AES256_GCM,data:lSMyASnRpEho6EOYaAjxMIBHrGxawSUCHqG20/fTB0z5ef7I7t6T4w==,iv:vPxWz8sTakg9uVyAgEjqtX/5nprh3n3Nt0bmTs5yIJw=,tag:KV3T4w/FINkZhl1H58AnbQ==,type:str]
 sops:
     age:
         - enc: |
@@ -17,6 +17,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-10-14T23:56:28Z"
-    mac: ENC[AES256_GCM,data:4SHYsA+EV8dacwktiKFtC5PAW2S/tGzc2CTBptETVg0J/I0qTJhPv0C7IG0zf36a66T5RdoWQ6cDpa+CgBwZmgH4Yfogop/mtQtZDGtqkZ9oA8Sm/iz/bfGE8R4Cg0m44FGK90zXeWfwwW9J3tOU7t+LhOBEw3AxOzhVGu1OStc=,iv:aSJq1lGy3vRtw8ViwIMC4R2XkuoJywOpP8JQ9sj0tAk=,tag:NPpYzl03PF3nYfUXJSUW7g==,type:str]
+    lastmodified: "2026-10-14T23:58:20Z"
+    mac: ENC[AES256_GCM,data:+tYKzTNG0/LjVSRNcR4tSeabo7jdFVjOpkf0pyanW+yxIcOJoqyV1ZiIWzx+q4+HYr8WQc5sGx2yslvlE6Rk2Ilw7vRmJlH48SM3CIopgeXkqtELEPw68MwykhBxHcZT72M6kUxCmjjsoM13ULFwz83U8c1cNdDbdn+PAcxV00w=,iv:cR5QWS5yGu6klGMfwIAIaTDOQeHSu1lyjJNbXHz66Mo=,tag:vbYonrbX7Oo/qaOmRn270Q==,type:str]
     version: 3.13.3
