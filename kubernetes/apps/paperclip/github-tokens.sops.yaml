@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: github-bot-tokens
+type: Opaque
+stringData:
+    AGENT_DEV_GITHUB_TOKEN: ENC[AES256_GCM,data:lSMyASnRpEho6EOYaAjxMIBHrGxawSUCHqG20/fTB0z5ef7I7t6T4w==,iv:vPxWz8sTakg9uVyAgEjqtX/5nprh3n3Nt0bmTs5yIJw=,tag:KV3T4w/FINkZhl1H58AnbQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2V2dnYkdjU29TbVA4bFg0
+            QXhjK1UzK2xTUnpLa1lmZjI5RXJkSFZtNUNZCmUwejAreTRaUm9vZnJFbWhBaGlR
+            WEZFYUZvR1gvdlJCcnkwQm1SRFRHMVEKLS0tIDh2a2NVNytEOHBhbzU3L2FCa3Ro
+            eWZqcmdHOTVaQk81U3FhU08wMTdhNVkKTRC5MGV8yn1fQVx/1CT9/FWUhf0n9r53
+            ETTuD6y8p81Gs2fbimFirOLaIh5T2bxD7/d3HUDw1k5UeUqtU1SiyA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-14T23:58:20Z"
+    mac: ENC[AES256_GCM,data:+tYKzTNG0/LjVSRNcR4tSeabo7jdFVjOpkf0pyanW+yxIcOJoqyV1ZiIWzx+q4+HYr8WQc5sGx2yslvlE6Rk2Ilw7vRmJlH48SM3CIopgeXkqtELEPw68MwykhBxHcZT72M6kUxCmjjsoM13ULFwz83U8c1cNdDbdn+PAcxV00w=,iv:cR5QWS5yGu6klGMfwIAIaTDOQeHSu1lyjJNbXHz66Mo=,tag:vbYonrbX7Oo/qaOmRn270Q==,type:str]
+    version: 3.13.3

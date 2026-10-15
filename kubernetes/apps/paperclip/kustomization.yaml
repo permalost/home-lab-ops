@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - secret.yaml
   - forgejo-tokens.sops.yaml
+  - github-tokens.sops.yaml
   - database.yaml
   - pvc.yaml
   - service.yaml
