@@ -211,6 +211,10 @@ curl -sS -X POST "$PAPERCLIP_API_URL/api/issues/<issue id from Step 2>/comments"
   -H "Content-Type: application/json" --data @/tmp/paperclip-comment.json
 ```
 
+If that comment POST fails (non-2xx or a connection error), don't retry it — fall through
+to Step 3 and file the issue anyway: a duplicate is recoverable, an investigation that
+leaves no Paperclip record is not.
+
 **Step 3: post it.** The `Host` header is required (Paperclip's hostname guard rejects the in-cluster name):
 
 ```bash
@@ -223,9 +227,11 @@ The response's `identifier` (e.g. `WDO-12`) is the issue to cite.
 
 **Rules.** Assign only to the triage agent (`PAPERCLIP_TRIAGE_AGENT_ID`) — never to anyone
 else — and `todo` is the only status: the triage agent decides what happens next. Report the
-identifier next to the diagnosis (and the PR link, if any). If filing fails (non-2xx or a
-connection error), say so plainly with the HTTP status and retry at most once; the
-investigation still stands, so don't hide it behind the failure.
+identifier next to the diagnosis (and the PR link, if any). If the Step 2 comment POST
+fails, fall through to Step 3 and file the issue — the `idempotencyKey` still prevents a
+same-day duplicate. If filing fails (non-2xx or a connection error), say so plainly with
+the HTTP status and retry at most once; the investigation still stands, so don't hide it
+behind the failure.
 
 ## Pitfalls
 
