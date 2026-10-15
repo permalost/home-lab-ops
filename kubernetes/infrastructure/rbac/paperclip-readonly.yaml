@@ -35,6 +35,15 @@ rules:
       - get
       - list
       - watch
+  # events.k8s.io mirrors core events; some tooling reads this group
+  - apiGroups:
+      - events.k8s.io
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
   - apiGroups:
       - apps
     resources:
