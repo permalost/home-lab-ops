@@ -72,7 +72,7 @@ VLAN Tagging on each port:
 etcd cluster:
   orion-cp-01 ←→ orion-cp-02 ←→ orion-cp-03
   (10.50.0.11)   (10.50.0.12)   (10.50.0.13)
-  Port 2379-2380 on VLAN 50
+  Port 2379-2380 on VLAN 50; 2381 (metrics, unauthenticated) on all interfaces
 
 API Server:
   Clients → 10.50.0.10:6443 (VIP)
