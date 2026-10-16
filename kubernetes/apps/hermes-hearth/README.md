@@ -192,9 +192,12 @@ alerts resolve. (Verified live 2026-09-17: pre-restart listeners were
 ## Paperclip
 
 Hearth is also a Paperclip agent ("Tracer Bullet", company W.D.O., adapter `http`, no wake triggers).
-After investigating an alert, the `maintenance` skill files one backlog issue there (idempotency key
-`alert:<alertname>:<UTC date>`, so repeats replay the same issue). Env: `PAPERCLIP_API_URL` (in-cluster, so
-filing works if the gateway is down), `PAPERCLIP_HOST` (Paperclip's hostname guard needs the public Host),
-`PAPERCLIP_COMPANY_ID`, and `PAPERCLIP_API_KEY` (an agent key, in `secret.yaml`; revoke or rotate it under
-the agent in Paperclip). Paperclip cannot call Hearth yet: its `http` adapter refuses private addresses
-unless the exact origin is in `PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST`.
+After investigating an alert, the `maintenance` skill files one issue there — status `todo`, assigned to
+the triage agent (Spiff), in the Cluster Alerts project (`PAPERCLIP_TRIAGE_AGENT_ID`,
+`PAPERCLIP_ALERTS_PROJECT_ID`) — or comments on the open issue the same alert already has, so a chronic
+alert updates one issue instead of spawning a daily one (idempotency key `alert:<alertname>:<UTC date>`
+backstops same-day repeats). Env: `PAPERCLIP_API_URL` (in-cluster, so filing works if the gateway is
+down), `PAPERCLIP_HOST` (Paperclip's hostname guard needs the public Host), `PAPERCLIP_COMPANY_ID`, and
+`PAPERCLIP_API_KEY` (an agent key, in `secret.yaml`; revoke or rotate it under the agent in Paperclip).
+Paperclip cannot call Hearth yet: its `http` adapter refuses private addresses unless the exact origin is
+in `PAPERCLIP_HTTP_ADAPTER_PRIVATE_ENDPOINT_ALLOWLIST`.

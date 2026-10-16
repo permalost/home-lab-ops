@@ -1,7 +1,7 @@
 ---
 name: maintenance
 description: "Investigate a Kubernetes alert using the k8s MCP server, and open a PR for a safe fix. No exec/delete/write cluster tools exist — the only write path is a git PR, and it can never merge itself."
-version: 0.4.0
+version: 0.5.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -9,7 +9,7 @@ prerequisites:
   # Not GITHUB_TOKEN: that name is reserved by Hermes itself and gets
   # unconditionally stripped from terminal subprocesses — see
   # patches/deploy-add-env.yaml for why.
-  env_vars: [MAINTENANCE_GITHUB_TOKEN, PAPERCLIP_API_KEY]
+  env_vars: [MAINTENANCE_GITHUB_TOKEN, PAPERCLIP_API_KEY, PAPERCLIP_TRIAGE_AGENT_ID, PAPERCLIP_ALERTS_PROJECT_ID]
   commands: [git, curl]
 metadata:
   hermes:
@@ -125,8 +125,9 @@ rewritten after the fact.
 
 ## Filing the finding in Paperclip
 
-Every investigation ends with exactly one Paperclip issue, so the work is tracked and a developer agent
-can pick it up later. You are the "Tracer Bullet" agent there (company W.D.O.). Paperclip is private, so
+Every investigation ends in Paperclip: a new issue, or a comment on the open issue that
+already exists for the same alert (Step 2) — a chronic alert must not spawn a duplicate a
+day. You are the "Tracer Bullet" agent there (company W.D.O.). Paperclip is private, so
 the issue may carry more detail than a PR, but the credential rules above still apply.
 
 **One issue per alert group per day.** The idempotency key is `alert:<alertname>:<UTC date>`. A repeat of
@@ -139,7 +140,7 @@ heredoc so nothing from alert text or pod logs is interpreted by the shell, keep
 
 ```bash
 python3 - <<'PY' > /tmp/paperclip-issue.json
-import json, datetime
+import json, datetime, os
 alertname = "<alertname>"
 day = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 description = """## What's wrong
@@ -161,14 +162,60 @@ Filed by Hearth from alert <alertname> (<severity>).
 print(json.dumps({
     "title": "[alert] " + alertname + ": <one-line diagnosis>",
     "description": description,
-    "status": "backlog",
+    "status": "todo",
     "priority": "high",  # critical -> high, warning -> medium
+    "assigneeAgentId": os.environ["PAPERCLIP_TRIAGE_AGENT_ID"],
+    "projectId": os.environ["PAPERCLIP_ALERTS_PROJECT_ID"],
     "idempotencyKey": "alert:" + alertname + ":" + day,
 }))
 PY
 ```
 
-**Step 2: post it.** The `Host` header is required (Paperclip's hostname guard rejects the in-cluster name):
+**Step 2: dedupe against open issues.** Before filing, look for an open issue whose title
+starts `[alert] <alertname>` — a chronic alert refires daily and must add to the existing
+issue, not file a new one. `q` searches descriptions and comments too, so filter on the
+title prefix yourself; don't trust the search hits alone:
+
+```bash
+curl -sS -G "$PAPERCLIP_API_URL/api/companies/$PAPERCLIP_COMPANY_ID/issues" \
+  -H "Host: $PAPERCLIP_HOST" -H "Authorization: Bearer $PAPERCLIP_API_KEY" \
+  --data-urlencode "status=backlog,todo,in_progress,in_review,blocked" \
+  --data-urlencode "q=<alertname>" --data-urlencode "limit=100" \
+  > /tmp/paperclip-issues.json
+python3 - <<'PY'
+import json
+alertname = "<alertname>"
+open_status = {"backlog", "todo", "in_progress", "in_review", "blocked"}
+for issue in json.load(open("/tmp/paperclip-issues.json")):
+    if issue["status"] in open_status and issue["title"].startswith("[alert] " + alertname):
+        print(issue["id"], issue["identifier"], issue["title"])
+PY
+```
+
+If that printed a match, comment on that issue instead of filing a new one, cite the
+existing `identifier`, and skip Step 3. Give the comment a deterministic `clientRequestId`
+(uuid5 of the alertname and UTC date) so a same-day refire dedupes server-side instead of
+stacking identical comments:
+
+```bash
+python3 - <<'PY' > /tmp/paperclip-comment.json
+import json, uuid, datetime
+day = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+print(json.dumps({
+    "body": "<one-paragraph update: what refired, what changed since the last comment>",
+    "clientRequestId": str(uuid.uuid5(uuid.NAMESPACE_URL, "alert:<alertname>:" + day)),
+}))
+PY
+curl -sS -X POST "$PAPERCLIP_API_URL/api/issues/<issue id from Step 2>/comments" \
+  -H "Host: $PAPERCLIP_HOST" -H "Authorization: Bearer $PAPERCLIP_API_KEY" \
+  -H "Content-Type: application/json" --data @/tmp/paperclip-comment.json
+```
+
+If that comment POST fails (non-2xx or a connection error), don't retry it — fall through
+to Step 3 and file the issue anyway: a duplicate is recoverable, an investigation that
+leaves no Paperclip record is not.
+
+**Step 3: post it.** The `Host` header is required (Paperclip's hostname guard rejects the in-cluster name):
 
 ```bash
 curl -sS -X POST "$PAPERCLIP_API_URL/api/companies/$PAPERCLIP_COMPANY_ID/issues" \
@@ -178,10 +225,13 @@ curl -sS -X POST "$PAPERCLIP_API_URL/api/companies/$PAPERCLIP_COMPANY_ID/issues"
 
 The response's `identifier` (e.g. `WDO-12`) is the issue to cite.
 
-**Rules.** Never assign the issue and never use a status other than `backlog`: a human or the CEO agent
-decides who works on it. Report the identifier next to the diagnosis (and the PR link, if any). If filing
-fails (non-2xx or a connection error), say so plainly with the HTTP status and retry at most once; the
-investigation still stands, so don't hide it behind the failure.
+**Rules.** Assign only to the triage agent (`PAPERCLIP_TRIAGE_AGENT_ID`) — never to anyone
+else — and `todo` is the only status: the triage agent decides what happens next. Report the
+identifier next to the diagnosis (and the PR link, if any). If the Step 2 comment POST
+fails, fall through to Step 3 and file the issue — the `idempotencyKey` still prevents a
+same-day duplicate. If filing fails (non-2xx or a connection error), say so plainly with
+the HTTP status and retry at most once; the investigation still stands, so don't hide it
+behind the failure.
 
 ## Pitfalls
 
