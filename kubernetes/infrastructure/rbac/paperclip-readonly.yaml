@@ -1,0 +1,148 @@
+---
+# Read-only cluster access for the paperclip agent (ServiceAccount default in
+# namespace paperclip). Verbs are get/list/watch only. Secrets are deliberately
+# excluded: a read-only role that can read every Secret in the cluster is a
+# cluster-admin credential in disguise.
+# Authorized by WDO-10 / WDO-30 (approved by Jon).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: paperclip-agent-readonly
+rules:
+  # Core resources for alert triage. pods/log supports crash diagnosis.
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - events
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+      - pods
+      - pods/log
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  # EndpointSlice lives in discovery.k8s.io, not core
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+  # events.k8s.io mirrors core events; some tooling reads this group
+  - apiGroups:
+      - events.k8s.io
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+  # metrics.k8s.io serves no watch endpoint
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+  # VictoriaMetrics operator CRDs
+  - apiGroups:
+      - operator.victoriametrics.com
+    resources:
+      - vlagents
+      - vlclusters
+      - vldistributed
+      - vlogs
+      - vlsingles
+      - vmanomalies
+      - vmanomalyconfigs
+      - vmdistributed
+      - vmauths
+      - vmagents
+      - vmalertmanagerconfigs
+      - vmalertmanagers
+      - vmalerts
+      - vmclusters
+      - vmnodescrapes
+      - vmpodscrapes
+      - vmprobes
+      - vmrules
+      - vmscrapeconfigs
+      - vmservicescrapes
+      - vmsingles
+      - vmstaticscrapes
+      - vtagents
+      - vtclusters
+      - vtsingles
+      - vmusers
+    verbs:
+      - get
+      - list
+      - watch
+  # Flux state
+  - apiGroups:
+      - helm.toolkit.fluxcd.io
+    resources:
+      - helmreleases
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kustomize.toolkit.fluxcd.io
+    resources:
+      - kustomizations
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: paperclip-agent-readonly
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: paperclip-agent-readonly
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: paperclip
