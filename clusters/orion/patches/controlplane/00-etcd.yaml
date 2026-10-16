@@ -2,5 +2,7 @@ cluster:
   etcd:
     advertisedSubnets:
       - 10.50.0.0/24
+    # Metrics listener for vmagent's kube-etcd pool: serves only /metrics and
+    # /health. 2379 (client, mTLS) is unchanged.
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
