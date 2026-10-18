@@ -90,6 +90,33 @@ kubeControllerManager:
           tlsConfig:
             caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             insecureSkipVerify: true
+# etcd runs as a Talos static pod without the chart's `component: etcd`
+# label, so the default selector-matched Service resolves no Endpoints and
+# the kube-etcd scrape pool stays empty (ScrapePoolHasNoTargets). Setting
+# endpoints makes the chart emit manual Endpoints for a headless Service
+# and drop the selector entirely. The scrape is plain http: 2381 is the
+# unauthenticated metrics listener etcd serves via listen-metrics-urls
+# (clusters/orion/patches/controlplane/00-etcd.yaml), so no bearer token or
+# TLS config. Deleting this block silently empties the pool again.
+kubeEtcd:
+  endpoints:
+    - 10.50.0.11
+    - 10.50.0.12
+    - 10.50.0.13
+  service:
+    port: 2381
+    targetPort: 2381
+  vmScrape:
+    spec:
+      jobLabel: app.kubernetes.io/component
+      namespaceSelector:
+        matchNames: []
+      endpoints:
+        # Full override, same reason as kubeControllerManager above: Helm
+        # replaces lists wholesale. Drops the default bearerTokenFile and
+        # https tlsConfig meant for the 2379 listener.
+        - port: http-metrics
+          scheme: http
 kubeScheduler:
   vmScrape:
     spec:
