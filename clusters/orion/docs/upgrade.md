@@ -34,6 +34,30 @@ task talos:apply NODE=orion-w-01  IP=10.50.0.21
 task talos:apply NODE=orion-w-02  IP=10.50.0.22
 ```
 
+## Changes that need a reboot
+
+`talos:apply` can succeed without restarting what it changed. etcd args
+(`cluster.etcd.extraArgs`) are not picked up until the node reboots, and
+`talosctl service etcd restart` is not supported. Verify the live effect, not the
+apply (e.g. `curl http://<cp-ip>:2381/health` after adding `listen-metrics-urls`).
+
+For control-plane nodes, one at a time:
+
+```bash
+task talos:apply NODE=orion-cp-01 IP=10.50.0.11
+talosctl --nodes 10.50.0.11 --endpoints 10.50.0.11 reboot
+# gate: etcd healthy, 3 members, task talos:health, Ceph HEALTH_OK (wait for it)
+```
+
+Rook-Ceph mons/OSDs run on the control-plane nodes: do not start the next node
+until Ceph is `HEALTH_OK`. Forgejo, Paperclip and their databases run on workers.
+
+Notes:
+- `NODE` is the hostname (`orion-cp-01`); the task adds the cluster prefix, so the
+  rendered file is `clusterconfig/orion-orion-cp-01.yaml`.
+- Bare `talosctl` uses `~/.talos/config`; use
+  `TALOSCONFIG=clusters/orion/clusterconfig/talosconfig` (the tasks already do).
+
 ## Patch hygiene rules
 
 - **Only set fields that differ from Talos defaults.** If a field isn't in the
