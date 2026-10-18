@@ -5,7 +5,7 @@ each one and remove the workarounds that are no longer needed.
 
 **Validated against:** `2026.1005.0` (2026-10-12).
 
-Run the automated part (in the `wdo/agent-playbook` checkout, after the new pod is up):
+Run the automated part (in the `wdo/agent-playbook` checkout, after the new pod is up; `upgrade-check` is on branch `feat/upgrade-check`, not yet merged):
 
 ```sh
 task upgrade-check                # read-only checks, a few seconds
@@ -16,7 +16,7 @@ Then do the manual checks below, update the version above, and remove whatever t
 
 | # | Workaround | Why | Re-test | If fixed |
 |---|---|---|---|---|
-| W1 | Reviewer timer heartbeat (30 min, `agents/<Susie>` runtimeConfig) | The review stage did not wake the reviewer at the handoff (no run is created) | `task upgrade-check HANDOFF=1` | Disable the reviewer's heartbeat (`enabled: false`); it costs about 9k tokens per idle tick |
+| W1 | Reviewer safety-net timer (4 h, `skipTimerWhenNoActionableWork`, `agents/<Susie>` runtimeConfig) | The review stage did not wake the reviewer at the handoff (no run is created) | `task upgrade-check HANDOFF=1` | Disable the reviewer's heartbeat (`enabled: false`). The old 30 min timer without the skip flag was ~70% of Claude usage |
 | W2 | Agents hired through the API (`task agent`) | The New agent form forces an OpenRouter connection onto OpenCode agents and has no env editor | Manual: `/agents/new`, OpenCode, type model `spark/GLM-5.3-Flash-EXL3`; does Test pass and can you save? | Hiring in the UI becomes possible; the API route still works, so this is optional |
 | W3 | `CLAUDE_CODE_OAUTH_TOKEN` from the pod env | The connect step rejects the `setup-token` OAuth token | Automated: `claude_oauth_token_configured`. Manual: does the connect step now accept it? | Could use a managed connection instead of the env token |
 | W4 | "Require board approval for new agents" turned on | Off by default; the stock CEO hires on its own | Automated | Nothing to remove; confirm it is still on |
