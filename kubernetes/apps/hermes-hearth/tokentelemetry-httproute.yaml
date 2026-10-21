@@ -8,7 +8,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Tokens (Hearth)"
     gethomepage.dev/description: "Token usage, sessions, cron & gateway health"
-    gethomepage.dev/group: "AI"
+    gethomepage.dev/group: "Observability"
     gethomepage.dev/icon: "mdi-chart-timeline-variant"
 spec:
   parentRefs:

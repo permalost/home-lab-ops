@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Ceph"
     gethomepage.dev/description: "Storage cluster health"
-    gethomepage.dev/group: "Cluster"
+    gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "ceph.png"
 spec:
   parentRefs:

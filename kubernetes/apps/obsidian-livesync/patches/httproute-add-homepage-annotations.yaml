@@ -6,5 +6,5 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Obsidian LiveSync"
     gethomepage.dev/description: "CouchDB sync backend for Obsidian notes"
-    gethomepage.dev/group: "Productivity"
+    gethomepage.dev/group: "Platform"
     gethomepage.dev/icon: "obsidian.png"

@@ -82,6 +82,28 @@ def sub(m):
 sys.stdout.write(re.sub(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::[^}]*)?\}", sub, content))
 '
 
+# Homepage tags: every HTTPRoute says gethomepage.dev/enabled "true" or "false",
+# and every gethomepage.dev/group (routes, plus Helm values rendered into
+# ConfigMaps) is a group in homepage's layout.
+HOMEPAGE_VALUES="$REPO_ROOT/kubernetes/infrastructure/homepage/values.yaml"
+HOMEPAGE_GROUPS="$(yq eval '.config.settingsString' "$HOMEPAGE_VALUES" | yq eval '.layout | keys | .[]' -)"
+
+# $1 = rendered manifests; prints each problem, returns 1 if there are any
+check_homepage() {
+  local untagged groups g bad=0
+  untagged="$(printf '%s\n' "$1" | yq eval-all 'select(.kind == "HTTPRoute" and ((.metadata.annotations."gethomepage.dev/enabled" // "") | test("^(true|false)$") | not)) | .metadata.namespace + "/" + .metadata.name' - 2>/dev/null | grep -vE '^(---)?$' || true)"
+  for r in $untagged; do
+    echo "HTTPRoute $r has no gethomepage.dev/enabled \"true\" or \"false\""; bad=1
+  done
+  groups="$(printf '%s\n' "$1" | sed -nE 's/.*gethomepage\.dev\/group"?: *"?([^"]*)"?[[:space:]]*$/\1/p' | sort -u)"
+  while IFS= read -r g; do
+    [[ -z "$g" ]] && continue
+    printf '%s\n' "$HOMEPAGE_GROUPS" | grep -Fxq -- "$g" \
+      || { echo "group \"$g\" is not in the homepage layout"; bad=1; }
+  done <<< "$groups"
+  return "$bad"
+}
+
 # ── Build each Flux Kustomization ────────────────────────────────────────────
 
 FAILED=0
@@ -129,8 +151,12 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
         echo "  ✗ $name — unresolved variable(s):"
         echo "$UNRESOLVED" | sed 's/^/      /'
         FAILED=$((FAILED + 1))
-      else
+      elif HOMEPAGE_ERRORS="$(check_homepage "$RENDERED")"; then
         echo "  ✓ $name"
+      else
+        echo "  ✗ $name — homepage tags:"
+        echo "$HOMEPAGE_ERRORS" | sed 's/^/      /'
+        FAILED=$((FAILED + 1))
       fi
     else
       echo "  ✗ $name — FAILED (re-running to show error):"

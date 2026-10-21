@@ -4,6 +4,7 @@ metadata:
   name: http-to-https-redirect
   namespace: gateway
   annotations:
+    gethomepage.dev/enabled: "false"
     external-dns.alpha.kubernetes.io/exclude: "true"
 spec:
   parentRefs:

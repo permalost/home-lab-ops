@@ -6,5 +6,5 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Hermes (Sage)"
     gethomepage.dev/description: "General assistant agent"
-    gethomepage.dev/group: "AI"
+    gethomepage.dev/group: "Agents"
     gethomepage.dev/icon: "hermes.png"
