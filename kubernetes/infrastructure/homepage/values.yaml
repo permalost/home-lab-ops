@@ -39,23 +39,16 @@ config:
     # scripts/flux-build.sh fails on any other.
     layout:
       Home:
-        style: row
-        columns: 5
+        style: columns
       Inventory:
-        style: row
-        columns: 2
+        style: columns
       OSINT:
-        style: row
-        columns: 1
+        style: columns
       Agents:
-        style: row
-        columns: 3
+        style: columns
       Infrastructure:
-        style: row
-        columns: 4
+        style: columns
       Observability:
-        style: row
-        columns: 5
+        style: columns
       Platform:
-        style: row
-        columns: 3
+        style: columns
