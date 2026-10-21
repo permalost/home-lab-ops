@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Headlamp"
     gethomepage.dev/description: "Cluster dashboard"
-    gethomepage.dev/group: "Cluster"
+    gethomepage.dev/group: "Platform"
     gethomepage.dev/icon: "kubernetes.png"
 spec:
   parentRefs:

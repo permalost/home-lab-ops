@@ -35,3 +35,27 @@ config:
   settingsString: |
     title: orion
     headerStyle: boxed
+    # Group order, and the only groups a gethomepage.dev/group may use:
+    # scripts/flux-build.sh fails on any other.
+    layout:
+      Home:
+        style: row
+        columns: 5
+      Inventory:
+        style: row
+        columns: 2
+      OSINT:
+        style: row
+        columns: 1
+      Agents:
+        style: row
+        columns: 3
+      Infrastructure:
+        style: row
+        columns: 4
+      Observability:
+        style: row
+        columns: 5
+      Platform:
+        style: row
+        columns: 3

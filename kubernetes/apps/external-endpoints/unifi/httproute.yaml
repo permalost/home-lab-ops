@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Unifi"
     gethomepage.dev/description: "Network controller"
-    gethomepage.dev/group: "Network"
+    gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "unifi.png"
 spec:
   parentRefs:

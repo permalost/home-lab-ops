@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "God's Eye View"
     gethomepage.dev/description: "Live public flights, ships, satellites, earthquakes, and CCTV on a 3D globe"
-    gethomepage.dev/group: "Intel"
+    gethomepage.dev/group: "OSINT"
     # No vendor icon exists in dashboard-icons for this app; mdi-earth is
     # homepage's documented fallback syntax (Material Design Icons).
     gethomepage.dev/icon: "mdi-earth"
