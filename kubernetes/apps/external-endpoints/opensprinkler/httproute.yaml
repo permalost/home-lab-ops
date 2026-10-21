@@ -5,6 +5,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/pod-selector: ""
+    gethomepage.dev/siteMonitor: "https://sprinkler.${domain}"
     gethomepage.dev/name: "OpenSprinkler"
     gethomepage.dev/description: "Irrigation controller"
     gethomepage.dev/group: "Home"
