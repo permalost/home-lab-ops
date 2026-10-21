@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "grocy"
     gethomepage.dev/name: "Grocy"
     gethomepage.dev/description: "Grocery & pantry inventory tracking"
     gethomepage.dev/group: "Inventory"

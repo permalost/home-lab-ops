@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "hermes-hearth"
     gethomepage.dev/name: "Hermes (Hearth)"
     gethomepage.dev/description: "Home Assistant integration agent"
     gethomepage.dev/group: "Agents"

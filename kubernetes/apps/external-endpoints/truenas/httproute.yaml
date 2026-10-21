@@ -4,6 +4,7 @@ metadata:
   name: truenas
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: ""
     gethomepage.dev/name: "TrueNAS"
     gethomepage.dev/description: "NAS"
     gethomepage.dev/group: "Infrastructure"

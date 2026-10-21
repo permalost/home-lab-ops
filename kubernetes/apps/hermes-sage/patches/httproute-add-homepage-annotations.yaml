@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "hermes-sage"
     gethomepage.dev/name: "Hermes (Sage)"
     gethomepage.dev/description: "General assistant agent"
     gethomepage.dev/group: "Agents"

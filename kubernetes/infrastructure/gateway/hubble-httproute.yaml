@@ -5,6 +5,7 @@ metadata:
   namespace: cilium
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: "k8s-app=hubble-ui"
     gethomepage.dev/name: "Hubble"
     gethomepage.dev/description: "Cilium network observability"
     gethomepage.dev/group: "Observability"

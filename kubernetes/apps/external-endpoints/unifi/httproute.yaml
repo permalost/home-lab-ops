@@ -4,6 +4,7 @@ metadata:
   name: unifi
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: ""
     gethomepage.dev/name: "Unifi"
     gethomepage.dev/description: "Network controller"
     gethomepage.dev/group: "Infrastructure"

@@ -4,6 +4,7 @@ metadata:
   name: slzb-06
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: ""
     gethomepage.dev/name: "SLZB-06"
     gethomepage.dev/description: "Zigbee-to-Ethernet coordinator for Home Assistant"
     gethomepage.dev/group: "Home"

@@ -4,6 +4,7 @@ metadata:
   name: paperclip
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: "app=paperclip"
     gethomepage.dev/name: "Paperclip"
     gethomepage.dev/description: "Agent orchestrator"
     gethomepage.dev/group: "Agents"

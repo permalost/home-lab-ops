@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "godseye"
     gethomepage.dev/name: "God's Eye View"
     gethomepage.dev/description: "Live public flights, ships, satellites, earthquakes, and CCTV on a 3D globe"
     gethomepage.dev/group: "OSINT"
