@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "zigbee2mqtt"
     gethomepage.dev/name: "Zigbee2MQTT"
     gethomepage.dev/description: "Zigbee bridge frontend"
     gethomepage.dev/group: "Home"

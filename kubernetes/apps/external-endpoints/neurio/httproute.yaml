@@ -4,6 +4,8 @@ metadata:
   name: neurio
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/pod-selector: ""
+    gethomepage.dev/siteMonitor: "https://power.${domain}"
     gethomepage.dev/name: "Neurio"
     gethomepage.dev/description: "Home power monitor"
     gethomepage.dev/group: "Home"

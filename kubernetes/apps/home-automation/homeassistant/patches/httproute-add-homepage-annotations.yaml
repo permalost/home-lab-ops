@@ -4,6 +4,7 @@ metadata:
   name: route
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "homeassistant"
     gethomepage.dev/name: "Home Assistant"
     gethomepage.dev/description: "Home automation"
     gethomepage.dev/group: "Home"

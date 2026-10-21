@@ -6,6 +6,7 @@ metadata:
   name: tokentelemetry-ui
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "hermes-hearth"
     gethomepage.dev/name: "Tokens (Hearth)"
     gethomepage.dev/description: "Token usage, sessions, cron & gateway health"
     gethomepage.dev/group: "Observability"
