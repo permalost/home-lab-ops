@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: unpoller
+resources:
+  - namespace.yaml
+  # Jon pushes this file (SOPS-encrypted, keys listed in the PR) onto the
+  # branch before merging — see the PR description for the sops command.
+  - unpoller-credentials.sops.yaml
+  - service.yaml
+  - vmservicescrape.yaml
+  - deployment.yaml
+images:
+  - name: unpoller
+    newName: ghcr.io/unpoller/unpoller
+    newTag: v5.2.8
+    digest: sha256:ca82e584b9bb3c8d2f9998adb429ab9f9bbb8840388ba10f2c62f07bd31ea0e9
