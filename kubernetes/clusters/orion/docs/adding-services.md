@@ -58,7 +58,7 @@ spec:
 
 ## Pathway B: Raw manifests / simple web app
 
-Use this for application workloads that follow the standard Deployment + Service + Ingress shape.
+Use this for application workloads that follow the standard Deployment + Service + HTTPRoute shape (Gateway API; orion has no nginx ingress controller).
 
 **Reference implementation:** `kubernetes/apps/homebox/`
 
@@ -69,18 +69,18 @@ task gen:new-app NAME=my-service SUBDOMAIN=my-service IMAGE=ghcr.io/example/my-s
 ```
 
 This generates:
-- `kubernetes/apps/my-service/kustomization.yaml` — pulls `webapp/base`, opts into `ingress` Component, pre-fills substitution variables
+- `kubernetes/apps/my-service/kustomization.yaml` — pulls `webapp/base`, opts into the `httproute` Component, pre-fills substitution variables
 - `kubernetes/clusters/orion/my-service.yaml` — Flux Kustomization shell with `dependsOn: cluster-settings`, sops decryption, and `postBuild.substitute`
 
 ### Components available
 
 | Component | What it adds | Required substitute vars |
 |---|---|---|
-| `ingress` | nginx Ingress + cert-manager TLS | `subdomain`, `domain` (from cluster-settings) |
+| `httproute` | Gateway API HTTPRoute on `${gatewayName}` (default) | `subdomain`, `domain` and `gatewayName` (from cluster-settings) |
 | `pvc` | PVC + /data mount | `storageClass`, `storageSize` |
 | `tls-cert` | cert-manager Certificate | `subdomain`, `domain` |
-| `linkerd-inject` | Linkerd sidecar opt-in | — |
-| `linkerd-disable` | Linkerd sidecar opt-out | — |
+| `ingress` | nginx Ingress; dormant, orion has no nginx | — |
+| `linkerd-*` | Linkerd injection; dormant, orion has no Linkerd | — |
 
 Components live at `kubernetes/apps/webapp/components/`. Add them to the `components:` list in your `kustomization.yaml`. See `kubernetes/apps/webapp/README.md` for the full reference.
 
@@ -103,13 +103,18 @@ Components live at `kubernetes/apps/webapp/components/`. Add them to the `compon
    ```
 3. **Add extra resources** — PVCs not covered by the `pvc` Component, ConfigMaps for env files via `configMapGenerator`, etc.
 4. **Add secrets** (see below).
-5. Run `task gen:validate` — this runs `kubeconform` + `kube-linter` over all manifests.
+5. **Add `namespace.yaml`** (a `Namespace` named after the app) to `resources:`; the `httproute` component labels it for gateway access. Examples: `apps/grocy/`, `apps/obsidian-livesync/`.
+6. **Tag the HTTPRoute for Homepage** with a patch like `apps/obsidian-livesync/patches/httproute-add-homepage-annotations.yaml`. `gethomepage.dev/enabled` must be `"true"` or `"false"`, and `gethomepage.dev/group` must be a group in `infrastructure/homepage/values.yaml` (`task test:build` fails otherwise).
+7. **Set `dependsOn`** in the cluster shell to what the app needs (`cilium`, `gateway`, `cert-manager-issuers`, `cluster-settings`); copy `clusters/orion/obsidian-livesync.yaml`.
+8. Run `task gen:validate` and `task test:build`. `test:build` renders every Kustomization with substitution; an unresolved `${...}` is a bug.
+
+Do not add a root `kustomization.yaml` under `kubernetes/clusters/orion/`; Flux picks up each shell on its own.
 
 ---
 
 ## Adding secrets
 
-Secrets must be SOPS-encrypted before committing. The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
+Secrets must be SOPS-encrypted before committing. `.sops.yaml` matches by filename (`*.sops.yaml`, `secret.yaml`, `configMap.yaml`), so a differently named secret file is committed in plaintext. The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
 
 ```bash
 # 1. Create plaintext
