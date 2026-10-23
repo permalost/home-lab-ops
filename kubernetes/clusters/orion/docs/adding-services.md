@@ -62,6 +62,8 @@ Use this for application workloads that follow the standard Deployment + Service
 
 **Reference implementation:** `kubernetes/apps/homebox/`
 
+Headless workloads that don't need a route (exporters, operators) skip `webapp` entirely — copy `apps/unpoller/` instead, the minimal standalone example. `apps/paperclip/` is too big for that role.
+
 ### Scaffold with new-app
 
 ```bash
@@ -114,15 +116,15 @@ Do not add a root `kustomization.yaml` under `kubernetes/clusters/orion/`; Flux 
 
 ## Adding secrets
 
-Secrets must be SOPS-encrypted before committing. `.sops.yaml` matches by filename (`*.sops.yaml`, `secret.yaml`, `configMap.yaml`), so a differently named secret file is committed in plaintext. The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
+Secrets must be SOPS-encrypted before committing. `.sops.yaml` matches by filename (`*.sops.yaml`, `secret.yaml`, `configMap.yaml`), so a differently named secret file is committed in plaintext. Per-app secret files can use any `<app>-*.sops.yaml` name (e.g. `my-service-credentials.sops.yaml` — the same pattern as `forgejo-tokens.sops.yaml` and `unpoller-credentials.sops.yaml`). The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
 
 ```bash
 # 1. Create plaintext
-cat > kubernetes/apps/my-service/secret.sops.yaml <<EOF
+cat > kubernetes/apps/my-service/my-service-credentials.sops.yaml <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
-  name: my-service-secret
+  name: my-service-credentials
   namespace: my-service
 stringData:
   api-key: "replace-me"
@@ -130,10 +132,10 @@ EOF
 
 # 2. Encrypt in-place
 SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
-  sops --encrypt --in-place kubernetes/apps/my-service/secret.sops.yaml
+  sops --encrypt --in-place kubernetes/apps/my-service/my-service-credentials.sops.yaml
 
 # 3. Add to resources in kustomization.yaml
-#    - secret.sops.yaml
+#    - my-service-credentials.sops.yaml
 ```
 
 The cluster shell already sets `decryption: { provider: sops, secretRef: { name: sops-age } }` so Flux will decrypt it automatically.

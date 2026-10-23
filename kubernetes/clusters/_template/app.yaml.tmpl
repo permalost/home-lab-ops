@@ -4,6 +4,7 @@ metadata:
   name: __NAME__
   namespace: flux-system
 spec:
+  # 10m/15m default; stable apps may relax, e.g. 1h/5m (apps/unpoller).
   interval: 10m
   retryInterval: 30s
   timeout: 15m
