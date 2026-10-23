@@ -1,0 +1,20 @@
+# vmagent (vkms) selects every VMServiceScrape cluster-wide by default
+# (selectAllByDefault in the chart's vmagent.spec), so the target appears
+# without any scrape-config edit.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: unpoller
+spec:
+  # Service label to use as the Prometheus `job` label.
+  jobLabel: app
+  namespaceSelector:
+    matchNames:
+      - unpoller
+  selector:
+    matchLabels:
+      app: unpoller
+  endpoints:
+    - port: http
+      interval: 30s
+      scrapeTimeout: 10s
