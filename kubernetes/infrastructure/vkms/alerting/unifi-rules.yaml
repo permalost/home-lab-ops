@@ -1,0 +1,118 @@
+# Alerts on the unifi_* metrics exported by UnPoller (apps/unpoller). severity
+# routes to Hearth and Telegram exactly like gateway-rules.yaml. The owner
+# label names the triaging agent; no route reads it yet (WDO-70 finding).
+# Thresholds marked provisional come from ~1 h of healthy data on 2026-10-23.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: unifi
+spec:
+  groups:
+    - name: unifi
+      rules:
+        - alert: UnifiControllerDown
+          expr: >-
+            (unifi_controller_up == 0)
+            or (unifi_prometheus_cache_age_seconds > 300)
+            or (increase(unifi_prometheus_refresh_failures_total[5m]) > 0)
+          for: 5m
+          labels:
+            severity: critical
+            owner: spiff
+          annotations:
+            summary: "UnPoller cannot refresh metrics from the UniFi controller"
+            description: >-
+              No successful controller poll for 5m (controller_up=0, cache age over 5m, or refresh
+              failures rising), so device and WAN metrics are stale. Check unpoller logs and that the
+              controller endpoint in UP_UNIFI_CONTROLLER_0_URL is reachable. If the unpoller pod itself
+              is gone, TargetDown fires instead.
+        - alert: UnifiDeviceDown
+          expr: >-
+            (unifi_site_disconnected{subsystem=~"wlan|lan"} > 0)
+            or (unifi_site_pending{subsystem=~"wlan|lan"} > 0)
+          for: 10m
+          labels:
+            severity: critical
+            owner: spiff
+          annotations:
+            summary: "{{ $value }} {{ $labels.subsystem }} device(s) disconnected or pending adoption on {{ $labels.site_name }}"
+            description: >-
+              An access point (wlan) or switch (lan) has been disconnected or pending adoption for
+              10m. Check device power, PoE budget, and cabling in the controller.
+        - alert: UnifiWanDown
+          expr: unifi_wan_interface_state{state="DISCONNECTED"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            owner: spiff
+          annotations:
+            summary: "WAN interface {{ $labels.wan_interface }} is disconnected"
+            description: >-
+              The gateway reports {{ $labels.wan_interface }} ({{ $labels.wan_networkgroup }}) as
+              DISCONNECTED for 2m. Check the physical uplink and the ISP; if the failover WAN is down
+              too, the site is offline.
+        - alert: UnifiWanDegraded
+          expr: >-
+            (unifi_site_latency_seconds{subsystem="www"} > 0.1)
+            or (max_over_time(unifi_speedtest_latency_ms[15m]) > 100)
+            or (increase(unifi_site_intenet_drops_total[15m]) > 0)
+          for: 15m
+          labels:
+            severity: warning
+            owner: hobbes
+          annotations:
+            summary: "WAN latency or loss above baseline on {{ $labels.wan_interface }}{{ $labels.site_name }}"
+            description: >-
+              Site internet latency exceeded 100 ms, a speedtest exceeded 100 ms, or the WAN drop
+              counter increased over 15m. Healthy baseline is 11-15 ms (provisional threshold: under
+              5 days of data). Check ISP status and failover state on the gateway.
+        - alert: UnifiPoeBudgetHigh
+          expr: >-
+            sum by (name, site_name) (unifi_device_port_poe_watts)
+              / on (name, site_name) (unifi_device_max_power_total > 0)
+            > 0.85
+          for: 15m
+          labels:
+            severity: warning
+            owner: hobbes
+          annotations:
+            summary: "PoE draw on {{ $labels.name }} is {{ $value | humanizePercentage }} of budget"
+            description: >-
+              The switch has drawn over 85% of its PoE budget for 15m. Reduce per-port PoE priority
+              or move high-draw devices before the controller starts denying power.
+        - alert: UnifiPortErrorsRising
+          expr: >-
+            (increase(unifi_device_port_receive_errors_total[10m]) > 0)
+            or (increase(unifi_device_port_transmit_errors_total[10m]) > 0)
+          for: 30m
+          labels:
+            severity: warning
+            owner: hobbes
+          annotations:
+            summary: "Port errors rising on {{ $labels.name }} port {{ $labels.port_num }}"
+            description: >-
+              Receive or transmit errors have increased on a switch port for 30m (healthy baseline is
+              zero, provisional). Expect a cable, SFP, or negotiation problem; reseat or replace the
+              link.
+        - alert: UnifiApChannelUtilHigh
+          expr: unifi_device_radio_channel_utilization_total_ratio > 0.7
+          for: 30m
+          labels:
+            severity: warning
+            owner: hobbes
+          annotations:
+            summary: "Channel utilization is {{ $value | humanizePercentage }} on {{ $labels.name }} {{ $labels.band }} GHz radio"
+            description: >-
+              A radio has been over 70% channel utilization for 30m. Clients see slow Wi-Fi; look for
+              non-Wi-Fi interference or move the radio to a cleaner channel.
+        - alert: UnifiDhcpPoolExhausting
+          expr: unifi_dhcp_utilization_percent > 85
+          for: 1h
+          labels:
+            severity: warning
+            owner: hobbes
+          annotations:
+            summary: 'DHCP pool {{ $labels.network }} is {{ printf "%.0f" $value }}% leased'
+            description: >-
+              A network has leased over 85% of its DHCP pool for 1h. Shrink the lease time or widen
+              the pool before clients stop getting new leases.

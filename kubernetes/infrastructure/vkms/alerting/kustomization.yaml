@@ -5,6 +5,7 @@ resources:
   - alertmanagerconfig.yaml
   - blackbox-exporter.yaml
   - gateway-rules.yaml
+  - unifi-rules.yaml
 # webhook-hermes moved to infrastructure/vkms/values.yaml
 # (alertmanager.config) — the VM operator drops unknown http_config keys
 # (e.g. http_headers) from CR-derived receivers.

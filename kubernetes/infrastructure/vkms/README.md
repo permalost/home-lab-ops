@@ -51,6 +51,16 @@ Two receivers match every `warning`/`critical` alert independently
 - **Grafana dashboards empty:** vmagent may not be scraping. Check `kubectl -n monitoring logs -l app=vmagent`.
 - **Alertmanager not firing:** Verify alert routing config and that vmalert is connecting to vmsingle.
 
+## UniFi alerts
+
+`alerting/unifi-rules.yaml` alerts on the `unifi_*` metrics UnPoller exports
+(`apps/unpoller`): controller polling, disconnected/pending APs and switches, WAN
+state and latency, PoE budget, port errors, channel utilization, and DHCP pool
+utilization. Every rule carries a `severity` and an `owner` label (warning → hobbes,
+critical → spiff); routing matches on `severity` only — nothing consumes `owner` yet.
+Provisional thresholds (WAN degraded, port errors) were derived from ~1 h of healthy
+data on 2026-10-23, not the 5 days the alert plan asked for.
+
 ## Gateway HTTPS probe
 
 `alerting/blackbox-exporter.yaml` + `probes/gateway-probes.yaml` probe `https://{git,paperclip,homepage}.${domain}`
