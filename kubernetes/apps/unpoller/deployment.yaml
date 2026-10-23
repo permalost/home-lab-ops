@@ -28,21 +28,21 @@ spec:
               containerPort: 9130
               protocol: TCP
           env:
-            - name: UP_UNIFI_0_URL
+            - name: UP_UNIFI_CONTROLLER_0_URL
               valueFrom:
                 secretKeyRef:
                   name: unpoller-credentials
-                  key: UP_UNIFI_0_URL
-            - name: UP_UNIFI_0_USER
+                  key: UP_UNIFI_CONTROLLER_0_URL
+            - name: UP_UNIFI_CONTROLLER_0_USER
               valueFrom:
                 secretKeyRef:
                   name: unpoller-credentials
-                  key: UP_UNIFI_0_USER
-            - name: UP_UNIFI_0_PASS
+                  key: UP_UNIFI_CONTROLLER_0_USER
+            - name: UP_UNIFI_CONTROLLER_0_PASS
               valueFrom:
                 secretKeyRef:
                   name: unpoller-credentials
-                  key: UP_UNIFI_0_PASS
+                  key: UP_UNIFI_CONTROLLER_0_PASS
             # The image's bundled up.conf enables the InfluxDB output; this
             # stack is Prometheus-only (vkms).
             - name: UP_INFLUXDB_DISABLE
@@ -54,7 +54,7 @@ spec:
             # The controller serves a self-signed cert for a name that matches
             # no in-cluster address, and the audit user is read-only anyway —
             # same tradeoff as the unifi BackendTLSPolicy in external-endpoints.
-            - name: UP_UNIFI_0_VERIFY_SSL
+            - name: UP_UNIFI_CONTROLLER_0_VERIFY_SSL
               value: "false"
           # /metrics is served from the 60s poll cache, so probing it doesn't
           # hit the controller API.
