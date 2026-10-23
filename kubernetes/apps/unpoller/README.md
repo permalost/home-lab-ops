@@ -4,7 +4,7 @@ UniFi controller metrics for the VictoriaMetrics stack (`vkms`). Polls the
 controller with the read-only audit user and serves Prometheus on `:9130`.
 
 - Credentials: `unpoller-credentials.sops.yaml` (SOPS + age, committed
-  encrypted). Keys: `UP_UNIFI_0_URL`, `UP_UNIFI_0_USER`, `UP_UNIFI_0_PASS` —
+  encrypted). Keys: `UP_UNIFI_CONTROLLER_0_URL`, `UP_UNIFI_CONTROLLER_0_USER`, `UP_UNIFI_CONTROLLER_0_PASS` —
   the controller URL, audit username and password. Create or rotate with:
 
   ```bash
