@@ -42,6 +42,8 @@ config:
         style: columns
       Inventory:
         style: columns
+      Finances:
+        style: columns
       OSINT:
         style: columns
       Agents:
