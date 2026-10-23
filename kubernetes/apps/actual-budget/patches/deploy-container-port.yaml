@@ -1,0 +1,5 @@
+# actual-server listens on 5006 (its documented default); webapp/base ships
+# 8080.
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 5006
