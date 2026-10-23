@@ -2,6 +2,10 @@
 
 Reusable building blocks for simple web apps. Consuming apps pull `webapp/base` as a resource base and opt into Components for ingress, persistent storage, service-mesh injection, and TLS.
 
+## When to use webapp
+
+`webapp` is for HTTP apps that get a route. Headless workloads — exporters, operators — should skip it and copy `apps/unpoller/` (minimal standalone: Namespace, Deployment, Service, VMServiceScrape) instead. `apps/paperclip/` is too big for that role.
+
 ## Structure
 
 ```text
@@ -106,22 +110,22 @@ This writes `kubernetes/apps/my-service/kustomization.yaml` and `kubernetes/clus
 
 ## Handling secrets
 
-Per-app secrets live at `kubernetes/apps/<app-name>/secret.sops.yaml` (one file per app, distinct from cluster-wide secrets in `kubernetes/settings/orion/cluster-secrets.sops.yaml`). Add one like this:
+Per-app secrets live at `kubernetes/apps/<app-name>/<app>-*.sops.yaml` (distinct from cluster-wide secrets in `kubernetes/settings/orion/cluster-secrets.sops.yaml`). Any `<app>-*.sops.yaml` filename is fine — `forgejo-tokens.sops.yaml` and `unpoller-credentials.sops.yaml` are the pattern. Add one like this:
 
 ```bash
 # create the plaintext secret
-cat > kubernetes/apps/my-service/secret.sops.yaml <<EOF
+cat > kubernetes/apps/my-service/my-service-credentials.sops.yaml <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
-  name: my-service-secret
+  name: my-service-credentials
   namespace: my-service
 stringData:
   api-key: "replace-me"
 EOF
 
 # encrypt in-place (SOPS_AGE_KEY_FILE must point to your age key)
-sops --encrypt --in-place kubernetes/apps/my-service/secret.sops.yaml
+sops --encrypt --in-place kubernetes/apps/my-service/my-service-credentials.sops.yaml
 
 # add to resources in kustomization.yaml
 ```
