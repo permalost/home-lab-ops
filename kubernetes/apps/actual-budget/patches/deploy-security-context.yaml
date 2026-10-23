@@ -1,0 +1,10 @@
+# The 26.10.0 image's Dockerfile creates the `actual` user (uid/gid 1001) and
+# chowns /data to it. runAsUser/runAsNonRoot pin that explicitly; fsGroup
+# makes the CSI driver chown the rook-ceph PVC mount to gid 1001 so the app
+# can write /data.
+- op: add
+  path: /spec/template/spec/securityContext
+  value:
+    runAsUser: 1001
+    runAsNonRoot: true
+    fsGroup: 1001
