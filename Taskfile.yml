@@ -18,6 +18,7 @@ includes:
   test: .taskfiles/LocalTest/Tasks.yml
   forgejo: .taskfiles/Forgejo/Tasks.yml
   paperclip: .taskfiles/Paperclip/Tasks.yml
+  webapp: .taskfiles/Webapp/Tasks.yml
 
 tasks:
   default:
