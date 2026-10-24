@@ -1,6 +1,7 @@
 # Alerts on the unifi_* metrics exported by UnPoller (apps/unpoller). severity
 # routes to Hearth and Telegram exactly like gateway-rules.yaml. The owner
-# label names the triaging agent; no route reads it yet (WDO-70 finding).
+# label assigns the Paperclip issue Hearth's maintenance skill files
+# (apps/hermes-hearth/skills/maintenance/SKILL.md).
 # Thresholds marked provisional come from ~1 h of healthy data on 2026-10-23.
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule

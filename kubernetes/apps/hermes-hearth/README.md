@@ -192,9 +192,10 @@ alerts resolve. (Verified live 2026-09-17: pre-restart listeners were
 ## Paperclip
 
 Hearth is also a Paperclip agent ("Tracer Bullet", company W.D.O., adapter `http`, no wake triggers).
-After investigating an alert, the `maintenance` skill files one issue there — status `todo`, assigned to
-the triage agent (Spiff), in the Cluster Alerts project (`PAPERCLIP_TRIAGE_AGENT_ID`,
-`PAPERCLIP_ALERTS_PROJECT_ID`) — or comments on the open issue the same alert already has, so a chronic
+After investigating an alert, the `maintenance` skill files one issue there — status `todo`, assigned by
+the alert's `owner` label (`hobbes` to Hobbes, `spiff` to Spiff, no or unknown label to the triage agent
+`PAPERCLIP_TRIAGE_AGENT_ID`), in the Cluster Alerts project (`PAPERCLIP_ALERTS_PROJECT_ID`) — or comments
+on the open issue the same alert already has, so a chronic
 alert updates one issue instead of spawning a daily one (idempotency key `alert:<alertname>:<UTC date>`
 backstops same-day repeats). Env: `PAPERCLIP_API_URL` (in-cluster, so filing works if the gateway is
 down), `PAPERCLIP_HOST` (Paperclip's hostname guard needs the public Host), `PAPERCLIP_COMPANY_ID`, and
