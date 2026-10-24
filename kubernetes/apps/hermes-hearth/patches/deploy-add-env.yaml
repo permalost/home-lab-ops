@@ -123,10 +123,11 @@
           key: GITHUB_TOKEN
     #
     # Paperclip (company W.D.O.): the maintenance skill files each alert investigation there as a
-    # `todo` issue assigned to the triage agent in the Cluster Alerts project, or comments on the
-    # open issue the alert already has (skills/maintenance/SKILL.md, "Filing the finding in
-    # Paperclip"). The in-cluster URL keeps filing working when the gateway is down; Paperclip's
-    # hostname guard rejects the in-cluster Host, so requests send PAPERCLIP_HOST.
+    # `todo` issue in the Cluster Alerts project, assigned by the alert's `owner` label — the
+    # triage agent (PAPERCLIP_TRIAGE_AGENT_ID) unless the label names hobbes or spiff — or
+    # comments on the open issue the alert already has (skills/maintenance/SKILL.md, "Filing the
+    # finding in Paperclip"). The in-cluster URL keeps filing working when the gateway is down;
+    # Paperclip's hostname guard rejects the in-cluster Host, so requests send PAPERCLIP_HOST.
     - name: PAPERCLIP_API_URL
       value: "http://paperclip.paperclip.svc.cluster.local:3100"
     - name: PAPERCLIP_HOST

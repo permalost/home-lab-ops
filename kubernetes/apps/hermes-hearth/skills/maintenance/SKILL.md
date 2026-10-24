@@ -1,7 +1,7 @@
 ---
 name: maintenance
 description: "Investigate a Kubernetes alert using the k8s MCP server, and open a PR for a safe fix. No exec/delete/write cluster tools exist — the only write path is a git PR, and it can never merge itself."
-version: 0.5.0
+version: 0.6.0
 author: community
 license: MIT
 platforms: [linux, macos, windows]
@@ -134,6 +134,11 @@ the issue may carry more detail than a PR, but the credential rules above still 
 the same alert on the same day returns the existing issue (HTTP 200) instead of creating another; say so
 in your reply and don't file a second one.
 
+**Owner routing.** An alert's `owner` label names the agent who triages the finding: `hobbes`
+assigns to Hobbes and `spiff` to Spiff. Use the literal ID table in Step 1 — don't infer an ID
+from any other field. An alert with no `owner` label, or an owner outside the table, goes to the
+triage agent (`PAPERCLIP_TRIAGE_AGENT_ID`).
+
 **Step 1: build the body with Python** (this image has no `jq`). Put all free text inside the quoted
 heredoc so nothing from alert text or pod logs is interpreted by the shell, keep the lines flush left
 (no leading spaces), and summarize rather than pasting raw log lines:
@@ -142,6 +147,12 @@ heredoc so nothing from alert text or pod logs is interpreted by the shell, keep
 python3 - <<'PY' > /tmp/paperclip-issue.json
 import json, datetime, os
 alertname = "<alertname>"
+owner = "<labels.owner of the fired alert, empty string if it has none>"
+owner_agent_ids = {
+    "hobbes": "20fdea5c-e691-4dcd-bef2-e6245e38d565",
+    "spiff": "f8ce9a9d-f819-42b7-9161-14c27866536d",
+}
+assignee = owner_agent_ids.get(owner, os.environ["PAPERCLIP_TRIAGE_AGENT_ID"])
 day = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 description = """## What's wrong
 <the underlying cause>
@@ -164,7 +175,7 @@ print(json.dumps({
     "description": description,
     "status": "todo",
     "priority": "high",  # critical -> high, warning -> medium
-    "assigneeAgentId": os.environ["PAPERCLIP_TRIAGE_AGENT_ID"],
+    "assigneeAgentId": assignee,
     "projectId": os.environ["PAPERCLIP_ALERTS_PROJECT_ID"],
     "idempotencyKey": "alert:" + alertname + ":" + day,
 }))
@@ -225,8 +236,9 @@ curl -sS -X POST "$PAPERCLIP_API_URL/api/companies/$PAPERCLIP_COMPANY_ID/issues"
 
 The response's `identifier` (e.g. `WDO-12`) is the issue to cite.
 
-**Rules.** Assign only to the triage agent (`PAPERCLIP_TRIAGE_AGENT_ID`) — never to anyone
-else — and `todo` is the only status: the triage agent decides what happens next. Report the
+**Rules.** Assign per the owner table in Step 1 — no `owner` label, or one outside it, goes to the
+triage agent (`PAPERCLIP_TRIAGE_AGENT_ID`) — and `todo` is the only status: the assignee decides
+what happens next. Report the
 identifier next to the diagnosis (and the PR link, if any). If the Step 2 comment POST
 fails, fall through to Step 3 and file the issue — the `idempotencyKey` still prevents a
 same-day duplicate. If filing fails (non-2xx or a connection error), say so plainly with
