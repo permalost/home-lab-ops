@@ -28,7 +28,7 @@ images:
     newName: __IMAGE__
     newTag: "__IMAGE_TAG__"
     # Pin by digest so a re-pushed tag can't change what runs: set `digest: sha256:<digest>` — get it with:
-    #   docker buildx imagetools inspect __IMAGE__:__IMAGE_TAG__ --format '{{json .RepoDigests}}'
+    #   docker buildx imagetools inspect __IMAGE__:__IMAGE_TAG__ --format '{{.Manifest.Digest}}'
 
 # configMapGenerator:
 #   - name: env

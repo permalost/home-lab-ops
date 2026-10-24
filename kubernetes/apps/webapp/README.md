@@ -48,7 +48,7 @@ images:
     newName: ghcr.io/example/my-service
     newTag: "1.2.3"
     # Pin by digest so a re-pushed tag can't change what runs: set `digest: sha256:<digest>` — get it with:
-    #   docker buildx imagetools inspect ghcr.io/example/my-service:1.2.3 --format '{{json .RepoDigests}}'
+    #   docker buildx imagetools inspect ghcr.io/example/my-service:1.2.3 --format '{{.Manifest.Digest}}'
 ```
 
 Then add a cluster shell at `kubernetes/clusters/orion/my-service.yaml` via `task gen:new-app` or by copying `kubernetes/clusters/_template/app.yaml.tmpl`.
