@@ -138,3 +138,4 @@ The cluster shell already includes `decryption: { provider: sops, secretRef: { n
 
 - `webapp/base` and `webapp/components/` are excluded from direct `kustomize build` validation in `scripts/validate.sh` — they are not standalone overlays.
 - `apps/homebox/` is the canonical real-world example of a consumer.
+- `task webapp:render-diff` prints a unified diff of every consumer's rendered manifests between `main` and the working tree — run it before pushing changes to `webapp/base` or its components and paste the summary into the PR as evidence.
