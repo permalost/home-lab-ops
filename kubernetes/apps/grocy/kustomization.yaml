@@ -21,7 +21,7 @@ labels:
 images:
   - name: my-app
     newName: ghcr.io/linuxserver/grocy
-    newTag: "v4.6.0-ls334"
+    newTag: "v4.7.1-ls346"
 
 patches:
   - target:
