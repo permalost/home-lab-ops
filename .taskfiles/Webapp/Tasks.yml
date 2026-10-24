@@ -1,0 +1,19 @@
+---
+version: "3"
+
+tasks:
+  render-diff:
+    desc: "Diff every webapp/base consumer's rendered manifests between main and the working tree. Optional: BASE_REF"
+    summary: |
+      Discovers every kustomization that transitively includes webapp/base
+      (no hardcoded list), renders each with kustomize build at the base git
+      ref and in the working tree, and prints a unified diff per consumer or
+      "no change".
+
+      Usage:
+        task webapp:render-diff                    # diff against main
+        task webapp:render-diff BASE_REF=origin/main
+    vars:
+      BASE_REF: '{{.BASE_REF | default "main"}}'
+    cmds:
+      - bash scripts/webapp-render-diff.sh {{.BASE_REF}}
