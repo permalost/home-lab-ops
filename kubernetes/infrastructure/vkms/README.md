@@ -57,7 +57,9 @@ Two receivers match every `warning`/`critical` alert independently
 (`apps/unpoller`): controller polling, disconnected/pending APs and switches, WAN
 state and latency, PoE budget, port errors, channel utilization, and DHCP pool
 utilization. Every rule carries a `severity` and an `owner` label (warning → hobbes,
-critical → spiff); routing matches on `severity` only — nothing consumes `owner` yet.
+critical → spiff). Alertmanager routes on `severity`; hermes-hearth's `maintenance` skill assigns
+the Paperclip issue it files by `owner` — `hobbes`/`spiff` to the named agent, anything else to
+the triage agent.
 Provisional thresholds (WAN degraded, port errors) were derived from ~1 h of healthy
 data on 2026-10-23, not the 5 days the alert plan asked for.
 
