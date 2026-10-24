@@ -88,7 +88,7 @@ Components live at `kubernetes/apps/webapp/components/`. Add them to the `compon
 
 ### Manual steps after scaffolding
 
-1. **Set the correct image tag** — the scaffold uses `latest`; pin to a real tag.
+1. **Pin the image by tag and digest** — the scaffold fills `newTag` from the `IMAGE=name:tag` argument; add the `digest:` line next to it (the template comments how to get the digest).
 2. **Adjust port if not 8080** — add an inline JSON patch to `kustomization.yaml`:
    ```yaml
    patches:
