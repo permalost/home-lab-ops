@@ -19,7 +19,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: bootstrap
-          image: ghcr.io/paperclipai/paperclip:2026.1005.0
+          image: ghcr.io/paperclipai/paperclip:2026.1023.0
           workingDir: /app
           # The CLI exits 0 even when it fails, so wait for the server (migrations
           # applied) and fail on its error line.

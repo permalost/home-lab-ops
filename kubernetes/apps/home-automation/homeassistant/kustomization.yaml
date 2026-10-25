@@ -23,7 +23,7 @@ components:
 images:
   - name: my-app
     newName: ghcr.io/home-assistant/home-assistant
-    newTag: "2026.10.1"
+    newTag: "2026.10.4"
 
 patches:
   - target:

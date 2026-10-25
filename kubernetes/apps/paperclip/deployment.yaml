@@ -23,7 +23,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: paperclip
-          image: ghcr.io/paperclipai/paperclip:2026.1005.0
+          image: ghcr.io/paperclipai/paperclip:2026.1023.0
           ports:
             - name: http
               containerPort: 3100
