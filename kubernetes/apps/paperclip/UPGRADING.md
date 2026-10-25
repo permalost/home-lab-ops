@@ -3,7 +3,8 @@
 Several things here work around gaps in the Paperclip version we run. After a version bump, re-test
 each one and remove the workarounds that are no longer needed.
 
-**Validated against:** `2026.1005.0` (2026-10-12).
+**Validated against:** `2026.1005.0` (2026-10-12). The image now runs `2026.1023.0`
+(bumped 2026-10-24 for the eMudhra trust-store fix); the workaround re-test is pending.
 
 Run the automated part (in the `wdo/agent-playbook` checkout, after the new pod is up; `upgrade-check` is on branch `feat/upgrade-check`, not yet merged):
 
