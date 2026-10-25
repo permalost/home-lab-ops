@@ -3,7 +3,7 @@
 # Reference: https://budimanjojo.github.io/talhelper/latest/reference/configuration/
 
 clusterName: orion
-talosVersion: v1.13.7
+talosVersion: v1.13.12
 kubernetesVersion: v1.33.0
 endpoint: https://10.50.0.10:6443
 
