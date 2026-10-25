@@ -23,7 +23,7 @@ components:
 images:
   - name: my-app
     newName: ghcr.io/sysadminsmedia/homebox
-    newTag: 0.26.2
+    newTag: 0.27.1
 
 patches:
   - target:

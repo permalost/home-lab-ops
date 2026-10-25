@@ -24,7 +24,7 @@ spec:
     spec:
       initContainers:
         - name: init-config
-          image: eclipse-mosquitto:2.0.18
+          image: eclipse-mosquitto:2.0.22
           command:
             [
               "sh",
@@ -38,7 +38,7 @@ spec:
               mountPath: /dest
       containers:
         - name: mosquitto
-          image: "eclipse-mosquitto:2.0.18"
+          image: "eclipse-mosquitto:2.0.22"
           imagePullPolicy: IfNotPresent
           ports:
             - name: mqtt
