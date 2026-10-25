@@ -15,7 +15,10 @@
   path: /spec/template/spec/containers/-
   value:
     name: rotator
-    image: alpine:3.20
+    # alpine:3.20 is EOL and no longer receives ca-certificates fixes
+    # (eMudhra incident 2026-10); 3.24 is supported and ships
+    # ca-certificates-bundle 20261020-r0.
+    image: alpine:3.24
     command:
       - sh
       - -c
