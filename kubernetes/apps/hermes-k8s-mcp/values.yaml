@@ -1,11 +1,11 @@
 fullnameOverride: k8s-mcp
 
-# No numbered tags are ever published for this image (quay.io only ships
-# "latest"), so pin by digest instead — image.version accepts either and
-# the chart renders a `@sha256:...` ref when given one. Digest of `latest`
-# as of 2026-09-20; bump deliberately, don't drop back to a bare tag.
+# Pin by digest — image.version accepts a digest and the chart renders a
+# `@sha256:...` ref when given one. Digest of the v0.0.69 release index on
+# quay.io (UBI 9 minimal, built 2026-10-23 — post-eMudhra-fix base); bump
+# deliberately, don't drop back to a bare tag.
 image:
-  version: "sha256:71d2cf69429874fc972388284e337fd892eabdbaea632ca6dcab3b3bdeb2fec4"
+  version: "sha256:1da9d62ad0c008a6cadcf2718c86c2e2d18753ca1d9f1f3313068980794b24f2"
 
 ingress:
   enabled: false
