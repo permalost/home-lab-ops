@@ -80,7 +80,7 @@ kubectl drain orion-cp-01 --ignore-daemonsets --delete-emptydir-data
 task talos:dry-run NODE=orion-cp-01 IP=10.50.0.11
 
 # Upgrade
-task talos:upgrade-talos NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:v1.12.1
+task talos:upgrade-talos NODE=orion-cp-01 IP=10.50.0.11 IMAGE=ghcr.io/siderolabs/installer:v1.13.12
 
 # Wait for node to rejoin, then uncordon
 kubectl uncordon orion-cp-01
