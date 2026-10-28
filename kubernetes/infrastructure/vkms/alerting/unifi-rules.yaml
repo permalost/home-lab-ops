@@ -2,7 +2,11 @@
 # routes to Hearth and Telegram exactly like gateway-rules.yaml. The owner
 # label assigns the Paperclip issue Hearth's maintenance skill files
 # (apps/hermes-hearth/skills/maintenance/SKILL.md).
-# Thresholds marked provisional come from ~1 h of healthy data on 2026-10-23.
+# WanDegraded and PortErrorsRising thresholds are measured, not provisional:
+# re-measured 2026-10-28 over 1.75 days of healthy data (2026-10-26 22:07Z
+# onward). vmsingle lost all earlier history to its missing persistent storage
+# during the 2026-10-25 Talos upgrade reboots, so the planned 5-day window
+# shrank; see the vkms README.
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
@@ -56,17 +60,20 @@ spec:
           expr: >-
             (unifi_site_latency_seconds{subsystem="www"} > 0.1)
             or (max_over_time(unifi_speedtest_latency_ms[15m]) > 100)
-            or (increase(unifi_site_intenet_drops_total[15m]) > 0)
+            or (increase(unifi_site_intenet_drops_total[15m]) > 0
+            and count_over_time(unifi_site_intenet_drops_total[20m]) > 36)
           for: 15m
           labels:
             severity: warning
             owner: hobbes
           annotations:
-            summary: "WAN latency or loss above baseline on {{ $labels.wan_interface }}{{ $labels.site_name }}"
+            summary: 'WAN latency or loss above baseline on {{ $labels.site_name }}{{ if $labels.wan_interface }} ({{ $labels.wan_interface }}){{ end }}'
             description: >-
               Site internet latency exceeded 100 ms, a speedtest exceeded 100 ms, or the WAN drop
-              counter increased over 15m. Healthy baseline is 11-15 ms (provisional threshold: under
-              5 days of data). Check ISP status and failover state on the gateway.
+              counter increased over 15m. Healthy baseline is 10-15 ms p95, 20 ms max (measured over
+              1.75 days on 2026-10-28); 100 ms is ~8x p95. The count_over_time guard suppresses the
+              fresh-counter artifact VictoriaMetrics reports for one lookbehind window after an
+              UnPoller restart. Check ISP status and failover state on the gateway.
         - alert: UnifiPoeBudgetHigh
           expr: >-
             sum by (name, site_name) (unifi_device_port_poe_watts)
@@ -93,8 +100,8 @@ spec:
             summary: "Port errors rising on {{ $labels.name }} port {{ $labels.port_num }}"
             description: >-
               Receive or transmit errors have increased on a switch port for 30m (healthy baseline is
-              zero, provisional). Expect a cable, SFP, or negotiation problem; reseat or replace the
-              link.
+              zero: no port errors over the 1.75-day measurement window). Expect a cable, SFP, or
+              negotiation problem; reseat or replace the link.
         - alert: UnifiApChannelUtilHigh
           expr: unifi_device_radio_channel_utilization_total_ratio > 0.7
           for: 30m
