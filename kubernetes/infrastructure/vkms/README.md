@@ -60,8 +60,12 @@ utilization. Every rule carries a `severity` and an `owner` label (warning → h
 critical → spiff). Alertmanager routes on `severity`; hermes-hearth's `maintenance` skill assigns
 the Paperclip issue it files by `owner` — `hobbes`/`spiff` to the named agent, anything else to
 the triage agent.
-Provisional thresholds (WAN degraded, port errors) were derived from ~1 h of healthy
-data on 2026-10-23, not the 5 days the alert plan asked for.
+WAN degraded and port error thresholds were re-measured on 2026-10-28 over 1.75 days of
+healthy data (2026-10-26 22:07Z onward): site internet latency p95 10 ms / max 20 ms,
+speedtest latency 15 ms flat, zero port errors. The planned 5-day window did not exist:
+vmsingle runs without persistent storage (`vmsingle.spec.storage: null` in `values.yaml`),
+so the node reboots from the 2026-10-25 Talos upgrade wiped all metrics history before
+2026-10-26 22:07Z. Give vmsingle persistent storage before trusting any longer baseline.
 
 ## Gateway HTTPS probe
 
