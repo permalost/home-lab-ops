@@ -13,6 +13,7 @@ brew "talosctl"
 
 # Kubernetes
 brew "kubectl"
+brew "kind"
 
 # Kubernetes tools
 brew "yq"
