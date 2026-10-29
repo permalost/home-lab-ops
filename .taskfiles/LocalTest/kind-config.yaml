@@ -3,7 +3,7 @@
 # Wires containerd to trust the local OCI registry on localhost:5001
 # so flux push artifact / OCIRepository sources work without TLS.
 #
-# Usage: kind create cluster --config clusters/kind-config.yaml --name flux-test
+# Usage: kind create cluster --config .taskfiles/LocalTest/kind-config.yaml --name flux-test
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:

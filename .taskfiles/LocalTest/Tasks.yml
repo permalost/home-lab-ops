@@ -38,7 +38,7 @@ tasks:
           echo "Registry already running."
         fi
       # 2. Create kind cluster wired to the local registry
-      - kind create cluster --config clusters/kind-config.yaml --name flux-test
+      - kind create cluster --config .taskfiles/LocalTest/kind-config.yaml --name flux-test
       # 3. Connect registry container to kind's Docker network
       - docker network connect kind kind-registry 2>/dev/null || true
       # 4. Install Flux controllers (no GitRepository source yet)
