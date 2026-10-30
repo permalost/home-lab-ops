@@ -16,6 +16,10 @@ All five components expose ingress on the `cilium` ingressClass at `<component>.
 
 Cilium must be running (provides the ingress class). cert-manager is optional but recommended for TLS on the ingress endpoints.
 
+## Storage
+
+vmsingle persists metrics on a 10Gi PVC from the `rook-ceph-block` StorageClass, sized for the chart default 1-month retention: the October 2026 ingest rate measured ~11.2k rows/s at ~0.22 on-disk bytes/row, so one month of data is ~6.4 GB and the spare capacity covers series growth from new scrape targets. History therefore survives node reboots. Applying any change to `vmsingle.spec.storage` recreates the pod against the new volume and starts from empty data.
+
 ## Ingress / Endpoints
 
 | Component | Host |
@@ -63,9 +67,10 @@ the triage agent.
 WAN degraded and port error thresholds were re-measured on 2026-10-28 over 1.75 days of
 healthy data (2026-10-26 22:07Z onward): site internet latency p95 10 ms / max 20 ms,
 speedtest latency 15 ms flat, zero port errors. The planned 5-day window did not exist:
-vmsingle runs without persistent storage (`vmsingle.spec.storage: null` in `values.yaml`),
-so the node reboots from the 2026-10-25 Talos upgrade wiped all metrics history before
-2026-10-26 22:07Z. Give vmsingle persistent storage before trusting any longer baseline.
+vmsingle ran without persistent storage at the time, so the node reboots from the
+2026-10-25 Talos upgrade wiped all metrics history before 2026-10-26 22:07Z. vmsingle
+now has a persistent PVC (see Storage), so metrics history survives node reboots and
+longer baselines can be trusted.
 
 ## Gateway HTTPS probe
 
