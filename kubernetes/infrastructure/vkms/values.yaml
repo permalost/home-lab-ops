@@ -127,8 +127,17 @@ kubeScheduler:
           tlsConfig:
             caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             insecureSkipVerify: true
+# Post-eMudhra-fix overrides (WDO-138): the bundled 0.97.0 chart still pins
+# pre-fix builds for these two. Drop both blocks once the stack chart ships
+# fixed defaults (grafana subchart appVersion >= 13.2.5-distroless,
+# global.versions.alertmanager >= v0.34.2).
+global:
+  versions:
+    alertmanager: v0.34.2 # 2026-10-29 build; bundle has no compromised roots
 grafana:
   # Needs internet access to install (see infrastructure/victorialogs).
+  image:
+    tag: "13.2.5-distroless" # 2026-10-26 build; bundle has no compromised roots
   plugins:
     - victoriametrics-logs-datasource
   ingress:

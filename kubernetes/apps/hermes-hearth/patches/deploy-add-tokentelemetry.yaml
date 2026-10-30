@@ -11,7 +11,7 @@
   path: /spec/template/spec/containers/-
   value:
     name: tokentelemetry-api
-    image: ghcr.io/vasihemanth/tokentelemetry-backend:sha-665f136
+    image: ghcr.io/vasihemanth/tokentelemetry-backend:sha-f40b562
     env:
       - name: TT_HOST
         value: "0.0.0.0"
@@ -58,7 +58,7 @@
   path: /spec/template/spec/containers/-
   value:
     name: tokentelemetry-ui
-    image: ghcr.io/vasihemanth/tokentelemetry-frontend:sha-665f136
+    image: ghcr.io/vasihemanth/tokentelemetry-frontend:sha-f40b562
     env:
       - name: PORT
         value: "3000"
