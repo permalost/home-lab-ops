@@ -19,6 +19,16 @@ Additional disks on CP nodes (Ceph OSD candidates):
 - orion-cp-02: Samsung SSD 870 QVO 2 TB (`ata-Samsung_SSD_870_QVO_2TB_S6R4NJ0W405219J`)
 - orion-cp-03: Samsung SSD 870 EVO 500 GB (`ata-Samsung_SSD_870_EVO_500GB_S6PXNL0W600075W`)
 
+## Control Plane Nodes — Raspberry Pi CM5 Lite (Compute Blade)
+
+arm64, boot from NVMe (blade has no microSD; CM5 Lite has no eMMC). Official Talos can't boot a Pi 5/CM5 from NVMe yet (rpi_5 overlay U-Boot lacks the PCIe driver), so these run the community image `ghcr.io/yama6a/talos-raspberry-pi5` via `patches/hardware/cm5.yaml`. Tainted `control-plane:NoSchedule`. Trunk NIC `end0`, VLANs 50 + 10 tagged.
+
+| Hostname | K8s IP (VLAN 50) | Mgmt IP (VLAN 10) | NIC MAC (`end0`) | Boot disk |
+|---|---|---|---|---|
+| orion-cp-04 | 10.50.0.14/24 | 10.10.0.14/24 | `98:fe:54:24:b9:49` | Fanxiang S501 128 GB, serial `26071027630000357` |
+
+The disk is selected by serial: by-id paths aren't visible in maintenance mode.
+
 ## Worker Nodes — Bosgame
 
 Trunk NIC: `enp1s0` (bus `0000:01:00.0`). Boot disk: Kingston 1 TB NVMe. A second `enp2s0` NIC is present but carries no addresses in the new config (the old doubled-interface bug configured VLANs on both).
