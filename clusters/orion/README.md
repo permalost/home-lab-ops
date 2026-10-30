@@ -15,7 +15,7 @@ The Flux GitOps layer lives in `../../kubernetes/clusters/orion/`.
 
 | Property | Value |
 |---|---|
-| Control-plane nodes | 3× Beelink GK Mini |
+| Control-plane nodes | 3× Beelink GK Mini + CM5 Lite blades joining (arm64, see `NODES.md`) |
 | Worker nodes | 2× Bosgame |
 | VIP | 10.50.0.10 (VLAN 50) |
 | API endpoint | `https://10.50.0.10:6443` / `orion-api.norseamerican.com` |
@@ -34,6 +34,7 @@ clusters/orion/
 ├── patches/
 │   ├── cluster/            # applied to every node
 │   ├── controlplane/       # applied to control-plane nodes only
+│   ├── hardware/           # per-hardware-type patches (CM5 image + taint)
 │   ├── worker/             # applied to worker nodes only (reserved)
 │   └── nodes/              # per-node patches (certSANs)
 ├── clusterconfig/          # talhelper output — gitignored; regenerate with task talos:gen-config
