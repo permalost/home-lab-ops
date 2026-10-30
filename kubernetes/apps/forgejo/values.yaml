@@ -16,6 +16,8 @@ gitea:
       DISABLE_REGISTRATION: true
     actions:
       ENABLED: true
+    repository.pull-request:
+      DEFAULT_MERGE_STYLE: squash
   additionalConfigFromEnvs:
     - name: FORGEJO__database__NAME
       valueFrom:

@@ -17,6 +17,10 @@ tasks:
       vars: [REPO, TIER]
     cmds:
       - bash scripts/forgejo.sh protect REPO={{.REPO}} TIER={{.TIER}}
+  merge-style:
+    desc: Squash merges and rebase updates on every wdo repo (or REPO)
+    cmds:
+      - bash scripts/forgejo.sh merge-style {{if .REPO}}REPO={{.REPO}}{{end}}
   runner-token:
     desc: Write the wdo org runner registration token into the runner's sops secret
     cmds:
