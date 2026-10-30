@@ -7,6 +7,7 @@
 #   forgejo.sh bootstrap            # org + team + bot users (idempotent)
 #   forgejo.sh tokens [BOT=<agent-...>] [OUT=<path>]  # mint all bot tokens, or rotate one, in the sops secret
 #   forgejo.sh protect REPO=<name> TIER=auto|gated|human [CHECKS=<ctx,ctx>]
+#   forgejo.sh merge-style [REPO=<name>]  # squash merges + rebase updates, all repos if no REPO
 #   forgejo.sh runner-token         # org runner registration token -> sops secret
 #   forgejo.sh token-copy BOT=<agent-...>  # copy a bot token to the clipboard (never printed)
 #   forgejo.sh migrate PROJECT=<dir under ~/code> [TIER=auto|human] [DRY_RUN=1]
@@ -109,6 +110,19 @@ runner_token() {
   echo "wrote $out (sops-encrypted)"
 }
 
+# Squash only, so each merge commit is the PR title (conventional commits).
+# "Update branch" rebases instead of adding a merge commit.
+merge_style() {
+  admin PATCH "/repos/$ORG/$1" '{"default_merge_style":"squash","allow_squash_merge":true,"allow_merge_commits":false,"allow_rebase":false,"allow_rebase_explicit":false,"default_update_style":"rebase","allow_rebase_update":true,"default_delete_branch_after_merge":true}' >/dev/null
+  echo "$ORG/$1 merge style: squash, update by rebase"
+}
+
+# merge-style for REPO, or for every repo in the org when REPO is empty.
+merge_style_all() {
+  local repo
+  for repo in ${1:-$(admin GET "/orgs/$ORG/repos?limit=100" | jq -r '.[].name')}; do merge_style "$repo"; done
+}
+
 # tier/auto: agent-review approval merges; tier/human: only the admin approves and merges.
 protect() {
   local repo="$1" tier="$2" body
@@ -126,8 +140,7 @@ protect() {
   fi
   admin DELETE "/repos/$ORG/$repo/branch_protections/main" >/dev/null 2>&1 || true
   admin POST "/repos/$ORG/$repo/branch_protections" "$body" >/dev/null
-  # Squash only, so each merge commit is the PR title (conventional commits).
-  admin PATCH "/repos/$ORG/$repo" '{"default_merge_style":"squash","allow_squash_merge":true,"allow_merge_commits":false,"allow_rebase":false,"allow_rebase_explicit":false,"default_delete_branch_after_merge":true}' >/dev/null
+  merge_style "$repo"
   echo "$ORG/$repo main protected (tier/$tier)"
 }
 
@@ -195,6 +208,7 @@ case "$cmd" in
   runner-token) runner_token ;;
   token-copy) token_copy "${BOT:?BOT required}" ;;
   migrate)   migrate "${PROJECT:?PROJECT required}" "${TIER:-auto}" ;;
+  merge-style) merge_style_all "$REPO" ;;
   protect)   protect "${REPO:?REPO required}" "${TIER:?TIER required}" ;;
-  *) sed -n '2,10p' "${BASH_SOURCE[0]}"; exit 1 ;;
+  *) sed -n '2,11p' "${BASH_SOURCE[0]}"; exit 1 ;;
 esac
