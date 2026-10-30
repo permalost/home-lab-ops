@@ -161,7 +161,17 @@ vmalert:
       - "vmalert.${domain}"
 vmsingle:
   spec:
-    storage: null
+    # Persistent storage so metrics history survives node reboots. Retention
+    # stays at the chart default retentionPeriod: "1" (1 month). Ingest
+    # measured 2026-10-30 at ~11.2k rows/s and ~0.22 on-disk bytes/row, so one
+    # month is ~6.4 GB; 10Gi leaves headroom for series growth.
+    storage:
+      storageClassName: rook-ceph-block
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
   ingress:
     enabled: true
     ingressClassName: cilium
