@@ -23,7 +23,7 @@ labels:
 images:
   - name: my-app
     newName: nousresearch/hermes-agent
-    newTag: "v2026.8.27"
+    newTag: "v2026.9.24"
 
 configMapGenerator:
   - name: hermes-config
