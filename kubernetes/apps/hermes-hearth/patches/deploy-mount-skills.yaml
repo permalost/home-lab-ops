@@ -16,6 +16,14 @@
           path: network/unifi/SKILL.md
         - key: maintenance-SKILL.md
           path: kubernetes/maintenance/SKILL.md
+        - key: truenas-SKILL.md
+          path: infra/truenas/SKILL.md
+        - key: truenas-api.md
+          path: infra/truenas/references/api.md
+        - key: truenas-optimization.md
+          path: infra/truenas/references/optimization.md
+        - key: truenas-tn.py
+          path: infra/truenas/scripts/tn.py
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:

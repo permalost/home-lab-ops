@@ -76,6 +76,25 @@
         secretKeyRef:
           name: hermes-secrets
           key: UNIFI_PASSWORD
+    # truenas skill. URLs go through the Gateway (https only: TrueNAS revokes
+    # an API key used over http). Keys are optional until added to sops, so
+    # the pod starts without them.
+    - name: FASTNAS_URL
+      value: "https://fastnas.orion.norseamerican.com"
+    - name: FASTNAS_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: FASTNAS_API_KEY
+          optional: true
+    - name: BIGNAS_URL
+      value: "https://bignas.orion.norseamerican.com"
+    - name: BIGNAS_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: BIGNAS_API_KEY
+          optional: true
     # Telegram gateway platform — two-way notification/chat channel.
     # TELEGRAM_ALLOWED_USERS is load-bearing, not optional: with no
     # allowlist set, the gateway's authz falls back to an open "pair" mode
