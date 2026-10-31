@@ -42,6 +42,22 @@ platforms:
           events: ["alert"]
           skills: ["maintenance"]
           deliver: telegram
+          # Filing the finding in Paperclip (the maintenance skill's write
+          # path) shells out — a python3 heredoc builds the JSON, curl POSTs
+          # it — but the default webhook catalog is deliberately shell-free
+          # (upstream treats webhook payloads as untrusted), so no alert ever
+          # filed an issue (WDO-100). hermes-agent offers nothing narrower
+          # than a terminal for this (no HTTP/filing tool; same safe set in
+          # v2026.8.27 and the v2026.9.24 bump), so this trusted route opts
+          # into one via the per-route override — the adapter resolves it
+          # through the same platform-toolset path, and any other webhook
+          # route keeps the shell-free default. A session on this route can
+          # reach the whole container: filesystem, env (the skill's
+          # never-quote-a-credential rule still binds) and network. Commands
+          # the approval layer flags as dangerous still fail closed: a
+          # webhook session has no user to approve them. The skill's curl
+          # POSTs and python3 heredocs are not flagged.
+          toolsets: [hermes-webhook, terminal]
           # _render_prompt can't loop over `alerts`, only substitute
           # {dotted.path}s — and commonLabels/commonAnnotations are empty
           # once a group spans namespaces (group_by is alertname-only), so
