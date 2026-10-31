@@ -18,6 +18,14 @@
 # stopped pinning csi.* images in 1.21 (its defaults are now empty, letting
 # the ceph-csi-operator apply these built-ins) — re-check these when the
 # chart (and with it the operator) version bumps.
+#
+# plugin is deliberately pinned BELOW that (v3.17.0, the last version that
+# ran on every node here): the cephcsi v3.18.x image is built on a distro
+# with an x86-64-v3 baseline, and the binary aborts at startup with "Fatal
+# glibc error: CPU does not support x86-64-v3" on the cluster's older
+# nodes, crashlooping the nodeplugin. Re-check when the operator bumps
+# again, when a v3.18.x image ships with an x86-64-v2-compatible base, or
+# when the older nodes are replaced.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -29,7 +37,7 @@ data:
   resizer: "registry.k8s.io/sig-storage/csi-resizer:v2.2.1"
   snapshotter: "registry.k8s.io/sig-storage/csi-snapshotter:v8.6.0"
   registrar: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.18.0"
-  plugin: "quay.io/cephcsi/cephcsi:v3.18.1"
+  plugin: "quay.io/cephcsi/cephcsi:v3.17.0"
   addons: "quay.io/csiaddons/k8s-sidecar:v0.15.1"
 ---
 apiVersion: csi.ceph.io/v1
