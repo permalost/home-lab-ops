@@ -108,7 +108,7 @@ policy boundary, not enforcement.
 - Secrets are encrypted with `master.key` on `paperclip-data`; the stored Claude login is encrypted
   in the database. Back both up together (no backups are configured yet).
 - A subscription sign-in refreshes itself but can expire; Paperclip then shows a reconnect card.
-- The Spark GLM server takes 4 concurrent requests (`MAX_NUM_SEQS=4`), shared with Hermes. One stream runs about
+- The Spark GLM server takes 4 concurrent streams (TensorFold `max` in `/health`), shared with Hermes. One stream runs about
   25 tok/s, four about 10 each. Keep concurrent GLM agent runs low.
 
 Upgrading: see `UPGRADING.md` (workarounds to re-test after a version bump).
