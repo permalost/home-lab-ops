@@ -1,0 +1,16 @@
+---
+# Hobbes's own Kubernetes credential (WDO-147, Jon's decision on WDO-143).
+# The Paperclip pod itself runs with automountServiceAccountToken: false and no
+# RBAC binding; this ServiceAccount is never mounted into it. Its token reaches
+# the cluster only through Hobbes's adapter env (see README.md, "Hobbes's
+# read-only cluster access"). The read-only ClusterRole and ClusterRoleBinding
+# live in kubernetes/infrastructure/rbac/.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hobbes-readonly
+  namespace: paperclip
+# Belt and braces: if this SA were ever mounted by mistake, the pod gets no
+# token. This flag does not affect the manually managed token Secret; that is
+# filled by the token controller regardless.
+automountServiceAccountToken: false

@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - readonly.yaml
   - readonly-token.sops.yaml
+  - hobbes-readonly.yaml

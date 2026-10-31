@@ -1,0 +1,149 @@
+---
+# Read-only cluster access for Hobbes only (WDO-147, Jon's decision on
+# WDO-143). Verbs are get/list/watch only. Secrets are deliberately excluded:
+# a read-only role that can read every Secret in the cluster is a cluster-admin
+# credential in disguise. The credential is bound to the hobbes-readonly
+# ServiceAccount and reaches the Paperclip pod only through Hobbes's adapter
+# env (see kubernetes/apps/paperclip/README.md).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hobbes-readonly
+rules:
+  # Core resources for alert triage. pods/log supports crash diagnosis.
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - events
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+      - pods
+      - pods/log
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  # EndpointSlice lives in discovery.k8s.io, not core
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+  # events.k8s.io mirrors core events; some tooling reads this group
+  - apiGroups:
+      - events.k8s.io
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+  # metrics.k8s.io serves no watch endpoint
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+  # VictoriaMetrics operator CRDs
+  - apiGroups:
+      - operator.victoriametrics.com
+    resources:
+      - vlagents
+      - vlclusters
+      - vldistributed
+      - vlogs
+      - vlsingles
+      - vmanomalies
+      - vmanomalyconfigs
+      - vmdistributed
+      - vmauths
+      - vmagents
+      - vmalertmanagerconfigs
+      - vmalertmanagers
+      - vmalerts
+      - vmclusters
+      - vmnodescrapes
+      - vmpodscrapes
+      - vmprobes
+      - vmrules
+      - vmscrapeconfigs
+      - vmservicescrapes
+      - vmsingles
+      - vmstaticscrapes
+      - vtagents
+      - vtclusters
+      - vtsingles
+      - vmusers
+    verbs:
+      - get
+      - list
+      - watch
+  # Flux state
+  - apiGroups:
+      - helm.toolkit.fluxcd.io
+    resources:
+      - helmreleases
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kustomize.toolkit.fluxcd.io
+    resources:
+      - kustomizations
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hobbes-readonly
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hobbes-readonly
+subjects:
+  - kind: ServiceAccount
+    name: hobbes-readonly
+    namespace: paperclip

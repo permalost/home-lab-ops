@@ -1,0 +1,15 @@
+---
+# Long-lived API token for the hobbes-readonly ServiceAccount (WDO-147).
+# This manifest is a skeleton on purpose: the token controller fills
+# data.token, data.ca.crt and data.namespace in-cluster, so no credential is
+# ever committed here. The file is named *.sops.yaml so that any data fields
+# added later would be encrypted (.sops.yaml, see lessons.md), and this
+# directory is decrypted by Flux.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hobbes-readonly-token
+  namespace: paperclip
+  annotations:
+    kubernetes.io/service-account.name: hobbes-readonly
+type: kubernetes.io/service-account-token
