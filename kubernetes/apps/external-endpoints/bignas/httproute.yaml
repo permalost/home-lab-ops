@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/pod-selector: ""
     gethomepage.dev/siteMonitor: "https://bignas.${domain}"
-    gethomepage.dev/name: "bignas"
+    gethomepage.dev/name: "BigNAS"
     gethomepage.dev/description: "HDD NAS"
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "truenas.png"

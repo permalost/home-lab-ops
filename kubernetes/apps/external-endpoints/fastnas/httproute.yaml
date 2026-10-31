@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/pod-selector: ""
     gethomepage.dev/siteMonitor: "https://fastnas.${domain}"
-    gethomepage.dev/name: "fastnas"
+    gethomepage.dev/name: "FastNAS"
     gethomepage.dev/description: "SSD NAS"
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "truenas.png"
