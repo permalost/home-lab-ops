@@ -40,6 +40,11 @@ which also has the full explanation and the roster. What lives here is the serve
 
 ## Keep in mind
 
+- The pod has no Kubernetes API access: it runs with `automountServiceAccountToken: false`
+  and no RBAC binding on its ServiceAccount. The token file stays in a running pod until
+  the pod restarts, so delete the pod after merging a token change. The
+  `@paperclipai/plugin-kubernetes` sandbox provider is the only Paperclip feature that
+  reads the token; it is not installed here.
 - Secrets are encrypted with `master.key` on `paperclip-data`; the stored Claude login is encrypted
   in the database. Back both up together (no backups are configured yet).
 - A subscription sign-in refreshes itself but can expire; Paperclip then shows a reconnect card.
