@@ -21,8 +21,9 @@ themselves.
 GLM-5.3-Flash-EXL3 (`GLM-5.3-Flash-EXL3`, EXL3 4bpw via
 `MiaAI-Lab/GLM-5.3-Flash-EXL3-2x-DGX-Sparks`), TP=2 across the same
 dual-Spark pair (`spark-5a0c` + `spark-b`), standalone outside Talos/Flux,
-at `10.50.0.126:8888`. DFlash2 speculative decoding, 1M-token context
-ceiling (`--max-model-len 1000000`). Swapped 2026-09-04 from
+at `10.50.0.126:8888`. Served by TensorFold (container `glm53-flash-tf`,
+image `tensorfold-glm53:v0.6.0`, not vLLM), 4 concurrent streams, speculative
+decoding, 1,048,576-token context. Live state: `GET /health`. Swapped 2026-09-04 from
 DeepSeek-V4-Flash-0731 (`deepseek-v4-flash-dspark`) — DeepSeek's
 containers are stopped but its weights/image are kept in place on both
 nodes for revert (`~/dspark-repo/start-deepseek-v4-flash-dspark.sh`).
