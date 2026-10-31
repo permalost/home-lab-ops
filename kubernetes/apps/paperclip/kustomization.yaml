@@ -6,6 +6,8 @@ resources:
   - secret.yaml
   - forgejo-tokens.sops.yaml
   - github-tokens.sops.yaml
+  - hobbes-readonly.yaml
+  - hobbes-readonly-token.sops.yaml
   - database.yaml
   - pvc.yaml
   - service.yaml
