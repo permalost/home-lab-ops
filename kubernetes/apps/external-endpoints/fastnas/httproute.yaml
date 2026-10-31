@@ -1,13 +1,13 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: truenas
+  name: fastnas
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/pod-selector: ""
-    gethomepage.dev/siteMonitor: "https://nas.${domain}"
-    gethomepage.dev/name: "TrueNAS"
-    gethomepage.dev/description: "NAS"
+    gethomepage.dev/siteMonitor: "https://fastnas.${domain}"
+    gethomepage.dev/name: "fastnas"
+    gethomepage.dev/description: "SSD NAS"
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "truenas.png"
 spec:
@@ -16,8 +16,8 @@ spec:
       namespace: gateway
       sectionName: https
   hostnames:
-    - "nas.${domain}"
+    - "fastnas.${domain}"
   rules:
     - backendRefs:
-        - name: truenas
-          port: 80
+        - name: fastnas
+          port: 443
