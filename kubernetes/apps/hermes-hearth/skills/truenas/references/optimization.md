@@ -24,8 +24,9 @@ count before adding disks.
 ## fastnas (SSD)
 
 - Trim: autotrim on the pool, or a monthly manual trim. Cost: brief extra IO.
-- SMART: SHORT test weekly, LONG test quarterly; watch `Percentage Used`
-  and media errors, not reallocated sectors.
+- SMART: not in the 25.10 API. Jon keeps a SHORT test weekly and a LONG test
+  quarterly (Cron Job); the agent relies on `alert.list`. Watch `Percentage Used`
+  and media errors in the shell, not reallocated sectors.
 - Temperatures: warn 60 C, act 70 C.
 - Pool near full hurts SSD write speed and wear more than HDD; keep under 80%.
 - Sync-write latency: a SLOG is not needed on an all-SSD pool.

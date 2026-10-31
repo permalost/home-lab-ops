@@ -1,7 +1,8 @@
 # TrueNAS API notes
 
 Checked against the live OpenAPI specs of fastnas (25.10) and bignas (25.04)
-on 2026-10-31. Re-check after a major upgrade:
+and the middleware source (branches `stable/goldeye`, `stable/fangtooth`)
+on 2026-10-31. A method with no `roles=` in the source is admin-only. Re-check after a major upgrade:
 `curl -sk https://<nas>/api/v2.0/openapi.json` needs no login.
 
 ## Transport
@@ -17,11 +18,11 @@ incomplete on 25.10. Use it only to read the spec.
 
 | Need | bignas (25.04) | fastnas (25.10) |
 |---|---|---|
-| SMART results / tests / attributes | `smart.test.results`, `smart.test.manual_test`, `disk.smart_attributes` | not in REST; try `tn.py fastnas --methods smart` |
+| SMART | `smart.test.results` (role `REPORTING_READ`). Starting a test and `disk.smart_attributes` list no role, so they are admin-only. | removed from the API in 25.10. `disk.smart_test` is private (cron only). |
 | Snapshots | `zfs.snapshot.query` / `.create` | `pool.snapshot.query` / `.create` |
 | Update check | `update.check_available`, `update.get_pending` | `update.status` |
 | Disk temperature | `disk.temperature`, `disk.temperatures` | `disk.temperatures`, `disk.temperature_agg` |
-| Scrub | `pool.scrub.scrub [pool, "START"]` | same |
+| Scrub (not used) | `pool.scrub.run`/`.scrub` need `POOL_WRITE` | same |
 
 If a method is not found, run `--methods <word>`; do not guess names.
 
@@ -41,11 +42,9 @@ If a method is not found, run `--methods <word>`; do not guess names.
 | `reporting.get_data` | ARC hit ratio, disk busy, load |
 | `core.get_jobs` | progress of a started scrub/test |
 
-## Writes (the only three)
+## The one write
 
 ```bash
-python3 scripts/tn.py bignas pool.scrub.scrub '["tank", "START"]'
-python3 scripts/tn.py bignas smart.test.manual_test '[[{"identifier": "sda", "type": "SHORT"}]]'
 python3 scripts/tn.py fastnas pool.snapshot.create '[{"dataset": "tank/data", "name": "agent-20261031-1200"}]'
 ```
 
@@ -53,7 +52,8 @@ On bignas use `zfs.snapshot.create` with the same body.
 
 ## Access
 
-User `agent-maint` on each NAS, in a group whose privilege is Read-only
-Admin plus the write roles for scrubs, SMART tests and snapshots. No shell,
-no SMB. One API key per NAS. TrueNAS revokes a key used over plain HTTP:
+User `agent-maint` on each NAS, in a group whose privilege is exactly
+Readonly Admin (`READONLY_ADMIN`) plus Snapshot Write (`SNAPSHOT_WRITE`).
+Do not add Snapshot Task Write (it can change retention, which deletes
+snapshots), `POOL_WRITE`, `DISK_WRITE` or `DATASET_WRITE`. No shell, no SMB. One API key per NAS. TrueNAS revokes a key used over plain HTTP:
 keep every URL `https://`.

@@ -1,6 +1,6 @@
 ---
 name: truenas
-description: "Check, troubleshoot and tune the two TrueNAS boxes: fastnas (SSD) and bignas (HDD). Pool health, capacity, scrubs, SMART, disk temps, alerts, snapshots, replication, ARC, updates. Can start a scrub, a SHORT/LONG SMART test, or an agent- snapshot; nothing else changes."
+description: "Check, troubleshoot and tune the two TrueNAS boxes: fastnas (SSD) and bignas (HDD). Pool health, capacity, scrubs, SMART, disk temps, alerts, snapshots, replication, ARC, updates. Read-only except one action: it can create an agent- snapshot."
 version: 0.1.0
 author: community
 license: MIT
@@ -29,22 +29,19 @@ request names neither, check both and report them separately.
 
 ## What you may change
 
-Exactly three actions. For everything else, recommend it and say what it
-risks; do not do it.
+One action: create a snapshot named `agent-<YYYYMMDD-HHMM>`
+(`pool.snapshot.create` on fastnas, `zfs.snapshot.create` on bignas).
+Everything else is read-only. Never delete or roll back a snapshot, start a
+scrub or SMART test, edit pool/dataset/share/network/snapshot-task settings,
+apply updates, reboot, or offline a disk.
 
-1. Start a pool scrub (`pool.scrub.scrub` with `START`).
-2. Start a `SHORT` or `LONG` SMART test (`smart.test.manual_test`).
-3. Create a snapshot named `agent-<YYYYMMDD-HHMM>` (`pool.snapshot.create`
-   on fastnas, `zfs.snapshot.create` on bignas).
+When a scrub or SMART test is overdue, say so and name where Jon starts it
+(below). Starting them needs roles the agent does not have, on purpose:
+scrub needs `POOL_WRITE` (pool management), and SMART tests are admin-only
+on bignas and not in the API on fastnas.
 
-Before any of them: no scrub while a scrub or resilver runs
-(`pool.query` -> `scan`); no LONG test on a disk that is already testing.
-One action per request. Report the job id and how to watch it
-(`core.get_jobs`). Never delete, rollback, edit pool/dataset/share/network
-settings, apply updates, reboot, or offline a disk.
-
-`scripts/tn.py` refuses anything outside this list, and the NAS user
-`agent-maint` has no wider role. If either fence blocks you, stop and say so.
+`scripts/tn.py` refuses any other write, and the NAS user `agent-maint`
+has no wider role. If either fence blocks you, stop and say so.
 
 ## Use the helper
 
@@ -55,12 +52,11 @@ versions). Run `python3 scripts/tn.py ...` from this skill's directory; if
 ```bash
 python3 scripts/tn.py bignas pool.query
 python3 scripts/tn.py bignas smart.test.results
-python3 scripts/tn.py bignas pool.scrub.scrub '["tank", "START"]'
-python3 scripts/tn.py fastnas --methods smart      # find a renamed method
+python3 scripts/tn.py fastnas --methods snapshot   # find a renamed method
 ```
 
-Why not curl: fastnas (25.10) dropped REST for SMART, update checks and
-`zfs.snapshot`. See `references/api.md`. Keys must travel over HTTPS only;
+Why not curl: fastnas (25.10) dropped REST for update checks and
+`zfs.snapshot`, and removed SMART from the API. See `references/api.md`. Keys must travel over HTTPS only;
 TrueNAS revokes a key used over plain HTTP, and the helper refuses `http://`.
 
 ## Procedure: health check
@@ -73,8 +69,10 @@ explains the complaint.
    `topology`, `scan` shows last scrub and its errors.
 3. Capacity: `size`/`allocated` -> warn at 80% used, act at 90%.
 4. `disk.query` + `disk.temperatures` — temps (limits in `references/optimization.md`).
-5. SMART: `smart.test.results` — any FAILED, or none in 35 days (HDD) / 90 days (SSD).
-   Also `disk.smart_attributes` on HDDs: reallocated, pending, offline-uncorrectable > 0.
+5. SMART. bignas: `smart.test.results` — any FAILED, or no test in 35 days.
+   fastnas: 25.10 has no SMART in the API; rely on `alert.list` and say so.
+   Raw attributes (reallocated, pending, CRC) are not readable with this
+   role; if a disk looks suspect, ask Jon to read them in the UI or shell.
 6. `pool.snapshottask.query` + `pool.snapshot.query` (fastnas) /
    `zfs.snapshot.query` (bignas) — newest snapshot older than its task
    interval means the task is failing.
@@ -84,13 +82,21 @@ explains the complaint.
 
 If all clean, say so in two lines. Do not keep digging.
 
+Overdue items go in the report as a task for Jon:
+- Scrub (last scrub older than the limit in `references/optimization.md`):
+  Data Protection > Scrub Tasks, or Storage > pool > Scrub.
+- SMART test on bignas: Data Protection > Periodic S.M.A.R.T. Tests.
+- SMART test on fastnas: 25.10 removed the scheduler; the old schedule became
+  a Cron Job (System > Advanced > Cron Jobs) that calls `disk.smart_test`.
+  If it is missing, tell Jon.
+
 ## Procedure: one symptom
 
 | Symptom | Look at |
 |---|---|
 | Slow reads/writes | `pool.query` scan (scrub/resilver running?), `reporting.get_data` ARC and disk busy, temps (HDD thermal throttle), pool > 80% full |
 | Alert emailed | `alert.list`, then the object it names |
-| Disk "degraded" | `pool.query` topology, `smart.test.results`, `smart_attributes` for that disk |
+| Disk "degraded" | `pool.query` topology, `alert.list`, `smart.test.results` (bignas) |
 | Pool filling | `pool.dataset.query` sorted by `used`, `snapshot_count`; snapshots are the usual cause |
 | Share unreachable | `service.query` (smb/nfs running?), `alert.list`; if the NAS answers here, the problem is network or share config, not the pool |
 
@@ -98,16 +104,16 @@ If all clean, say so in two lines. Do not keep digging.
 
 Write it for the person who owns the NAS. Per issue: what is wrong in plain
 words (not the raw field), the specific action, and its side effects. A
-scrub slows the pool for hours; a LONG test on an HDD adds load for
-many hours; say so before running either. Optimization advice lives in
+scrub slows the pool for hours; a LONG test on an HDD adds load for many
+hours; say so when you ask Jon to start one. Optimization advice lives in
 `references/optimization.md`; quote thresholds from there.
 
 ## Pitfalls
 
 - A pool can be `ONLINE` with a failing disk. Check SMART, not only status.
 - `disk.temperatures` caches for 5 minutes; one reading is not a trend.
-- bignas is on 25.04, fastnas on 25.10: method paths and results differ.
-  When a method is missing, use `--methods <word>`.
+- bignas is on 25.04, fastnas on 25.10: method names and results differ
+  (SMART is bignas only). When a method is missing, use `--methods <word>`.
 - A new NAS user without access returns an auth failure, not an empty list.
 
 ## Sensitive data

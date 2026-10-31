@@ -11,7 +11,7 @@
 <nas> is "fastnas" or "bignas". Reads <NAS>_URL and <NAS>_API_KEY from the
 environment (https://host, API key). The key is never printed.
 
-Client-side guard: read-only methods and a short write allow-list only. This
+Client-side guard: read-only methods plus agent- snapshot creation only. This
 is a second fence; the real limit is the NAS user's role (see SKILL.md).
 """
 import asyncio
@@ -24,11 +24,10 @@ import websockets
 
 READ = re.compile(
     r"\.(query|get_instance|config|status|results|temperatures?|temperature_agg"
-    r"|smart_attributes|get_state|get_methods|list|info|version|get_jobs"
+    r"|get_state|get_methods|list|info|version|get_jobs"
     r"|check_available|get_pending|available_versions)$"
 )
-WRITE = {"pool.scrub.run", "pool.scrub.scrub", "smart.test.manual_test",
-         "pool.snapshot.create", "zfs.snapshot.create"}
+WRITE = {"pool.snapshot.create", "zfs.snapshot.create"}
 
 
 def check(method: str, params: list) -> None:
@@ -37,16 +36,9 @@ def check(method: str, params: list) -> None:
     if method not in WRITE:
         sys.exit(f"refused: {method} is not read-only or on the write allow-list")
     first = params[0] if params else None
-    if method == "pool.scrub.scrub" and not (len(params) == 2 and params[1] == "START"):
-        sys.exit("refused: pool.scrub.scrub only allows action START")
-    if method == "smart.test.manual_test":
-        tests = first if isinstance(first, list) else []
-        if not tests or any(t.get("type") not in ("SHORT", "LONG") for t in tests):
-            sys.exit("refused: only SHORT or LONG SMART tests")
-    if method.endswith("snapshot.create"):
-        name = (first or {}).get("name", "") if isinstance(first, dict) else ""
-        if not name.startswith("agent-"):
-            sys.exit("refused: snapshot name must start with agent-")
+    name = (first or {}).get("name", "") if isinstance(first, dict) else ""
+    if not name.startswith("agent-"):
+        sys.exit("refused: snapshot name must start with agent-")
 
 
 async def call(nas: str, method: str, params: list):
