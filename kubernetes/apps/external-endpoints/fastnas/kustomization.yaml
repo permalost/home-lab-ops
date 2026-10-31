@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - service.yaml
+  - endpointslice.yaml
+  - configmap-ca.yaml
+  - httproute.yaml
+
+components:
+  - ../_components/backend-tls
+
+# Wires the generic backend-tls component to this instance's Service/ConfigMap.
+# TrueNAS' stock cert is self-signed with SAN "localhost", hence the hostname.
+patches:
+  - target:
+      kind: BackendTLSPolicy
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: fastnas-backend-tls
+      - op: replace
+        path: /spec/targetRefs/0/name
+        value: fastnas
+      - op: replace
+        path: /spec/validation/caCertificateRefs/0/name
+        value: fastnas-ca
+      - op: replace
+        path: /spec/validation/hostname
+        value: localhost

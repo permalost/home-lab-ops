@@ -36,6 +36,16 @@ Additional disks on worker nodes (Ceph OSD candidates):
 
 `10.50.0.10` — Talos VIP on VLAN 50, declared on all three control-plane nodes via `vip.ip`.
 
+## Storage (off-cluster)
+
+TrueNAS boxes on VLAN 50, static IPs in the reserved `10.50.0.30–39` block.
+Routed through the Gateway by `kubernetes/apps/external-endpoints/`.
+
+| Name | IP | Media | URL |
+|---|---|---|---|
+| fastnas | 10.50.0.31 | SSD | `https://fastnas.<domain>` |
+| bignas | 10.50.0.32 | HDD | `https://bignas.<domain>` |
+
 ## Network
 
 | VLAN | Purpose | Subnet | Gateway |

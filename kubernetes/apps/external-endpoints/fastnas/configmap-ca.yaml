@@ -1,0 +1,34 @@
+# fastnas' self-signed leaf cert, trusted as its own CA (chain of one) so
+# BackendTLSPolicy can validate the re-encrypted hop. Pulled with:
+#   echo | openssl s_client -connect 10.50.0.31:443 -servername 10.50.0.31 \
+#     2>/dev/null | openssl x509 > ca.crt
+# Valid to 2027-10-09; re-run and update if the NAS regenerates its cert
+# (not a secret, it's a public leaf cert).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastnas-ca
+data:
+  ca.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIDrTCCApWgAwIBAgIEAzAgTjANBgkqhkiG9w0BAQsFADCBgDELMAkGA1UEBhMC
+    VVMxEjAQBgNVBAoMCWlYc3lzdGVtczESMBAGA1UEAwwJbG9jYWxob3N0MSEwHwYJ
+    KoZIhvcNAQkBFhJpbmZvQGl4c3lzdGVtcy5jb20xEjAQBgNVBAgMCVRlbm5lc3Nl
+    ZTESMBAGA1UEBwwJTWFyeXZpbGxlMB4XDTI2MDkwNzE2MjgwMVoXDTI3MTAwOTE2
+    MjgwMVowgYAxCzAJBgNVBAYTAlVTMRIwEAYDVQQKDAlpWHN5c3RlbXMxEjAQBgNV
+    BAMMCWxvY2FsaG9zdDEhMB8GCSqGSIb3DQEJARYSaW5mb0BpeHN5c3RlbXMuY29t
+    MRIwEAYDVQQIDAlUZW5uZXNzZWUxEjAQBgNVBAcMCU1hcnl2aWxsZTCCASIwDQYJ
+    KoZIhvcNAQEBBQADggEPADCCAQoCggEBAM0HKMzq6LcV8166w/vNPgCaoISsi3mz
+    FWJY8RjXZnxcCqcjDqRmv3wUDFhJfJRBn0MiVumYKcOtnnF0sWbdHKTdpaTZfUBd
+    7tgTaGl0oihMrrUyej6wG1MNi1aBYO6WUcPSXoBPa3vK+4s8Pxi8eKtP6g52dL+1
+    s84jyorA4uYdfgjuzzMIM21WGCYRBzJBJe4kHRdk/iVzDWK1xdV5MCthC8wiqO1s
+    p5t+EFxXii7Ul/Bst6p01U8s5OWjbb96bbN1fDc0grxKY0gLfx1dSEFOEi5c7Lpt
+    81rnn7eK1wVMNOhud9R+j4NywkR/WLAnOwJXkilDLDZevXWMSlk71hECAwEAAaMt
+    MCswFAYDVR0RBA0wC4IJbG9jYWxob3N0MBMGA1UdJQQMMAoGCCsGAQUFBwMBMA0G
+    CSqGSIb3DQEBCwUAA4IBAQCzdX/O+FKOA0A3q+IHD0U8Y4vuKTcmPdfbsw0ZMcEO
+    Ru3z2181hrZltVyUHZ8SzlPl6CuGQrbPQEmUou6vpIH7hfRtC4582D7S7G4NvCJs
+    qVhmPBT1yr2gn1y4IkvyNaUamLfgoUqT/Z6ksxL/XIXQZRd63jwm1c7cNP20g8R5
+    NytwWKVsgwyb+p56/RGr6hUrVzYEhoSfeI600sDXyWgdmVIhvFgxFD3cir4EFshL
+    Z0X1hbEdPrP+rmrH4skvW4HyXt6yM0BaoM0Bs5t021zD7nf81YNsrPCk2g0crFyx
+    JQuRES+a4S2UXDlDDanPaplIT7SWVoQvPdTHfktooTZo
+    -----END CERTIFICATE-----
