@@ -77,9 +77,15 @@ refused with 403):
 ```bash
 printf '%s' "$KUBERNETES_CA" > /tmp/hobbes-ca.crt
 API="https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
+# Expected: exit 0, HTTP 200, and a PodList document.
 curl --fail --silent --cacert /tmp/hobbes-ca.crt \
   -H "Authorization: Bearer $KUBERNETES_TOKEN" \
   "$API/api/v1/namespaces/paperclip/pods?limit=1"
+# Expected: HTTP 403 with a Status document, "reason": "Forbidden"
+# ("...cannot list resource \"secrets\" in API group \"\" in the namespace
+# \"paperclip\""); the token is valid, the role just excludes Secrets.
+# Without --fail this prints the body instead of erroring, so a 403 shows
+# up as JSON, not as a failed command.
 curl --silent --cacert /tmp/hobbes-ca.crt \
   -H "Authorization: Bearer $KUBERNETES_TOKEN" \
   "$API/api/v1/namespaces/paperclip/secrets?limit=1"
