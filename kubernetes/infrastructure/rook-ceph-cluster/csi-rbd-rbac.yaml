@@ -5,7 +5,7 @@
 # these — confirmed by the driver-controller reconcile actually failing
 # without them: "serviceaccount rook-ceph/rbd-nodeplugin-sa not found".
 # They come from ceph-csi-operator's own deploy/multifile/csi-rbac.yaml
-# (https://github.com/ceph/ceph-csi-operator/blob/v1.0.4/deploy/multifile/csi-rbac.yaml,
+# (https://github.com/ceph/ceph-csi-operator/blob/v1.1.0/deploy/multifile/csi-rbac.yaml,
 # pinned to the ceph-csi-operator version installed by the rook-ceph chart
 # in ../rook-ceph-operator/release.yaml) — extracted to RBD-only (no
 # CephFS/NFS/NVMe-oF pools exist here), renamed from
@@ -207,6 +207,7 @@ rules:
   - get
   - list
   - watch
+  - update
 - apiGroups:
   - snapshot.storage.k8s.io
   resources:
@@ -417,6 +418,7 @@ rules:
   - persistentvolumeclaims
   verbs:
   - get
+  - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
