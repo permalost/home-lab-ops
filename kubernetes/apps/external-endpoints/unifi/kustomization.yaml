@@ -23,4 +23,4 @@ patches:
         value: unifi-ca
       - op: replace
         path: /spec/validation/hostname
-        value: unifi
+        value: unifi.local
