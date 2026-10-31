@@ -126,6 +126,23 @@ path (`WEBHOOK_ENABLED`+`WEBHOOK_SECRET`, both in
 `patches/deploy-add-env.yaml`) — `platforms.webhook.enabled: true` in
 `config.yaml` alone isn't enough to wire up the secret, only the listener.
 
+### Route toolset
+
+The default webhook catalog is deliberately shell-free (upstream treats
+webhook payloads as untrusted), but the maintenance skill's filing path is
+python3 + curl — the reason no alert ever filed a Paperclip issue (WDO-100).
+hermes-agent offers no narrower HTTP or filing tool (same safe set in
+v2026.8.27 and the v2026.9.24 renovate bump), so `cluster-alert` is the only
+route that carries `toolsets: [hermes-webhook, terminal]`
+(`platforms.webhook.extra.routes.cluster-alert` in `config.yaml`) — the
+per-route override resolves through the same platform-toolset path, and any
+other webhook route keeps the shell-free default. A cluster-alert session
+can reach the whole container: filesystem, env (the skill's
+never-quote-a-credential rule still binds) and network. Commands the
+approval layer flags as dangerous still fail closed — a webhook session has
+no user to approve them; the skill's curl POSTs and python3 heredocs are
+not flagged.
+
 ## TokenTelemetry
 
 Sidecars (`deploy-add-tokentelemetry.yaml`) run
