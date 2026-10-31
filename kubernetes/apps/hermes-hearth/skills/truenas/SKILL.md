@@ -50,6 +50,7 @@ versions). Run `python3 scripts/tn.py ...` from this skill's directory; if
 `websockets` is missing, `pip install --user websockets` first (`uv run` also works).
 
 ```bash
+python3 scripts/tn.py bignas --health              # whole health check, one call
 python3 scripts/tn.py bignas pool.query
 python3 scripts/tn.py bignas smart.test.results
 python3 scripts/tn.py fastnas --methods snapshot   # find a renamed method
@@ -61,8 +62,15 @@ TrueNAS revokes a key used over plain HTTP, and the helper refuses `http://`.
 
 ## Procedure: health check
 
-Do this per NAS, cheapest first. Stop and report as soon as something
-explains the complaint.
+Run `python3 scripts/tn.py <nas> --health` once per NAS. It makes every
+read call below over one login and returns a short JSON summary: alerts,
+pools (capacity, last scrub, bad vdevs), disks with temperatures, SMART
+(bignas), snapshot tasks, replication, cloud sync, services, boot pool,
+update status. A call that fails on that version is listed under
+`unavailable`; that is normal (SMART on fastnas, one update method on each).
+Do not repeat the calls by hand. Use the steps below to read the summary
+and to dig into one finding with a single call (`pool.query`, `alert.list`, ...).
+Stop and report as soon as something explains the complaint.
 
 1. `alert.list` — anything not dismissed? These are the NAS's own findings.
 2. `pool.query` — `status` is `ONLINE`, `healthy` true, no errors in
