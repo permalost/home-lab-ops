@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-worker
+  labels:
+    app: netbox
+    app.kubernetes.io/component: worker
+  annotations:
+    ignore-check.kube-linter.io/env-value-from: "netbox-db-app is created by CNPG at runtime"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netbox
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app: netbox
+        app.kubernetes.io/component: worker
+    spec:
+      automountServiceAccountToken: false
+      # Same image user as the web pod; no volumes, so fsGroup is irrelevant.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 0
+      # Mirrors netbox-docker 5.1.1 docker-compose.yml: the worker replaces the
+      # image CMD (entrypoint + launch-netbox.sh) with a plain rqworker — no
+      # DB wait/migrations here, so SKIP_SUPERUSER avoids a second superuser
+      # pass and there are no probes (no HTTP endpoint to hit).
+      containers:
+        - name: netbox-worker
+          image: docker.io/netboxcommunity/netbox:v4.7.3-5.1.1
+          imagePullPolicy: IfNotPresent
+          # command/args preserve the image's tini entrypoint and only replace
+          # the CMD, exactly like the upstream compose `command:` override.
+          command: ["/usr/bin/tini", "--"]
+          args:
+            - /opt/netbox/venv/bin/python
+            - /opt/netbox/netbox/manage.py
+            - rqworker
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: dbname
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: password
+            - name: REDIS_HOST
+              value: netbox-valkey
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DATABASE
+              value: "0"
+            - name: REDIS_SSL
+              value: "false"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-secret
+                  key: SECRET_KEY
+            - name: SKIP_SUPERUSER
+              value: "true"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: 500m, memory: 512Mi}

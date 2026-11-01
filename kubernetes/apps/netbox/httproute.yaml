@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: netbox
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "netbox"
+    gethomepage.dev/name: "NetBox"
+    gethomepage.dev/description: "IPAM and DCIM"
+    gethomepage.dev/group: "Network"
+    gethomepage.dev/icon: "netbox.png"
+spec:
+  parentRefs:
+    - name: ${gatewayName}
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - netbox.${domain}
+  rules:
+    - backendRefs:
+        - name: netbox
+          port: 8080

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-valkey
+  labels:
+    app: netbox
+    app.kubernetes.io/component: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netbox
+      app.kubernetes.io/component: cache
+  template:
+    metadata:
+      labels:
+        app: netbox
+        app.kubernetes.io/component: cache
+    spec:
+      containers:
+        - name: valkey
+          image: docker.io/valkey/valkey:8.1.10-alpine
+          # No persistence on purpose: NetBox only uses Valkey for the task
+          # queue (db 0) and the cache (db 1) — losing it just re-runs jobs.
+          args: ["--bind", "0.0.0.0", "--save", "", "--appendonly", "no"]
+          ports:
+            - name: valkey
+              containerPort: 6379
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 256Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-valkey
+spec:
+  type: ClusterIP
+  selector:
+    app: netbox
+    app.kubernetes.io/component: cache
+  ports:
+    - name: valkey
+      port: 6379
+      targetPort: valkey
