@@ -25,7 +25,7 @@ ADMIN="$(sops -d --extract '["stringData"]["username"]' "$SECRET")"
 ADMIN_PW="$(sops -d --extract '["stringData"]["password"]' "$SECRET")"
 
 # bot -> token scopes
-BOTS="agent-dev agent-review agent-docs agent-chief"
+BOTS="agent-dev agent-review agent-review-2 agent-docs agent-chief"
 scopes() {
   case "$1" in
     *) echo "write:repository,write:issue,read:organization,read:user" ;;
@@ -123,11 +123,11 @@ merge_style_all() {
   for repo in ${1:-$(admin GET "/orgs/$ORG/repos?limit=100" | jq -r '.[].name')}; do merge_style "$repo"; done
 }
 
-# tier/auto: agent-review approval merges; tier/human: only the admin approves and merges.
+# tier/auto: agent-review and agent-review-2 must both approve; tier/human: only the admin approves and merges.
 protect() {
   local repo="$1" tier="$2" body
   case "$tier" in
-    auto)  body='{"approvals_whitelist_username":["agent-review"],"merge_whitelist_usernames":["'"$ADMIN"'","agent-chief"]}' ;;
+    auto)  body='{"approvals_whitelist_username":["agent-review","agent-review-2"],"required_approvals":2,"merge_whitelist_usernames":["agent-dev"]}' ;;
     # gated: needs agent-review (lgtm) AND the admin (approve). agent-dev, the author, schedules the
     # auto-merge when it opens the PR; Forgejo only runs it once both approvals exist.
     gated) body='{"approvals_whitelist_username":["agent-review","'"$ADMIN"'"],"merge_whitelist_usernames":["agent-dev"],"required_approvals":2}' ;;
