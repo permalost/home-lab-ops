@@ -40,6 +40,15 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+            # The image entrypoint steps down from root via setpriv when it
+            # starts as uid 0; with ALL capabilities dropped that fails with
+            # EPERM (setresuid not permitted) and the container exits 127 in a
+            # crash loop. Run directly as the image's valkey user (uid 999 /
+            # gid 1000) so the entrypoint takes its non-root path instead.
+            # Persistence is disabled, so there is nothing to chown.
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 1000
           resources:
             requests: {cpu: 50m, memory: 64Mi}
             limits: {cpu: 250m, memory: 256Mi}
