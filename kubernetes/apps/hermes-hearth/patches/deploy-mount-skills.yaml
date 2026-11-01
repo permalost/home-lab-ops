@@ -24,6 +24,16 @@
           path: infra/truenas/references/optimization.md
         - key: truenas-tn.py
           path: infra/truenas/scripts/tn.py
+        - key: watchers-SKILL.md
+          path: devops/watchers/SKILL.md
+        - key: watchers-_watermark.py
+          path: devops/watchers/scripts/_watermark.py
+        - key: watchers-watch_github.py
+          path: devops/watchers/scripts/watch_github.py
+        - key: watchers-watch_http_json.py
+          path: devops/watchers/scripts/watch_http_json.py
+        - key: watchers-watch_rss.py
+          path: devops/watchers/scripts/watch_rss.py
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
