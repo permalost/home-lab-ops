@@ -12,7 +12,8 @@ spec:
   rules:
     - backendRefs:
         - name: svc
-          # Matches webapp/base's Service port. Consumers that repatch the
-          # Service to a different port (e.g. pihole -> 80) must patch this
-          # HTTPRoute's port to match — see pihole/overlays/orion for the example.
+          # Matches webapp/base's Service port. To run the app on another
+          # port, patch the container port once and add the replacements
+          # wiring from webapp/README.md — the Service port and this
+          # backendRef follow it (see apps/pihole).
           port: 8080

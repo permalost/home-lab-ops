@@ -32,11 +32,31 @@ patches:
   - target:
       kind: Deployment
       name: deploy
-    path: patches/deploy-update-ports.yaml
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-ports.yaml
   - target:
       kind: Service
       name: svc
-    path: patches/svc-update-ports.yaml
+    path: patches/svc-add-ports.yaml
+
+# Webapp port pattern (webapp/README.md, "Changing the port"): the container
+# port is the single port setting, so the Service port follows it here. The
+# HTTPRoute backendRef is wired the same way in overlays/orion, where the
+# route exists.
+replacements:
+  - source:
+      kind: Deployment
+      name: deploy
+      fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+    targets:
+      - select:
+          kind: Service
+          name: svc
+        fieldPaths:
+          - spec.ports.0.port
 
 configMapGenerator:
   - name: env
