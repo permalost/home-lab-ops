@@ -74,6 +74,11 @@ metadata:
   namespace: rook-ceph
 spec:
   fsGroupPolicy: File
+  # Explicit, not just the OperatorConfig default: after the cephx key rotation (#276)
+  # the operator re-rendered the nodeplugin/ctrlplugin with the built-in v3.18.1 and
+  # cp-03 crashlooped. If that recurs, restart ceph-csi-controller-manager.
+  imageSet:
+    name: rook-csi-operator-image-set-configmap
   nodePlugin:
     updateStrategy:
       type: RollingUpdate
