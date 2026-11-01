@@ -40,6 +40,11 @@ configMapGenerator:
       - truenas-api.md=skills/truenas/references/api.md
       - truenas-optimization.md=skills/truenas/references/optimization.md
       - truenas-tn.py=skills/truenas/scripts/tn.py
+      - watchers-SKILL.md=skills/watchers/SKILL.md
+      - watchers-_watermark.py=skills/watchers/scripts/_watermark.py
+      - watchers-watch_github.py=skills/watchers/scripts/watch_github.py
+      - watchers-watch_http_json.py=skills/watchers/scripts/watch_http_json.py
+      - watchers-watch_rss.py=skills/watchers/scripts/watch_rss.py
 
 patches:
   - target:

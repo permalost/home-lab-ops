@@ -77,6 +77,11 @@ Curator, so nothing rewrites them.
   `apps/home-automation/homeassistant/`'s `esl_sync_labels` automation) —
   the skill can look up a location's UUID and edit it; the automation is
   what actually pushes to the physical tags.
+- `skills/watchers/` — upstream `devops/watchers` (RSS / GitHub / JSON-API
+  pollers with watermark dedup), vendored from the image's
+  `optional-skills/`; script paths rewritten to `/opt/skills-external/`.
+  State lands in `$HERMES_HOME/watcher-state/` on the PVC. Needs a cron
+  job per watch to do anything.
 - The skill loader is cached per session — a new skill (or an edit to one)
   needs a fresh session to show up, not just a pod restart.
 
