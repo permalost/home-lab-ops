@@ -139,9 +139,13 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+          # The image spawns 4 granian workers by default; each loads the full
+          # NetBox Django app (~300-400MB apiece), so a 1Gi limit OOMKills the
+          # container within the first minute, before the startupProbe can
+          # pass. 3Gi fits 4 workers with headroom.
           resources:
-            requests: {cpu: 250m, memory: 512Mi}
-            limits: {cpu: "1", memory: 1Gi}
+            requests: {cpu: 250m, memory: 1Gi}
+            limits: {cpu: "1", memory: 3Gi}
           volumeMounts:
             - name: media
               mountPath: /opt/netbox/netbox/media
