@@ -4,7 +4,7 @@ metadata:
     name: forgejo-bot-tokens
 type: Opaque
 stringData:
-    AGENT_DEV_TOKEN: ENC[AES256_GCM,data:FKGpf+lP189NVNUvrdg8UtM3/AoXyjEuviMmRJjqMykWWH2kCT2K6g==,iv:v8dtqHXp/807QsvnNE67halxD4f4szD5iwXIoC9T8Bg=,tag:3+QCFM4m9NUUhCW5TF6t7w==,type:str]
+    AGENT_DEV_TOKEN: ENC[AES256_GCM,data:RFcOV2/b8mrKd5sMig2lzGPm7qALz1oIhFjfjSil/PcSnlopUYuFyA==,iv:dWS5zRf+21rYXeIU9jd05A8POE9S45LeENQvQ/dC4SQ=,tag:gn8RGLMZNRSt1EjdpWwALQ==,type:str]
     AGENT_REVIEW_TOKEN: ENC[AES256_GCM,data:3CEQi0aMEmmSuGFlZ2GXxGXa0pB7n1tCxl/RAi5+CwuAVPWHuwddFA==,iv:jRiVkqDCBEv8XBf8st8jjY/RkFIUgMleWN6aFPNJYyM=,tag:cY713OAr3k12e1NpuWLazg==,type:str]
     AGENT_DOCS_TOKEN: ENC[AES256_GCM,data:lm3ZKnCfCmvCzsQgfYpITcgrY48IbZnJ1SZOH+Qv0M8JTMA1ov2LUw==,iv:5TcUva3XHjkA5O1YqEpmJ/b942VsiKBKGgwG/yzLXIU=,tag:5JgkaQPvatRmoLUDrxpJlQ==,type:str]
     AGENT_CHIEF_TOKEN: ENC[AES256_GCM,data:i/eoOZ0sxt+lnfbZEAxwAA0aLcJFcN3obd8k4f1kT3Ym5VeV/LM8DQ==,iv:/VL33Nf4y6wMaRuHp3MmAvgnumy6PZ7AP5keYS78Hgk=,tag:2BiTHF4N4octUqqf/OelHg==,type:str]
@@ -20,6 +20,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-10-11T23:42:54Z"
-    mac: ENC[AES256_GCM,data:l3pJxFfSQcF0KiTnk970X4FLx5xJzC35G1B9/UpR3QWQ5QGOlZQUuk4pgG2s32ztiGlsBnx62z08ApjirDBZqXiMrrMNWbO5cupdBjJlWubN0gR5RvKPtu9nG5tyNJ0nynQnI3F8eVqVzv0DMuVUK5KW2ly6PbWrcCHBwxlbu+s=,iv:5mpedjInJ29YOP2VcWfuMt3zbU/MonkC4U0fIUfhKRE=,tag:W3Nnef22h7RvKxYrmQ2H0g==,type:str]
+    lastmodified: "2026-11-01T02:53:26Z"
+    mac: ENC[AES256_GCM,data:Zhkkzi/7LovRquBSqsdu9esKNr9mN3pruFsasiNs1Tw867WgBQfInVoPCRRaG0RYOwoR3ZyKbh4XolwAqx8f7WPJqjGvQJfi5sRxI9iTjFjWqlvBsm45Avz9ZGbUN6gLOhDprGf9MHXIQtDT4Q/Gf8H3X5py1QGteks5eXF7XpQ=,iv:9q297GEvsTABWYOB0e8Gm5I1Z7lLQBt8j8O4Di1HqFg=,tag:LBo4Bb3cTmJvb+B1mMEk+Q==,type:str]
     version: 3.13.3
