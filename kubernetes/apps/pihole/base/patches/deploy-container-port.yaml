@@ -1,0 +1,7 @@
+# The single port setting (webapp/README.md, "Changing the port"): pihole's
+# HTTP interface listens on 80. The Service port follows via the replacements
+# block in base/kustomization.yaml, and the HTTPRoute backendRef via the one
+# in overlays/orion.
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 80

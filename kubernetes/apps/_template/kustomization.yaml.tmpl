@@ -42,4 +42,6 @@ images:
 #     patch: |-
 #       - op: replace
 #         path: /spec/template/spec/containers/0/ports/0/containerPort
-#         value: 8080   # change if app doesn't listen on 8080
+#         value: 8080   # change if app doesn't listen on 8080 — then add the
+#                       # replacements block from webapp/README.md so the Service
+#                       # port and HTTPRoute follow it

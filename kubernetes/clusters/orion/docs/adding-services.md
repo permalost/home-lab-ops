@@ -89,7 +89,7 @@ Components live at `kubernetes/apps/webapp/components/`. Add them to the `compon
 ### Manual steps after scaffolding
 
 1. **Pin the image by tag and digest** — the scaffold fills `newTag` from the `IMAGE=name:tag` argument; add the `digest:` line next to it (the template comments how to get the digest).
-2. **Adjust port if not 8080** — add an inline JSON patch to `kustomization.yaml`:
+2. **Adjust port if not 8080** — set the container port once and let the Service and HTTPRoute follow via `replacements` (see `kubernetes/apps/webapp/README.md`, "Changing the port"):
    ```yaml
    patches:
      - target: {kind: Deployment, name: deploy}
@@ -97,11 +97,17 @@ Components live at `kubernetes/apps/webapp/components/`. Add them to the `compon
          - op: replace
            path: /spec/template/spec/containers/0/ports/0/containerPort
            value: 3000
-     - target: {kind: Service, name: svc}
-       patch: |-
-         - op: replace
-           path: /spec/ports/0/port
-           value: 3000
+
+   replacements:
+     - source:
+         kind: Deployment
+         name: deploy
+         fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+       targets:
+         - select: {kind: Service, name: svc}
+           fieldPaths: [spec.ports.0.port]
+         - select: {kind: HTTPRoute, name: route}
+           fieldPaths: [spec.rules.0.backendRefs.0.port]
    ```
 3. **Add extra resources** — PVCs not covered by the `pvc` Component, ConfigMaps for env files via `configMapGenerator`, etc.
 4. **Add secrets** (see below).

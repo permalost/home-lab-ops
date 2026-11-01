@@ -53,6 +53,59 @@ images:
 
 Then add a cluster shell at `kubernetes/clusters/orion/my-service.yaml` via `task gen:new-app` or by copying `kubernetes/clusters/_template/app.yaml.tmpl`.
 
+## Changing the port
+
+The port defaults to 8080 in three places: the Deployment's container port, the
+Service port and the HTTPRoute `backendRefs.port`. To run the app on a
+different port, set it in exactly one place — the container port — and wire the
+other two to follow with a `replacements` block. The block carries no value, so
+it is safe to paste verbatim; the container-port patch is the only place the
+port appears.
+
+```yaml
+# kubernetes/apps/my-service/kustomization.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 3000
+
+replacements:
+  - source:
+      kind: Deployment
+      name: deploy
+      fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+    targets:
+      - select:
+          kind: Service
+          name: svc
+        fieldPaths:
+          - spec.ports.0.port
+      - select:
+          kind: HTTPRoute
+          name: route
+        fieldPaths:
+          - spec.rules.0.backendRefs.0.port
+```
+
+The Service port then equals the container port, so no explicit `targetPort` is
+needed. Drop any `svc-target-port.yaml`-style patch when adopting this — it
+would otherwise keep pointing the Service at the old port. The HTTPRoute target
+silently matches nothing if the `httproute` component is not included, so the
+same block works for every consumer. Run `task webapp:render-diff` after
+adopting it: it shows the Service and HTTPRoute ports moving to the new value.
+
+For a base + overlay app (like `apps/pihole/`), the HTTPRoute only exists in
+the overlay, so split the wiring: the base gets a `replacements` block with the
+Service target, and the overlay gets one with the HTTPRoute target. The
+container-port patch stays in the base either way.
+
+Extra container or Service ports (DNS, metrics, TLS) are still added with
+patches; the wiring above only syncs the first port of each.
+
 ## Component reference
 
 ### ingress
@@ -76,10 +129,10 @@ Default on orion. Adds a Gateway API `HTTPRoute` attached to `${gatewayName}` (n
 
 `backendRefs.port` defaults to `8080` — matching `webapp/base`'s Service — because
 Gateway API's `HTTPRoute` only accepts a numeric port (unlike `ingress`'s
-`port: {name: http}`, there's no name-based backend ref to fall back on). If an
-overlay repatches the Service to a different port (pihole -> `80`, since its
-container really listens there), patch the HTTPRoute's `backendRefs[0].port` to
-match — see `apps/pihole/overlays/orion/patches/httproute-update-port.yaml`.
+`port: {name: http}`, there's no name-based backend ref to fall back on). If the
+app runs on a different port, follow [Changing the port](#changing-the-port):
+one container-port patch plus a `replacements` block keeps this backendRef in
+sync — see `apps/pihole/`.
 
 ### pvc
 
