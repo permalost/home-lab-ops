@@ -8,14 +8,14 @@ spec:
     image: quay.io/ceph/ceph:v20.2.4
     allowUnsupported: false
   dataDirHostPath: /var/lib/rook
-  # One-time daemon key rotation to aes256k (clears AUTH_INSECURE_SERVICE_KEY_TYPE).
-  # csi stays on aes: aes256k needs kernel 7.0+ on the nodes. Bump keyGeneration to rotate again.
+  # Daemon keys were rotated to aes256k (Rook's default for daemons) by bumping keyGeneration;
+  # bump it again to rotate. Don't set daemon.keyType: Rook then adds the mon emergency-ciphers
+  # flag and AUTH_EMERGENCY_CIPHERS_SET stays up. csi stays on aes: aes256k needs kernel 7.0+.
   security:
     cephx:
       daemon:
         keyRotationPolicy: KeyGeneration
         keyGeneration: 2
-        keyType: aes256k
   mon:
     count: 3
     allowMultiplePerNode: false
