@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox
+  labels:
+    app: netbox
+    app.kubernetes.io/component: web
+  annotations:
+    ignore-check.kube-linter.io/env-value-from: "netbox-db-app is created by CNPG at runtime"
+spec:
+  replicas: 1
+  # RWO media volume — a rolling update would need both pods on the same PVC.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: netbox
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app: netbox
+        app.kubernetes.io/component: web
+    spec:
+      automountServiceAccountToken: false
+      # The image ships user `netbox` (uid 999, gid 0) and group-writes media
+      # (netbox:root, g+w); fsGroup 0 keeps a fresh rook-ceph-block volume
+      # writable by that group.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+        - name: netbox
+          image: docker.io/netboxcommunity/netbox:v4.7.3-5.1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ALLOWED_HOSTS
+              value: netbox.${domain}
+            - name: CSRF_TRUSTED_ORIGINS
+              value: https://netbox.${domain}
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: dbname
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-db-app
+                  key: password
+            # Tasks (db 0) and cache (db 1) share the netbox-valkey instance.
+            - name: REDIS_HOST
+              value: netbox-valkey
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DATABASE
+              value: "0"
+            - name: REDIS_SSL
+              value: "false"
+            - name: REDIS_CACHE_HOST
+              value: netbox-valkey
+            - name: REDIS_CACHE_PORT
+              value: "6379"
+            - name: REDIS_CACHE_DATABASE
+              value: "1"
+            - name: REDIS_CACHE_SSL
+              value: "false"
+            - name: MEDIA_ROOT
+              value: /opt/netbox/netbox/media
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-secret
+                  key: SECRET_KEY
+            # Consumed by the image entrypoint: migrations run on container
+            # start, then the superuser is seeded from the SUPERUSER_* keys
+            # (no SKIP_SUPERUSER, no separate Job).
+            - name: SUPERUSER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-secret
+                  key: SUPERUSER_NAME
+            - name: SUPERUSER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-secret
+                  key: SUPERUSER_EMAIL
+            - name: SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: netbox-secret
+                  key: SUPERUSER_PASSWORD
+          # /login/ is unauthenticated, so the probes work before first login.
+          # The Host header must be in ALLOWED_HOSTS — Django 400s on the
+          # kubelet's default (pod IP) host, same guard as paperclip's probes.
+          # startupProbe gives first-boot migrations (~minutes on a fresh DB)
+          # before the liveness failure threshold starts counting.
+          startupProbe:
+            httpGet:
+              path: /login/
+              port: http
+              httpHeaders: [{name: Host, value: "netbox.${domain}"}]
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /login/
+              port: http
+              httpHeaders: [{name: Host, value: "netbox.${domain}"}]
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /login/
+              port: http
+              httpHeaders: [{name: Host, value: "netbox.${domain}"}]
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          volumeMounts:
+            - name: media
+              mountPath: /opt/netbox/netbox/media
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: netbox-media

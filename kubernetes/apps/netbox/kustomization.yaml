@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: netbox
+
+resources:
+  - namespace.yaml
+  - netbox-secret.sops.yaml
+  - database.yaml
+  - pvc-media.yaml
+  - valkey.yaml
+  - service.yaml
+  - httproute.yaml
+  - deployment.yaml
+  - netbox-worker.yaml
+
+# Pin by digest so a re-pushed tag can't change what runs.
+images:
+  - name: docker.io/netboxcommunity/netbox
+    newTag: v4.7.3-5.1.1
+    digest: sha256:22cf3c61fc367fb74a5cf6de018e9d7e10a7da8d09a695eab30740793040de08
+  - name: docker.io/valkey/valkey
+    newTag: 8.1.10-alpine
+    digest: sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507

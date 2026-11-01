@@ -48,6 +48,8 @@ config:
         style: columns
       Agents:
         style: columns
+      Network:
+        style: columns
       Infrastructure:
         style: columns
       Observability:

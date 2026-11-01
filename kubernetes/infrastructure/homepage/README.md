@@ -17,9 +17,9 @@ each route opts in via `gethomepage.dev/*` annotations (see
 Add the same annotations to any new HTTPRoute to get it listed for free.
 
 Groups are fixed by `layout` in `values.yaml`, which also sets their order:
-Home, Inventory, Finances, OSINT, Agents, Infrastructure, Observability,
-Platform. `scripts/flux-build.sh` (`task test:build`) fails on a group outside
-that list
+Home, Inventory, Finances, OSINT, Agents, Network, Infrastructure,
+Observability, Platform. `scripts/flux-build.sh` (`task test:build`) fails on a
+group outside that list
 and on any HTTPRoute without `gethomepage.dev/enabled: "true"` or `"false"`
 (use `"false"` for routes that aren't tiles, e.g. the HTTP redirect). To add a
 group, add it to `layout`.

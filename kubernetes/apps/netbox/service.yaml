@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox
+spec:
+  type: ClusterIP
+  # component: web so the worker pods (also app: netbox) never receive traffic
+  selector:
+    app: netbox
+    app.kubernetes.io/component: web
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
