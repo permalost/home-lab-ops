@@ -21,7 +21,7 @@ labels:
 images:
   - name: my-app
     newName: docker.io/actualbudget/actual-server
-    newTag: "26.10.0"
+    newTag: "26.11.0"
 
 patches:
   - target:
