@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unifi-drift-script
+  labels:
+    app: unifi-drift
+data:
+  run-drift-audit.sh: |
+    #!/bin/sh
+    # Wrapper for the unifi-drift-audit CronJob. Runs the audit with
+    # --diff latest, then POSTs one Alertmanager alert when the diff is
+    # non-empty. Nothing is sent on exit 0; the job fails on exit 1/2 so
+    # UnifiDriftJobFailed fires. audit.py builds "https://$UNIFI_HOST", so a
+    # bare host is parsed out of UnPoller's URL-shaped secret key first.
+    set -eu
+
+    UNIFI_HOST="$(python3 - <<'PY'
+    import os
+    import urllib.parse as p
+
+    s = p.urlparse(os.environ["UP_UNIFI_CONTROLLER_0_URL"])
+    host = s.hostname or ""
+    print(host + ":" + str(s.port) if host and s.port else host)
+    PY
+    )"
+    export UNIFI_HOST
+
+    out=/tmp/audit.log
+    set +e
+    python3 /app/audit.py --non-interactive --diff latest >"$out" 2>&1
+    code=$?
+    set -e
+    cat "$out"
+
+    if [ "$code" -eq 3 ]; then
+        python3 - "$out" <<'PY'
+    import os
+    import sys
+
+    import requests
+
+    with open(sys.argv[1], encoding="utf-8", errors="replace") as f:
+        log = f.read()
+
+    # Drift lines are printed as "  - <line>" below the CONFIG DRIFT header;
+    # their leading words name the changed category.
+    _, _, section = log.partition("CONFIG DRIFT")
+    category_names = (
+        ("admin ", "admin accounts"),
+        ("firewall rule ", "firewall rules"),
+        ("port forward ", "port forwards"),
+        ("network ", "networks/VLANs"),
+        ("device ", "devices"),
+        ("firmware changed", "device firmware"),
+        ("wlan ", "WLANs"),
+    )
+    categories = []
+    drift_lines = []
+    for line in section.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("- "):
+            continue
+        detail = stripped[2:]
+        drift_lines.append(detail)
+        for prefix, name in category_names:
+            if detail.startswith(prefix):
+                if name not in categories:
+                    categories.append(name)
+                break
+
+    summary = (
+        "UniFi config drift in: " + ", ".join(categories)
+        if categories
+        else "UniFi config drift (categories not parsed; see the job log)"
+    )
+    description = "\n".join(f"- {line}" for line in drift_lines)
+    if len(description) > 2400:
+        description = description[:2400] + "\n- … truncated; the full diff is in the job log"
+
+    alert = {
+        "labels": {
+            "alertname": "UnifiConfigDrift",
+            "severity": "warning",
+            "owner": "spiff",
+            "cronjob": "unifi-drift-audit",
+            "namespace": os.environ.get("POD_NAMESPACE", ""),
+        },
+        "annotations": {"summary": summary, "description": description},
+    }
+    base = os.environ["ALERTMANAGER_URL"].rstrip("/")
+    response = requests.post(base + "/api/v2/alerts", json=[alert], timeout=15)
+    response.raise_for_status()
+    print("UnifiConfigDrift alert posted to Alertmanager")
+    PY
+    else
+        exit "$code"
+    fi

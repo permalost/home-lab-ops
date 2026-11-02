@@ -1,0 +1,97 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: unifi-drift-audit
+  labels:
+    app: unifi-drift
+  annotations:
+    # The unpoller-credentials Secret is defined in apps/unpoller; kube-linter
+    # kustomize-builds each app dir, so it cannot resolve that cross-dir ref.
+    ignore-check.kube-linter.io/env-value-from: "true"
+spec:
+  schedule: "0 3 * * 1"
+  # Run the missed weekly slot if the cluster was down for up to an hour
+  # past the schedule; otherwise skip it and let UnifiDriftScheduleStalled
+  # speak for the gap.
+  startingDeadlineSeconds: 3600
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # One attempt: a failed audit alerts once instead of retry-storming the
+      # controller with logins, and the next scheduled run retries anyway.
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
+      template:
+        metadata:
+          labels:
+            app: unifi-drift
+        spec:
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            # rook-ceph-block volumes are mounted root-owned; fsGroup makes
+            # /reports writable for the non-root audit process.
+            fsGroup: 65534
+          imagePullSecrets:
+            - name: unifi-drift-registry-pull
+          containers:
+            - name: audit
+              image: git.orion.norseamerican.com/wdo/unifi:v0.1.0
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/run-drift-audit.sh"]
+              env:
+                # The read-only audit user UnPoller already uses, referenced
+                # in place — no second copy of the credential exists.
+                - name: UP_UNIFI_CONTROLLER_0_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: unpoller-credentials
+                      key: UP_UNIFI_CONTROLLER_0_URL
+                - name: UNIFI_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: unpoller-credentials
+                      key: UP_UNIFI_CONTROLLER_0_USER
+                - name: UNIFI_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: unpoller-credentials
+                      key: UP_UNIFI_CONTROLLER_0_PASS
+                - name: UNIFI_REPORT_DIR
+                  value: /reports
+                - name: ALERTMANAGER_URL
+                  value: http://vmalertmanager-vkms-victoria-metrics-k8s-stack.monitoring.svc:9093
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+              volumeMounts:
+                - name: reports
+                  mountPath: /reports
+                - name: script
+                  mountPath: /scripts
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests: {cpu: 100m, memory: 128Mi}
+                limits: {memory: 512Mi}
+          volumes:
+            - name: reports
+              persistentVolumeClaim:
+                claimName: unifi-drift-reports
+            - name: script
+              configMap:
+                name: unifi-drift-script
+                defaultMode: 0755
+            - name: tmp
+              emptyDir: {}
+          restartPolicy: Never

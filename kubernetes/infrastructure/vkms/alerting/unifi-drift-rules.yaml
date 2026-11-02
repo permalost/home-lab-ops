@@ -1,0 +1,50 @@
+# Alerts on the unifi-drift-audit CronJob (apps/unifi-drift). The job itself
+# POSTs UnifiConfigDrift to Alertmanager when it finds drift; these rules make
+# a broken audit visible (failed run, or no run at all). The shipped default
+# KubeJobFailed rule uses the kube-state-metrics v3 metric name (kube_job_failed)
+# while this cluster runs v2.20.0 (kube_job_status_*), so it cannot fire here;
+# this rule also adds the owner routing and self-clears after 48 h. Metric and
+# label names verified against the live kube-state-metrics on 2026-11-02.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: unifi-drift
+spec:
+  groups:
+    - name: unifi-drift
+      rules:
+        - alert: UnifiDriftJobFailed
+          expr: >-
+            kube_job_status_failed{namespace="unpoller", job_name=~"unifi-drift-audit-.*"} > 0
+            and on(namespace, job_name)
+            (time() - kube_job_status_completion_time{namespace="unpoller", job_name=~"unifi-drift-audit-.*"} < 172800)
+          for: 15m
+          labels:
+            severity: warning
+            owner: spiff
+          annotations:
+            summary: "The weekly UniFi drift-audit job failed"
+            description: >-
+              A unifi-drift-audit Job failed within the last 48 h, so last week's UniFi config
+              state is not being tracked and drift would go unreported. Check the job's log
+              (kubectl -n unpoller logs job/unifi-drift-audit-<id>): exit 1 is a controller
+              login or connectivity failure, exit 2 a bad invocation or a corrupt report, and a
+              failed alert POST means Alertmanager was unreachable. If the log shows an unusable
+              report under /reports, delete that report file from the PVC — it stays the newest
+              and fails every later run otherwise. If credentials are the cause, the read-only
+              audit user is the one in the unpoller-credentials Secret.
+        - alert: UnifiDriftScheduleStalled
+          expr: >-
+            time() - kube_cronjob_status_last_schedule_time{namespace="unpoller", cronjob="unifi-drift-audit"} > 691200
+          for: 1h
+          labels:
+            severity: warning
+            owner: spiff
+          annotations:
+            summary: "The weekly UniFi drift-audit CronJob has not scheduled a run for over 8 days"
+            description: >-
+              No Job has been created from unifi-drift-audit for more than one weekly period, so
+              UniFi config drift is unmonitored. Check that the CronJob exists and its schedule
+              (kubectl -n unpoller get cronjob unifi-drift-audit), that its Flux Kustomization is
+              healthy (flux get kustomizations -A | grep unifi-drift), and for events blocking
+              Job creation such as quota or the unifi-drift-registry-pull Secret missing.

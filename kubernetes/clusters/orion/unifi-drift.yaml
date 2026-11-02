@@ -1,0 +1,28 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: unifi-drift
+  namespace: flux-system
+spec:
+  # unpoller owns the namespace and the read-only audit credentials this job
+  # reuses; vkms ships the Alertmanager the job POSTs drift to.
+  dependsOn:
+    - name: cluster-settings
+    - name: unpoller
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/unifi-drift
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

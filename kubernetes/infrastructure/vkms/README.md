@@ -72,6 +72,12 @@ vmsingle ran without persistent storage at the time, so the node reboots from th
 now has a persistent PVC (see Storage), so metrics history survives node reboots and
 longer baselines can be trusted.
 
+`alerting/unifi-drift-rules.yaml` watches the weekly UniFi drift-audit CronJob
+(`apps/unifi-drift`). That job POSTs its own `UnifiConfigDrift` alert to
+Alertmanager when it finds drift; the rules here cover a failed run
+(`UnifiDriftJobFailed`) and a stalled schedule (`UnifiDriftScheduleStalled`), both
+`owner=spiff`.
+
 ## Gateway HTTPS probe
 
 `alerting/blackbox-exporter.yaml` + `probes/gateway-probes.yaml` probe `https://{git,paperclip,homepage}.${domain}`
