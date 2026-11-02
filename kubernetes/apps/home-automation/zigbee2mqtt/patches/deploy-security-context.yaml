@@ -1,0 +1,9 @@
+# koenkk/zigbee2mqtt ships no USER (defaults to root) and the data PVC is
+# root-owned from previous deploys — so the container keeps running as root
+# and overrides only that one base key. Everything else from the base still
+# applies: no privilege escalation, all capabilities dropped, read-only root
+# filesystem (z2m writes only to its data dir — the coordinator is
+# network-attached via serial.adapter zstack over tcp://, so no device nodes).
+- op: add
+  path: /spec/template/spec/containers/0/securityContext/runAsNonRoot
+  value: false

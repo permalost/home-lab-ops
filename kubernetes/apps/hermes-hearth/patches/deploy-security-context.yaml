@@ -1,0 +1,11 @@
+# The hermes-agent image declares User: root and boots via s6-overlay
+# (entrypoint-dispatch.sh execs /init), which writes its supervision state
+# under /run on the container filesystem — so root and a writable container
+# filesystem are kept, and the PUID/PGID init keeps the runtime's default
+# capability set (it uses chown/setuid). No privilege escalation.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

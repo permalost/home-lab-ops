@@ -31,6 +31,10 @@ patches:
   - target:
       kind: Deployment
       name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
     path: patches/deploy-config-mountpath.yaml
   - target:
       kind: Deployment

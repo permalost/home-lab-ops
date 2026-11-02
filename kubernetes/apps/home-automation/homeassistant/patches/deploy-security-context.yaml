@@ -1,0 +1,14 @@
+# The Home Assistant container boots via s6-overlay (/init) as root and
+# writes its supervision state under /run, and it pip-installs integration
+# requirements into the image's site-packages at runtime — so it needs root
+# and a writable container filesystem. NET_RAW is kept for the ping
+# integration (raw ICMP sockets); every other capability is dropped.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+      add: ["NET_RAW"]
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

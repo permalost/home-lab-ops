@@ -1,0 +1,15 @@
+# pihole's startup (usr/bin/start.sh) grants file capabilities to the FTL
+# binary with setcap and drops to the pihole user via capsh --user — both
+# need CAP_SETUID/SETGID/SETPCAP/SETFCAP, and no_new_privs would strip the
+# file capabilities at exec. FTL then writes runtime state (pihole-FTL.db,
+# gravity, pihole.toml, logs, /run) under /etc/pihole and /var/log on the
+# container filesystem. So pihole opts out of runAsNonRoot, the read-only
+# root filesystem, and the base's drop-ALL — it keeps the runtime's default
+# capability set (NET_BIND_SERVICE for the 53/80/443 binds and NET_RAW are
+# in that set; NET_ADMIN was never granted and stays that way — DHCP is
+# unused). The pod-level seccompProfile RuntimeDefault is kept.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

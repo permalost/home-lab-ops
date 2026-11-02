@@ -12,7 +12,16 @@ spec:
   template:
     spec:
       serviceAccountName: default
-      automountServiceAccountToken: true
+      # No consumer talks to the Kubernetes API from inside the pod; apps that
+      # later need it opt back in explicitly.
+      automountServiceAccountToken: false
+      # Secure by default (webapp/README.md, "Secure by default"): images that
+      # cannot comply opt out per key in their own overlay — the base never
+      # weakens a setting to accommodate one image.
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       containers:
@@ -23,7 +32,17 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          # A CPU request but no CPU limit: a tight limit throttles bursts
+          # (boot-time CPU spikes showed up as multi-minute boots, #90).
+          # Memory is bounded both ways so a leak cannot take the node.
           resources:
-            limits:
+            requests:
               cpu: 10m
+              memory: 128Mi
+            limits:
               memory: 500Mi

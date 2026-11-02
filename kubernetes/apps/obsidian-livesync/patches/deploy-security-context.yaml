@@ -8,12 +8,20 @@
 # 5984 (skipping the chown block entirely, per its own root-vs-non-root
 # branch) boots cleanly.
 #
-# runAsUser/runAsNonRoot skip that chown pass altogether. fsGroup still
-# makes the CSI driver chown the PVC's mount to that gid so it can write
-# /opt/couchdb/data.
+# runAsUser skips that chown pass altogether (runAsNonRoot comes from
+# webapp/base). fsGroup still makes the CSI driver chown the PVC's mount to
+# that gid so it can write /opt/couchdb/data.
+#
+# The entrypoint unconditionally touches /opt/couchdb/etc/local.d/docker.ini
+# on the container filesystem (and appends the COUCHDB_* admin to it until
+# present), so the read-only root filesystem is opted out of — the only
+# relaxation; drop-ALL and no-privilege-escalation from the base still apply.
 - op: add
-  path: /spec/template/spec/securityContext
-  value:
-    runAsUser: 5984
-    runAsNonRoot: true
-    fsGroup: 5984
+  path: /spec/template/spec/securityContext/runAsUser
+  value: 5984
+- op: add
+  path: /spec/template/spec/securityContext/fsGroup
+  value: 5984
+- op: add
+  path: /spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem
+  value: false

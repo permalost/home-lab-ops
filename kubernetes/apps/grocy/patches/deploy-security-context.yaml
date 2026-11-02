@@ -1,0 +1,12 @@
+# linuxserver images boot via s6-overlay (/init), which runs as root and
+# writes its supervision state under /run and /var on the container
+# filesystem, and the PUID/PGID init pass does a recursive chown of /config
+# (needs CAP_CHOWN). So this consumer opts out of runAsNonRoot, the
+# read-only root filesystem and the base's drop-ALL — the container keeps
+# the runtime's default capability set, exactly what it ran with before.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false
