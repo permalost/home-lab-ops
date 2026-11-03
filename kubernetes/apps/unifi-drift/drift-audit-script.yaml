@@ -12,6 +12,13 @@ data:
     # non-empty. Nothing is sent on exit 0; the job fails on exit 1/2 so
     # UnifiDriftJobFailed fires. audit.py builds "https://$UNIFI_HOST", so a
     # bare host is parsed out of UnPoller's URL-shaped secret key first.
+    #
+    # Contract this wrapper depends on (wdo/unifi audit.py, --diff mode):
+    # exit 3 when drift was found, 0 when unchanged, 1/2 on failure; drift
+    # prints a "CONFIG DRIFT" header followed by one "  - <line>" per change.
+    # Those lines are plain text (ANSI colour is only on the header) and their
+    # leading words name the changed category: "admin ", "firewall rule ",
+    # "port forward ", "network ", "device ", "firmware changed", "wlan ".
     set -eu
 
     UNIFI_HOST="$(python3 - <<'PY'
