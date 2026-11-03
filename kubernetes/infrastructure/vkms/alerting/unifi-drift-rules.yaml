@@ -5,6 +5,10 @@
 # while this cluster runs v2.20.0 (kube_job_status_*), so it cannot fire here;
 # this rule also adds the owner routing and self-clears after 48 h. Metric and
 # label names verified against the live kube-state-metrics on 2026-11-02.
+# The 48 h window uses kube_job_status_start_time because Kubernetes sets
+# status.completionTime only on success, so kube-state-metrics emits no
+# kube_job_status_completion_time series for a failed Job and a join on it
+# would never fire. This matches the shipped KubeJobNotCompleted rule.
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
@@ -17,7 +21,7 @@ spec:
           expr: >-
             kube_job_status_failed{namespace="unpoller", job_name=~"unifi-drift-audit-.*"} > 0
             and on(namespace, job_name)
-            (time() - kube_job_status_completion_time{namespace="unpoller", job_name=~"unifi-drift-audit-.*"} < 172800)
+            (time() - kube_job_status_start_time{namespace="unpoller", job_name=~"unifi-drift-audit-.*"} < 172800)
           for: 15m
           labels:
             severity: warning
