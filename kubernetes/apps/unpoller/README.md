@@ -3,14 +3,12 @@
 UniFi controller metrics for the VictoriaMetrics stack (`vkms`). Polls the
 controller with the read-only audit user and serves Prometheus on `:9130`.
 
-- Credentials: `unpoller-credentials.sops.yaml` (SOPS + age, committed
-  encrypted). Keys: `UP_UNIFI_CONTROLLER_0_URL`, `UP_UNIFI_CONTROLLER_0_USER`, `UP_UNIFI_CONTROLLER_0_PASS` —
-  the controller URL, audit username and password. Create or rotate with:
-
-  ```bash
-  SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt \
-    sops --encrypt --in-place kubernetes/apps/unpoller/unpoller-credentials.sops.yaml
-  ```
+- Credentials: `externalsecret.yaml` copies them from Bitwarden Secrets Manager
+  (project `orion-apps`) into the `unpoller-credentials` Secret through the
+  `bitwarden-orion` ClusterSecretStore. Keys: `UP_UNIFI_CONTROLLER_0_URL`, `UP_UNIFI_CONTROLLER_0_USER`, `UP_UNIFI_CONTROLLER_0_PASS` —
+  the controller URL, audit username and password. Create or rotate by editing the
+  `unpoller-UP_UNIFI_CONTROLLER_0_*` secrets in Bitwarden; restart the pod after a
+  rotation. See `kubernetes/infrastructure/external-secrets/README.md`.
 
 - vmagent discovers the target through the `VMServiceScrape`; the vkms chart
   sets `selectAllByDefault: true`, so no scrape-config edit is needed.

@@ -123,7 +123,7 @@ Do not add a root `kustomization.yaml` under `kubernetes/clusters/orion/`; Flux 
 
 ## Adding secrets
 
-Secrets must be SOPS-encrypted before committing. `.sops.yaml` matches by filename (`*.sops.yaml`, `secret.yaml`, `configMap.yaml`), so a differently named secret file is committed in plaintext. Per-app secret files can use any `<app>-*.sops.yaml` name (e.g. `my-service-credentials.sops.yaml` — the same pattern as `forgejo-tokens.sops.yaml` and `unpoller-credentials.sops.yaml`). The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
+Secrets must be SOPS-encrypted before committing. `.sops.yaml` matches by filename (`*.sops.yaml`, `secret.yaml`, `configMap.yaml`), so a differently named secret file is committed in plaintext. Per-app secret files can use any `<app>-*.sops.yaml` name (e.g. `my-service-credentials.sops.yaml` — the same pattern as `forgejo-tokens.sops.yaml`). The cluster already has a `cluster-secrets` Secret in `flux-system` for cluster-wide substitution vars. For per-service secrets:
 
 ```bash
 # 1. Create plaintext
