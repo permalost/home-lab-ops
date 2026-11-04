@@ -14,8 +14,10 @@ Single `fireflyiii/core` container backed by a CNPG PostgreSQL cluster.
 - Uploads: PVC `firefly-upload` (1Gi on `rook-ceph-block`) mounted at
   `/var/www/html/storage/upload`.
 - Secrets: `APP_KEY` and `STATIC_CRON_TOKEN` live in
-  `firefly-secrets.sops.yaml` (Secret `firefly-secrets` after the app's
-  `namePrefix`).
+  `firefly-secrets.sops.yaml` (Secret `firefly-secrets`). The file is
+  included by the root `kustomization.yaml`, outside the app's `namePrefix`:
+  the Secret was encrypted under that name, and renaming an encrypted file
+  breaks its SOPS MAC.
 - The image runs as `www-data` (uid/gid 33); `deploy-security-context.yaml`
   pins that and sets `fsGroup: 33` so the upload PVC is writable.
 
@@ -45,6 +47,8 @@ III's registration page stays open until the first account exists.
   the CNPG cluster to go ready (`kubectl get cluster -n firefly`).
 - **Uploads fail with permission denied:** Confirm `fsGroup: 33` survived
   on the rendered pod spec (`kubectl get deploy -n firefly -o yaml`).
-- **Cron did not run:** Check `kubectl -n firefly logs job/firefly-cron-<id>`
-  — the job only retries once via curl; `concurrencyPolicy: Forbid` skips
-  runs while a previous one is active.
+- **Cron did not run:** Check `kubectl -n firefly logs job/firefly-cron-<id>`.
+  curl retries up to 3 times per run (`retry = 3` in its config file) and the
+  Job itself has `backoffLimit: 0`, so a failed Job waits for the next
+  schedule. `concurrencyPolicy: Forbid` skips runs while a previous one is
+  active.
