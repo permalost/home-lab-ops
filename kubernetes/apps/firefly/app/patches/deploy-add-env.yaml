@@ -1,7 +1,8 @@
 # Variable names match Firefly III's .env.example; an unknown name is
 # ignored silently, so each one is checked against upstream docs.
-# firefly-secrets is the namePrefix-rendered name of firefly-secrets.sops.yaml;
-# firefly-db-app is created by the CNPG operator for the firefly-db Cluster.
+# firefly-secrets is the Secret in firefly-secrets.sops.yaml, which lives
+# outside the app's namePrefix (see ../kustomization.yaml); firefly-db-app is
+# created by the CNPG operator for the firefly-db Cluster.
 - op: add
   path: /spec/template/spec/containers/0/env
   value:
