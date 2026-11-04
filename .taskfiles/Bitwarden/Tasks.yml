@@ -1,0 +1,10 @@
+---
+version: "3"
+
+tasks:
+  token:
+    desc: Store a machine-account token (clipboard or stdin) in its sops Secret — task bitwarden:token ACCOUNT=eso-orion|eso-paperclip
+    cmds:
+      - bash scripts/bitwarden-token.sh ACCOUNT={{.ACCOUNT}}
+    requires:
+      vars: [ACCOUNT]

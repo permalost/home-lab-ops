@@ -1,0 +1,13 @@
+# Values for the external-secrets chart 2.14.0 (appVersion v2.14.0).
+# The Bitwarden Secrets Manager provider talks to the bitwarden-sdk-server
+# deployment from this chart; see README.md.
+bitwarden-sdk-server:
+  enabled: true
+  image:
+    # Subchart appVersion is v0.6.0; pinned so a chart bump cannot move the
+    # sdk-server image silently.
+    tag: v0.6.0
+    tls:
+      # The sdk-server must serve HTTPS. The certificate comes from tls.yaml.
+      enabled: true
+      secretName: bitwarden-tls-certs

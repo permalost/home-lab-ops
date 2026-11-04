@@ -1,0 +1,28 @@
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: bitwarden-paperclip
+spec:
+  # Only ExternalSecrets in the paperclip namespace may use this store.
+  conditions:
+    - namespaceRegexes:
+        - ^paperclip$
+  provider:
+    bitwardensecretsmanager:
+      # Bitwarden cloud, US region.
+      apiURL: https://api.bitwarden.com
+      identityURL: https://identity.bitwarden.com
+      bitwardenServerSDKURL: https://bitwarden-sdk-server.external-secrets.svc.cluster.local:9998
+      auth:
+        secretRef:
+          credentials:
+            name: bitwarden-paperclip-token
+            key: token
+            namespace: external-secrets
+      organizationID: 1982cd6d-2eb7-43b4-b5d3-b4ed01398b5f
+      projectID: 3a963ee5-22a9-4845-9a5a-b4ed0139f306
+      caProvider:
+        type: Secret
+        name: bitwarden-tls-certs
+        key: ca.crt
+        namespace: external-secrets

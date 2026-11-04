@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-sdk-server
+spec:
+  # Long-lived on purpose: the sdk-server loads the certificate at startup and
+  # would keep serving an expired in-memory copy after a renewal. Re-issue by
+  # restarting the bitwarden-sdk-server deployment if it is ever renewed.
+  duration: 87600h
+  secretName: bitwarden-tls-certs
+  dnsNames:
+    - bitwarden-sdk-server
+    - bitwarden-sdk-server.external-secrets.svc
+    - bitwarden-sdk-server.external-secrets.svc.cluster.local
+  issuerRef:
+    name: selfsigned
+    kind: Issuer
