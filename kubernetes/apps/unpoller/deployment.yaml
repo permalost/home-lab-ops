@@ -4,6 +4,10 @@ metadata:
   name: unpoller
   labels:
     app: unpoller
+  annotations:
+    # The credentials Secret comes from the ExternalSecret in
+    # externalsecret.yaml, so there is no Secret manifest to resolve.
+    ignore-check.kube-linter.io/env-value-from: "unpoller-credentials is created by an ExternalSecret (ESO)"
 spec:
   replicas: 1
   selector:

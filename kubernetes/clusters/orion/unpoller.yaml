@@ -5,10 +5,13 @@ metadata:
   namespace: flux-system
 spec:
   # vkms ships the VMServiceScrape CRD; without this dependency a fresh
-  # install would apply the CR before its kind exists.
+  # install would apply the CR before its kind exists. external-secrets-stores
+  # makes the bitwarden-orion ClusterSecretStore (and its CRDs) ready before
+  # the ExternalSecret here syncs.
   dependsOn:
     - name: cluster-settings
     - name: vkms
+    - name: external-secrets-stores
   interval: 1h
   retryInterval: 1m
   timeout: 5m
@@ -18,10 +21,6 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./kubernetes/apps/unpoller
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   postBuild:
     substituteFrom:
       - kind: ConfigMap

@@ -191,7 +191,7 @@ This writes `kubernetes/apps/my-service/kustomization.yaml` and `kubernetes/clus
 
 ## Handling secrets
 
-Per-app secrets live at `kubernetes/apps/<app-name>/<app>-*.sops.yaml` (distinct from cluster-wide secrets in `kubernetes/settings/orion/cluster-secrets.sops.yaml`). Any `<app>-*.sops.yaml` filename is fine — `forgejo-tokens.sops.yaml` and `unpoller-credentials.sops.yaml` are the pattern. Add one like this:
+Per-app secrets live at `kubernetes/apps/<app-name>/<app>-*.sops.yaml` (distinct from cluster-wide secrets in `kubernetes/settings/orion/cluster-secrets.sops.yaml`). Any `<app>-*.sops.yaml` filename is fine — `forgejo-tokens.sops.yaml` is the pattern. Add one like this:
 
 ```bash
 # create the plaintext secret
