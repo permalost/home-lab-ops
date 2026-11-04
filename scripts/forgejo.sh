@@ -25,9 +25,11 @@ ADMIN="$(sops -d --extract '["stringData"]["username"]' "$SECRET")"
 ADMIN_PW="$(sops -d --extract '["stringData"]["password"]' "$SECRET")"
 
 # bot -> token scopes
-BOTS="agent-dev agent-review agent-review-2 agent-docs agent-chief"
+BOTS="agent-dev agent-review agent-review-2 agent-docs agent-chief agent-research"
 scopes() {
   case "$1" in
+    # researchers are read-only: they read repos/PRs/issues but never push or post
+    agent-research) echo "read:repository,read:organization,read:user" ;;
     *) echo "write:repository,write:issue,read:organization,read:user" ;;
   esac
 }
