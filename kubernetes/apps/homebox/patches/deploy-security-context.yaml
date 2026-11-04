@@ -1,0 +1,19 @@
+# ghcr.io/sysadminsmedia/homebox ships no USER (defaults to root) and the
+# data PVC is root-owned from previous deploys — so the container keeps
+# running as root and overrides only that one base key. Exports and imports
+# stage a zip via os.CreateTemp (TMPDIR, /tmp), so /tmp gets a writable
+# emptyDir while the rest of the root filesystem stays read-only. No
+# capabilities and no privilege escalation.
+- op: add
+  path: /spec/template/spec/containers/0/securityContext/runAsNonRoot
+  value: false
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: tmp
+    emptyDir: {}
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: tmp
+    mountPath: /tmp

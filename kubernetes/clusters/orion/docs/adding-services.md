@@ -110,11 +110,12 @@ Components live at `kubernetes/apps/webapp/components/`. Add them to the `compon
            fieldPaths: [spec.rules.0.backendRefs.0.port]
    ```
 3. **Add extra resources** — PVCs not covered by the `pvc` Component, ConfigMaps for env files via `configMapGenerator`, etc.
-4. **Add secrets** (see below).
-5. **Add `namespace.yaml`** (a `Namespace` named after the app) to `resources:`; the `httproute` component labels it for gateway access. Examples: `apps/grocy/`, `apps/obsidian-livesync/`.
-6. **Tag the HTTPRoute for Homepage** with a patch like `apps/obsidian-livesync/patches/httproute-add-homepage-annotations.yaml`. `gethomepage.dev/enabled` must be `"true"` or `"false"`, and `gethomepage.dev/group` must be a group in `infrastructure/homepage/values.yaml` (`task test:build` fails otherwise).
-7. **Set `dependsOn`** in the cluster shell to what the app needs (`cilium`, `gateway`, `cert-manager-issuers`, `cluster-settings`); copy `clusters/orion/obsidian-livesync.yaml`.
-8. Run `task gen:validate` and `task test:build`. `test:build` renders every Kustomization with substitution; an unresolved `${...}` is a bug.
+4. **Check the image against the secure-by-default set** (see `webapp/README.md`, "Secure by default"). If the image needs root, a writable root filesystem, capabilities or an SA token, add a `patches/deploy-security-context.yaml` opt-out with the reason in its header comment. Examples: `apps/pihole/base/`, `apps/grocy/`, `apps/homebox/`.
+5. **Add secrets** (see below).
+6. **Add `namespace.yaml`** (a `Namespace` named after the app) to `resources:`; the `httproute` component labels it for gateway access. Examples: `apps/grocy/`, `apps/obsidian-livesync/`.
+7. **Tag the HTTPRoute for Homepage** with a patch like `apps/obsidian-livesync/patches/httproute-add-homepage-annotations.yaml`. `gethomepage.dev/enabled` must be `"true"` or `"false"`, and `gethomepage.dev/group` must be a group in `infrastructure/homepage/values.yaml` (`task test:build` fails otherwise).
+8. **Set `dependsOn`** in the cluster shell to what the app needs (`cilium`, `gateway`, `cert-manager-issuers`, `cluster-settings`); copy `clusters/orion/obsidian-livesync.yaml`.
+9. Run `task gen:validate` and `task test:build`. `test:build` renders every Kustomization with substitution; an unresolved `${...}` is a bug.
 
 Do not add a root `kustomization.yaml` under `kubernetes/clusters/orion/`; Flux picks up each shell on its own.
 

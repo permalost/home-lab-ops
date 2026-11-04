@@ -1,7 +1,8 @@
 # goflow2 image runs as uid 100 / gid 65533 (nogroup) by default, with no
 # runAsUser set here. fsGroup makes the CSI driver chown the PVC's mount to
-# that gid so it can write /data/flows.json.
+# that gid so it can write /data/flows.json. runAsNonRoot is satisfied by
+# the image's own USER; the container-level hardening comes from
+# webapp/base.
 - op: add
-  path: /spec/template/spec/securityContext
-  value:
-    fsGroup: 65533
+  path: /spec/template/spec/securityContext/fsGroup
+  value: 65533

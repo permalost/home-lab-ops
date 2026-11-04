@@ -41,3 +41,15 @@
     volumeMounts:
       - mountPath: /data
         name: data
+    # alpine ships no USER (defaults to root): the pod-level runAsNonRoot
+    # from webapp/base would reject this sidecar outright. Running as
+    # goflow2's uid (100) keeps the copy-truncate legal on /data/flows.json,
+    # which goflow2 owns; the gzip/cp/find workload needs no capabilities and
+    # writes only under /data, so the root fs stays read-only.
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      runAsUser: 100
+      runAsGroup: 65533

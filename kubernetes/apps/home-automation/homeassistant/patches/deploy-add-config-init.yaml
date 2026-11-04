@@ -136,3 +136,15 @@
           mountPath: /secrets-src
         - name: data
           mountPath: /dest
+      # busybox ships no USER (defaults to root): the pod-level runAsNonRoot
+      # from webapp/base would reject this init container outright. It stays
+      # root — /config on the PVC is root-owned — but gets everything else
+      # from the secure-by-default set: no caps, no privilege escalation,
+      # and it writes only to /dest (mounted), so the root fs stays
+      # read-only.
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+        readOnlyRootFilesystem: true
+        runAsNonRoot: false

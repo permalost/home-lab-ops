@@ -106,6 +106,32 @@ container-port patch stays in the base either way.
 Extra container or Service ports (DNS, metrics, TLS) are still added with
 patches; the wiring above only syncs the first port of each.
 
+## Secure by default
+
+`webapp/base` enforces a hardened pod and container. Consumers opt out; the base never opts in:
+
+- Pod: `runAsNonRoot: true`, `seccompProfile: RuntimeDefault`, `automountServiceAccountToken: false`.
+- Container: `allowPrivilegeEscalation: false`, `capabilities.drop: ["ALL"]`, `readOnlyRootFilesystem: true`.
+- Resources: CPU and memory requests plus a memory limit, with no CPU limit — a tight CPU limit throttles boot bursts.
+
+An image that cannot comply opts out in its own overlay, so the rest of the hardened set stays. Override one key when the image is healthy otherwise:
+
+```yaml
+# patches/deploy-security-context.yaml — koenkk/zigbee2mqtt ships no USER and
+# the data PVC is root-owned: run as root, keep everything else from the base.
+- op: add
+  path: /spec/template/spec/containers/0/securityContext/runAsNonRoot
+  value: false
+```
+
+Images whose entrypoint manages users or capabilities (`s6-overlay`, `capsh`, `setcap`) need the runtime's default capability set and no `no_new_privs`: replace the whole container `securityContext` and omit `capabilities` and `allowPrivilegeEscalation`. See `apps/pihole/base/` and `apps/grocy/` for that shape, `apps/home-automation/homeassistant/` for a replace that keeps a `NET_RAW` add.
+
+An app that writes only to known scratch paths keeps the read-only root filesystem and mounts a writable `emptyDir` there — `apps/homebox/` (`/tmp`, for export/import staging) and `apps/godseye/` (`/app/node_modules/.vite-temp`, where vite writes its bundled config).
+
+Containers added by consumer patches (init containers, sidecars) do not inherit the base's container `securityContext`, and a root image is rejected outright by the pod-level `runAsNonRoot`. Give each one an explicit `securityContext` — `apps/flow-collector/patches/deploy-add-rotator-sidecar.yaml` and the `deploy-add-config-init.yaml` patches are the pattern.
+
+Every consumer's `deploy-security-context.yaml` (or equivalent) carries a one-line reason in its header comment. Run `task webapp:render-diff` after changing the base or an opt-out.
+
 ## Component reference
 
 ### ingress

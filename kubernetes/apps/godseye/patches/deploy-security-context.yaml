@@ -1,0 +1,22 @@
+# ghcr.io/permalost/gods-eye-view is the stock node:24 image (no USER), but
+# `npx vite preview` only reads /app/dist and serves in-memory proxy caches,
+# so it runs fine as the image's built-in node user (uid 1000). Confirmed
+# live-render: vite writes its bundled config to
+# /app/node_modules/.vite-temp/vite.config.js.timestamp-*.mjs on every boot
+# and fails with EACCES if that path is read-only, so that single path gets
+# a writable emptyDir while the rest of the root filesystem stays read-only.
+# godseye has no pvc component, so spec.volumes does not exist yet and is
+# created wholesale — switch to a /- append if a volume is ever added first.
+- op: add
+  path: /spec/template/spec/containers/0/securityContext/runAsUser
+  value: 1000
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    - name: vite-temp
+      emptyDir: {}
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+    - name: vite-temp
+      mountPath: /app/node_modules/.vite-temp
