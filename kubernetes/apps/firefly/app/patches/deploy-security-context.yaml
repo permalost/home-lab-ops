@@ -1,0 +1,11 @@
+# The image's www-data user is uid/gid 33 (Debian base, verified in the
+# image config). runAsUser/runAsNonRoot pin that explicitly; fsGroup makes
+# the CSI driver chown the rook-ceph upload PVC mount to gid 33 so the app
+# can write /var/www/html/storage/upload.
+- op: add
+  path: /spec/template/spec/securityContext
+  value:
+    runAsUser: 33
+    runAsGroup: 33
+    runAsNonRoot: true
+    fsGroup: 33

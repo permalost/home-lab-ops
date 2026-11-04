@@ -1,0 +1,14 @@
+# Root for the Flux Kustomization in clusters/orion/firefly.yaml. It only
+# aggregates; all naming and labels live in app/.
+#
+# The SOPS secret deliberately sits outside app/, whose namePrefix would
+# rename it (firefly-secrets -> firefly-firefly-secrets) and break every
+# hardcoded reference. It was encrypted with metadata.name: firefly-secrets,
+# and editing the name of an encrypted file breaks its SOPS MAC, so the
+# rendered Secret must keep the name the MAC was computed over.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - app
+  - firefly-secrets.sops.yaml
