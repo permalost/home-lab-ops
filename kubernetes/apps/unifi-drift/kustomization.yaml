@@ -5,6 +5,10 @@ resources:
   - pvc.yaml
   - drift-audit-script.yaml
   - cronjob.yaml
-  # Jon pushes this file (SOPS-encrypted, commands in the PR) onto the branch
-  # before merging — see the PR description. Until then this build fails.
-  - registry-pull.sops.yaml
+  # The registry pull Secret is not committed yet — Jon adds
+  # registry-pull.sops.yaml pre-merge (commands in the PR description) and
+  # re-adds it to this resources list in the same commit: an unreferenced
+  # file is never applied, and a referenced but missing file breaks this
+  # build (evalsymlink). It belongs in the app dir, not settings/, because
+  # this Kustomization dependsOn unpoller — the Namespace the Secret needs
+  # exists by then; the cluster-settings wave does not.

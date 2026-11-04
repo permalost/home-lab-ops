@@ -21,8 +21,9 @@ plus `UnifiDriftScheduleStalled` if no Job has been scheduled for over
 ## Gotchas
 
 - The image is pulled from the private Forgejo registry with the
-  `unifi-drift-registry-pull` Secret; without it the pods stay in
-  `ImagePullBackOff`.
+  `unifi-drift-registry-pull` Secret (added pre-merge as
+  `registry-pull.sops.yaml` in this dir — commands in the PR); without
+  it the pods stay in `ImagePullBackOff`.
 - The first run writes a baseline report and sends no alert.
 - A corrupt newest report fails every later run with exit 2 until the
   file is deleted from the PVC.
