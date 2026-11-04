@@ -1,8 +1,20 @@
-# goflow2 image runs as uid 100 / gid 65533 (nogroup) by default, with no
-# runAsUser set here. fsGroup makes the CSI driver chown the PVC's mount to
-# that gid so it can write /data/flows.json. runAsNonRoot is satisfied by
-# the image's own USER; the container-level hardening comes from
-# webapp/base.
+# fsGroup makes the CSI driver chown the PVC's mount to that gid so the
+# collector can write /data/flows.json (the rotator runs as 100:65533).
+#
+# runAsUser: 100 is required on the flow-collector container: the goflow2
+# v2.2.7 image declares a non-numeric USER (flow), and the cluster admission
+# policy sets runAsNonRoot: true at pod level, so the kubelet refuses to
+# create the container ("cannot verify user is non-root") unless the
+# securityContext pins a numeric, non-zero uid. 100 matches the image's
+# flow user (alpine adduser -S). fsGroup is also applied as a supplemental
+# group, so the container keeps write access to the volume.
 - op: add
-  path: /spec/template/spec/securityContext/fsGroup
-  value: 65533
+  path: /spec/template/spec/securityContext
+  value:
+    fsGroup: 65533
+- op: add
+  # containers/0 is the flow-collector container (rotator is appended as
+  # containers/1 by deploy-add-rotator-sidecar, which runs before this).
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    runAsUser: 100
