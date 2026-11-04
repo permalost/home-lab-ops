@@ -9,3 +9,14 @@
     runAsGroup: 33
     runAsNonRoot: true
     fsGroup: 33
+# The image is built to run as www-data (its default USER) with a writable
+# container filesystem: at boot the serversideup entrypoint renders
+# /etc/nginx/nginx.conf and nginx writes its cache under /var/cache/nginx and
+# state under /run — all chowned www-data in the image. With the base's
+# read-only root filesystem the entrypoint aborts on "Read-only file system"
+# (the pod crash-loops at boot). Single-key opt-out:
+# the rest of the hardened context (non-root, no caps, no privilege
+# escalation) stays.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem
+  value: false
