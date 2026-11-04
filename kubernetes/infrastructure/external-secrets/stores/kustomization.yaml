@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - store-bitwarden-orion.yaml
+  - store-bitwarden-paperclip.yaml
+# The machine-account token Secrets are appended here by
+# scripts/bitwarden-token.sh (`task bitwarden:token`); they are never
+# committed to the repo by an agent. Until they exist the stores stay
+# not-Ready — see README.md.
