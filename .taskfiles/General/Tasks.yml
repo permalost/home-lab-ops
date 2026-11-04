@@ -5,7 +5,7 @@ tasks:
   validate:
     desc: Validation script to be run locally before merged into Flux in-cluster.
     cmds:
-      - sh scripts/validate.sh
+      - bash scripts/validate.sh
   tools:
     desc: Install tools via Homebrew and install pre-commit hooks
     cmds:
