@@ -1,0 +1,12 @@
+# webapp/base's cpu: 10m default throttles anything heavier than a static
+# file server. Firefly III is a PHP application server with migrations on
+# boot — sized like actual-budget, with headroom for the PHP runtime.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi

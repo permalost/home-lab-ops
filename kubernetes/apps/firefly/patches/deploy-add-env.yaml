@@ -1,0 +1,50 @@
+# Variable names match Firefly III's .env.example; an unknown name is
+# ignored silently, so each one is checked against upstream docs.
+# firefly-secrets is the namePrefix-rendered name of firefly-secrets.sops.yaml;
+# firefly-db-app is created by the CNPG operator for the firefly-db Cluster.
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: APP_KEY
+      valueFrom:
+        secretKeyRef:
+          name: firefly-secrets
+          key: APP_KEY
+    - name: STATIC_CRON_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: firefly-secrets
+          key: STATIC_CRON_TOKEN
+    - name: DB_CONNECTION
+      value: pgsql
+    - name: DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: firefly-db-app
+          key: host
+    - name: DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: firefly-db-app
+          key: port
+    - name: DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: firefly-db-app
+          key: dbname
+    - name: DB_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: firefly-db-app
+          key: user
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: firefly-db-app
+          key: password
+    - name: APP_URL
+      value: https://${subdomain}.${domain}
+    - name: TRUSTED_PROXIES
+      value: "**"
+    - name: TZ
+      value: America/Boise

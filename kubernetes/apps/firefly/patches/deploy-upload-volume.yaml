@@ -1,0 +1,13 @@
+# Attachments live on the upload PVC, not in the container. The claimName is
+# the namePrefix-rendered name of pvc-upload.yaml (upload -> firefly-upload).
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    - name: upload
+      persistentVolumeClaim:
+        claimName: firefly-upload
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+    - name: upload
+      mountPath: /var/www/html/storage/upload

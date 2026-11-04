@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: db
+spec:
+  instances: 1
+  # Pinned to the first post-eMudhra-fix weekly build (2026-10-26); the
+  # operator default tag is floating and never rolls existing pods.
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-202610260820-system-trixie
+  storage:
+    size: 5Gi
+    storageClass: rook-ceph-block
+  # namePrefix turns this Cluster into firefly-db, so the operator creates
+  # Secret firefly-db-app (host, port, dbname, user, password, uri, ...).
+  bootstrap:
+    initdb:
+      database: firefly
+      owner: firefly

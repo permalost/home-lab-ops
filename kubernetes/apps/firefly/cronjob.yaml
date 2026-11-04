@@ -1,0 +1,42 @@
+# Daily Firefly III cron (recurring transactions, auto-budgets, exchange
+# rates, bill notifications): GET /api/v1/cron/<STATIC_CRON_TOKEN> on the
+# in-cluster Service. The token is mounted as a file and piped to curl via
+# a stdin config, so it never appears in argv or in curl's error output —
+# a failed run logs the target host, not the token.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron
+spec:
+  schedule: "0 3 * * *"
+  timeZone: America/Boise
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 300
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: cron
+              image: docker.io/curlimages/curl:8.23.0
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  printf 'silent\nshow-error\nfail\nretry = 3\nurl = "http://firefly-svc:8080/api/v1/cron/%s"\n' \
+                    "$(cat /var/run/secrets/firefly/token)" | curl --config -
+              volumeMounts:
+                - name: token
+                  mountPath: /var/run/secrets/firefly
+                  readOnly: true
+          volumes:
+            - name: token
+              secret:
+                secretName: firefly-secrets
+                items:
+                  - key: STATIC_CRON_TOKEN
+                    path: token

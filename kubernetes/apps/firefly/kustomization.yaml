@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../webapp/base
+  - namespace.yaml
+  - database.yaml
+  - pvc-upload.yaml
+  - cronjob.yaml
+  - firefly-secrets.sops.yaml
+
+components:
+  - ../webapp/components/httproute      # Gateway API route — the default; orion has no nginx ingress controller
+
+namespace: firefly
+namePrefix: firefly-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: firefly
+      app.kubernetes.io/name: firefly
+
+# Pin by digest so a re-pushed tag can't change what runs.
+images:
+  - name: my-app
+    newName: docker.io/fireflyiii/core
+    newTag: "version-6.7.9"
+    digest: sha256:d51ab6a3a7b91a5c892441578e0da7f2935f84f36bd1151fc3833acc6e060871
+  - name: docker.io/curlimages/curl
+    newTag: "8.23.0"
+    digest: sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-upload-volume.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
