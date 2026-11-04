@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: nas-nfs-secrets
+    namespace: flux-system
+stringData:
+    nasNfsIp: ENC[AES256_GCM,data:r9vZFRdwijHRCA==,iv:3kkkKMiRs3AxbWzjFM99aUoTjIX1N7X526nGFjUnUE4=,tag:YryOc8H2eB+r4jp+9FmwzA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpOG9mU2o0NVFMZDlkUDl0
+            YVNlc0FhQzg4SzRjOU1CYmR1akcyYU92V2d3Cm5HL1VxYWVabnl4dDNyTHlVcFdM
+            UWZBb2htRkNDcVN5N3FkbWdmNElydFUKLS0tIGVIYTBTTUJwQksxUzJVZlhwRUFx
+            NEpSVGk3M2NXU0NMT0E5QTVFTDdBN3MKf+83AJlM2FcnzprviMVjv9bgRJZ0Q1HU
+            3QKg8kHOnoYKuOl3oGXMo6bHx04dWFn94fdSa2h8Te+h5v/LMAJUAg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-04T22:45:53Z"
+    mac: ENC[AES256_GCM,data:Q1tVnPyULspqcJdkCKzvWsnh7bYYcbJ75zwiZnc0FHqSgUSQcY46hRB4e4WXPkM+i3JbLXzwe6FCYdMwqKNBcsHSvgEagJthC3vfVp8jWbJINT/bkjnYBcOsjSb5iSNPt3MgopY6VzIBiUL9L2lFY18mFHVtt3kRqOupDp2Y6BU=,iv:ptP5h3yPs+a2J/J/mSfiQYttK9Sn17Y0Exib+liZUt0=,tag:gYueCNWLtlG8L+GDlvFMzQ==,type:str]
+    version: 3.13.3

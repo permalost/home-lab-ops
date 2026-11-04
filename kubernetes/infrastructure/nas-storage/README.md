@@ -12,8 +12,9 @@ themselves carry no workload.
 | `nas-prints` | `storage/prints` | `/mnt/storage/prints` | `${nasNfsIp}` |
 | `nas-photos` | `storage/photos` | `/mnt/storage/photos` | `${nasNfsIp}` |
 
-`${nasNfsIp}` comes from `kubernetes/settings/orion/cluster-settings.yaml`.
-The server also serves the same datasets over SMB for desktop access.
+`${nasNfsIp}` lives in `Secret/nas-nfs-secrets` (`kubernetes/settings/orion/nas-nfs.sops.yaml`,
+SOPS-encrypted — the cluster's public address never appears in plain YAML in this
+public repo). The server also serves the same datasets over SMB for desktop access.
 
 ## Binding (for app manifests)
 
