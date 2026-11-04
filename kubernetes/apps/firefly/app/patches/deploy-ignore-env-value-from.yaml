@@ -1,0 +1,9 @@
+# firefly-db-app is created by the CNPG operator for the firefly-db Cluster and
+# only exists at runtime, so kube-linter cannot resolve it when it renders this
+# overlay. Same ignore as netbox and paperclip put on their own deployments.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy
+  annotations:
+    ignore-check.kube-linter.io/env-value-from: "firefly-db-app is created by CNPG at runtime"

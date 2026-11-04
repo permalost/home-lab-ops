@@ -51,6 +51,10 @@ patches:
       name: deploy
     path: patches/deploy-upload-volume.yaml
   - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-ignore-env-value-from.yaml
+  - target:
       kind: HTTPRoute
       name: route
     path: patches/httproute-add-homepage-annotations.yaml
