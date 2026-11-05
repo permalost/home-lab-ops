@@ -1,0 +1,10 @@
+# Inference runs on the external LLM server; Hermes is a light orchestrator plus a shell and git.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi

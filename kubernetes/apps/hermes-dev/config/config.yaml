@@ -1,0 +1,47 @@
+# Mounted at /opt/data/config.yaml (subPath, see patches/deploy-mount-configmap.yaml).
+# Not secret; API_SERVER_KEY lives in secret.yaml.
+# Same model endpoint and caps as hermes-sage and Hobbes (opencode_local), so the A/B
+# varies the harness, not the model.
+model:
+  provider: custom
+  base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
+  default: GLM-5.3-Flash-EXL3
+  context_length: 1000000
+  # Required: unset, every call 400s and Hermes misroutes it into compression
+  # (hermes-hearth/README.md "Output cap"). 8192 matches Paperclip's OpenCode provider cap.
+  max_tokens: 8192
+
+auxiliary_models:
+  title:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  compression:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  approval:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  web_extraction:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+
+skills:
+  external_dirs: [/opt/skills-external]
+
+# Coding posture, like Hobbes: shell, files, web, planning, skills. No memory tool, so runs do
+# not carry notes between tasks. No Home Assistant, cron, browser or delegation tools.
+platform_toolsets:
+  api_server: [terminal, file, skills, todo, web]
+
+# The gateway cannot answer approval prompts (paperclipai/paperclip#15054). The pod has no
+# kubeconfig and only a fork-scoped GitHub token; the pod boundary is the isolation.
+approvals:
+  mode: "off"
+
+terminal:
+  backend: local
+  cwd: /opt/data/work

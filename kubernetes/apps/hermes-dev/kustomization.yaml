@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../webapp/base
+  - namespace.yaml
+  - secret.yaml
+
+components:
+  - ../webapp/components/httproute      # hermes-dev.${domain} -> the API (see README)
+  - ../webapp/components/pvc            # mounts /opt/data (retargeted below)
+
+namespace: hermes-dev
+namePrefix: hermes-dev-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: hermes-dev
+      app.kubernetes.io/name: hermes-dev
+
+images:
+  - name: my-app
+    newName: nousresearch/hermes-agent
+    newTag: "v2026.9.24"                # same as hermes-sage
+
+configMapGenerator:
+  - name: hermes-config
+    files:
+      - config.yaml=config/config.yaml
+  # Mounted as a directory (not subPath) at skills.external_dirs; the loader
+  # walks <dir>/<category>/<name>/SKILL.md. Regenerate with `task paperclip:hermes-dev-skill`.
+  - name: hermes-skills
+    files:
+      - dev-SKILL.md=skills/dev/SKILL.md
+
+patches:
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-container-port.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-args.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-config-mountpath.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-mount-configmap.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-mount-skills.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-add-env.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-update-resources.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-security-context.yaml
+  - target: {kind: Service, name: svc}
+    path: patches/svc-target-port.yaml
+  - target: {kind: HTTPRoute, name: route}
+    path: patches/httproute-homepage.yaml

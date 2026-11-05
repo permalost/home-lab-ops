@@ -7,6 +7,11 @@ tasks:
     cmds:
       - bash scripts/paperclip-claude-token.sh
 
+  hermes-dev-skill:
+    desc: Regenerate the hermes-dev `dev` skill from the agent-playbook developer files
+    cmds:
+      - bash scripts/hermes-dev-skill.sh
+
   nudge:
     desc: Show (or with APPLY=1, wake) reviewers whose in_review review never started
     cmds:

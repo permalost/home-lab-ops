@@ -1,0 +1,16 @@
+# Directory mount (not subPath) so ConfigMap updates are picked up live. items: builds the
+# <category>/<name>/SKILL.md nesting the loader expects from the flat ConfigMap key.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: skills-external
+    configMap:
+      name: hermes-skills
+      items:
+        - key: dev-SKILL.md
+          path: devops/dev/SKILL.md
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: skills-external
+    mountPath: /opt/skills-external
