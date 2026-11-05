@@ -6,3 +6,13 @@ tasks:
     desc: Store the clipboard (from `claude setup-token`) in the Paperclip sops secret
     cmds:
       - bash scripts/paperclip-claude-token.sh
+
+  nudge:
+    desc: Show (or with APPLY=1, wake) reviewers whose in_review review never started
+    cmds:
+      - bash scripts/paperclip-nudge.sh
+
+  nudger-key:
+    desc: Mint the nudger's board API key, store it in sops and unsuspend the CronJob
+    cmds:
+      - bash scripts/paperclip-nudger-key.sh
