@@ -1,0 +1,13 @@
+# The fireflyiii/core image's entrypoint (docker-php-serversideup-entrypoint)
+# renders /etc/nginx/nginx.conf from a template and writes nginx/php runtime
+# state (pid files, tmp dirs, storage/framework caches, logs) on the container
+# filesystem at boot. With the base's readOnlyRootFilesystem: true it exits
+# immediately ("cannot create /etc/nginx/nginx.conf: Read-only file system"),
+# putting the pod in CrashLoopBackOff since first start. The image cannot run
+# with a read-only root, so this consumer opts out of that single key —
+# pod-level runAsUser/runAsGroup 33 with runAsNonRoot: true still apply from
+# deploy-security-context.yaml, and allowPrivilegeEscalation and the
+# drop-ALL capability set keep the base's hardened values.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem
+  value: false

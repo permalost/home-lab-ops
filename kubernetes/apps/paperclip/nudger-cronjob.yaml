@@ -1,0 +1,63 @@
+# Wakes a reviewer whose review of an in_review issue never started: Paperclip drops the
+# handoff wake (upstream #13532, #18315). It reads state, so a missed wake is retried on
+# the next run. Dry-run against the live API first with `task paperclip:nudge`.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: paperclip-nudger
+spec:
+  # `task paperclip:nudger-key` mints the board key, adds its secret and sets this to false.
+  suspend: true
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 90
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: nudger
+              image: ghcr.io/paperclipai/paperclip:2026.1023.0
+              imagePullPolicy: IfNotPresent
+              command: ["node", "/scripts/nudger.mjs"]
+              env:
+                - name: PAPERCLIP_URL
+                  value: http://paperclip:3100
+                - name: PAPERCLIP_HOST
+                  value: paperclip.${domain}
+                - name: PAPERCLIP_TOKEN_FILE
+                  value: /var/run/secrets/nudger/token
+                - name: APPLY
+                  value: "true"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests: {cpu: 50m, memory: 64Mi}
+                limits: {memory: 256Mi}
+              volumeMounts:
+                - {name: script, mountPath: /scripts, readOnly: true}
+                - {name: token, mountPath: /var/run/secrets/nudger, readOnly: true}
+          volumes:
+            - name: script
+              configMap:
+                name: paperclip-nudger-script
+            - name: token
+              secret:
+                secretName: paperclip-nudger
+                items:
+                  - {key: token, path: token}

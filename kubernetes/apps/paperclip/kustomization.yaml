@@ -14,8 +14,12 @@ resources:
   - httproute.yaml
   - deployment.yaml
   - bootstrap-job.yaml
+  - nudger-cronjob.yaml
 
 configMapGenerator:
 - name: paperclip-config
   files:
   - config.json
+- name: paperclip-nudger-script
+  files:
+  - nudger.mjs
