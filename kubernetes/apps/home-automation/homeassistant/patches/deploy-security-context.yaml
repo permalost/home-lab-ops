@@ -1,14 +1,23 @@
 # The Home Assistant container boots via s6-overlay (/init) as root and
 # writes its supervision state under /run, and it pip-installs integration
 # requirements into the image's site-packages at runtime — so it needs root
-# and a writable container filesystem. NET_RAW is kept for the ping
-# integration (raw ICMP sockets); every other capability is dropped.
+# and a writable container filesystem. All capabilities stay dropped: the
+# ping integration (icmplib 3.0.4, per HA 2026.10.4) falls back to
+# unprivileged ICMP datagram sockets (SOCK_DGRAM) once its raw-socket probe
+# fails, and net.ipv4.ping_group_range lets the kernel grant those sockets
+# to the container's group. That sysctl is in the Pod Security "safe" list,
+# so the pod keeps passing the cluster-wide baseline default — no namespace
+# exemption needed.
 - op: replace
   path: /spec/template/spec/containers/0/securityContext
   value:
     allowPrivilegeEscalation: false
     capabilities:
       drop: ["ALL"]
-      add: ["NET_RAW"]
     runAsNonRoot: false
     readOnlyRootFilesystem: false
+- op: add
+  path: /spec/template/spec/securityContext/sysctls
+  value:
+    - name: net.ipv4.ping_group_range
+      value: "0 2147483647"

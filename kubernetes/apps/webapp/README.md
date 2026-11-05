@@ -124,7 +124,7 @@ An image that cannot comply opts out in its own overlay, so the rest of the hard
   value: false
 ```
 
-Images whose entrypoint manages users or capabilities (`s6-overlay`, `capsh`, `setcap`) need the runtime's default capability set and no `no_new_privs`: replace the whole container `securityContext` and omit `capabilities` and `allowPrivilegeEscalation`. See `apps/pihole/base/` and `apps/grocy/` for that shape, `apps/home-automation/homeassistant/` for a replace that keeps a `NET_RAW` add.
+Images whose entrypoint manages users or capabilities (`s6-overlay`, `capsh`, `setcap`) need the runtime's default capability set and no `no_new_privs`: replace the whole container `securityContext` and omit `capabilities` and `allowPrivilegeEscalation`. See `apps/pihole/base/` and `apps/grocy/` for that shape; `apps/home-automation/homeassistant/` replaces it while keeping `drop: ["ALL"]` and enables unprivileged ICMP ping with the safe `net.ipv4.ping_group_range` sysctl, so the pod still passes the cluster's Pod Security baseline.
 
 An app that writes only to known scratch paths keeps the read-only root filesystem and mounts a writable `emptyDir` there — `apps/homebox/` (`/tmp`, for export/import staging) and `apps/godseye/` (`/app/node_modules/.vite-temp`, where vite writes its bundled config).
 
