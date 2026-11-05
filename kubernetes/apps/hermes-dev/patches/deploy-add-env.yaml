@@ -1,0 +1,36 @@
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: PUID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: API_SERVER_ENABLED
+      value: "true"
+    - name: API_SERVER_HOST
+      value: "0.0.0.0"
+    - name: API_SERVER_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: API_SERVER_KEY
+    # Named DEV_*: Hermes strips GITHUB_TOKEN from terminal subprocesses
+    # (see hermes-hearth/patches/deploy-add-env.yaml). Fork-scoped token, added by
+    # `sops set` after the Hermes-dev join; optional so the pod starts without it.
+    - name: DEV_GITHUB_USER
+      value: shaved-monkey
+    - name: DEV_GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: DEV_GITHUB_TOKEN
+          optional: true
+    # Paperclip callbacks (comment, status, handoff). The key is claimed once by the join helper.
+    - name: PAPERCLIP_API_URL
+      value: "https://paperclip.${domain}"
+    - name: PAPERCLIP_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: PAPERCLIP_API_KEY
+          optional: true

@@ -6,3 +6,8 @@ tasks:
     desc: Store the clipboard (from `claude setup-token`) in the Paperclip sops secret
     cmds:
       - bash scripts/paperclip-claude-token.sh
+
+  hermes-dev-skill:
+    desc: Regenerate the hermes-dev `dev` skill from the agent-playbook developer files
+    cmds:
+      - bash scripts/hermes-dev-skill.sh

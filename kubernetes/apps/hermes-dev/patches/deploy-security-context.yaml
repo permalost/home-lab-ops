@@ -1,0 +1,8 @@
+# The hermes-agent image declares User: root and boots via s6-overlay, which writes supervision
+# state under /run, so root and a writable filesystem are kept (same as hermes-sage).
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

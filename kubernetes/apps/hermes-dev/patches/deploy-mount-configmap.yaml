@@ -1,0 +1,13 @@
+# config.yaml is projected via subPath so config changes ship through git/Flux.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: config
+    configMap:
+      name: hermes-config
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: config
+    subPath: config.yaml
+    mountPath: /opt/data/config.yaml
