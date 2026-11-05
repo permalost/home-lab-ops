@@ -1,0 +1,9 @@
+# Static PVs (nas-books / nas-prints / nas-photos) are the only NFS consumers
+# today; the driver exists so dynamic provisioning stays available later. Keep
+# the extra chart objects off until something needs them.
+storageClass:
+  create: false
+volumeSnapshotClass:
+  create: false
+externalSnapshotter:
+  enabled: false

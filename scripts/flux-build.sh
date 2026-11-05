@@ -7,7 +7,7 @@
 #   cluster: orion  (default: orion)
 #
 # Prerequisites: kustomize, yq, python3
-#                sops (when the cluster has a cluster-secrets.sops.yaml and
+#                sops (when the cluster has *.sops.yaml settings files and
 #                SOPS_AGE_KEY_FILE is set)
 
 set -euo pipefail
@@ -39,11 +39,16 @@ while IFS='=' read -r key val; do
   export "$key"="$val"
 done < <(yq eval '.data | to_entries | .[] | .key + "=" + .value' "$SETTINGS_FILE")
 
-# Optionally decrypt the cluster's SOPS secret and export its vars too.
-SECRETS_FILE="$SETTINGS_DIR/cluster-secrets.sops.yaml"
-if [[ -f "$SECRETS_FILE" ]]; then
+# Decrypt the cluster's SOPS files and export their vars too. Without the age
+# key (CI, fresh clones) the values are unknowable — substitute a placeholder
+# for each name in the cluster's secret-vars.txt (names only, not values) so
+# structure checks still pass. A var that is neither decrypted nor listed stays
+# unresolved and fails the build below.
+SECRET_VARS_FILE="$SETTINGS_DIR/secret-vars.txt"
+shopt -s nullglob
+for SECRETS_FILE in "$SETTINGS_DIR"/*.sops.yaml; do
   if [[ -n "${SOPS_AGE_KEY_FILE:-}" && -f "${SOPS_AGE_KEY_FILE:-}" ]]; then
-    echo "INFO  Decrypting cluster secrets for $CLUSTER"
+    echo "INFO  Decrypting $(basename "$SECRETS_FILE") for $CLUSTER"
     DECRYPTED="$(sops -d "$SECRETS_FILE")"
 
     # stringData: plain text values
@@ -60,10 +65,18 @@ if [[ -f "$SECRETS_FILE" ]]; then
       decoded="$(printf '%s' "$b64" | base64 -d 2>/dev/null || printf '%s' "$b64")"
       export "$key"="$decoded"
     done < <(echo "$DECRYPTED" | yq eval '.data // {} | to_entries | .[] | .key + "=" + .value' -)
+  elif [[ -f "$SECRET_VARS_FILE" ]]; then
+    echo "WARN  SOPS_AGE_KEY_FILE not set — placeholder values used for $(basename "$SECRETS_FILE") vars"
+    while IFS= read -r key; do
+      key="${key%%#*}"; key="${key//[[:space:]]/}"
+      [[ -z "$key" ]] && continue
+      export "$key=__SOPS_UNAVAILABLE__"
+    done < "$SECRET_VARS_FILE"
   else
     echo "WARN  SOPS_AGE_KEY_FILE not set — secret substitution vars skipped for $CLUSTER"
   fi
-fi
+done
+shopt -u nullglob
 
 # Flux skips substitution on resources annotated/labelled
 # kustomize.toolkit.fluxcd.io/substitute: disabled — filter those out before

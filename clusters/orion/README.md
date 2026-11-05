@@ -39,6 +39,7 @@ clusters/orion/
 ├── clusterconfig/          # talhelper output — gitignored; regenerate with task talos:gen-config
 └── docs/
     ├── network-topology.md
+    ├── nas.md              # bignas NFS shares: PVs, PVC binding, troubleshooting
     ├── bootstrap.md        # new-cluster bring-up
     ├── upgrade.md          # Talos + K8s upgrades
     ├── recovery.md         # etcd backup, node loss, secret policy
