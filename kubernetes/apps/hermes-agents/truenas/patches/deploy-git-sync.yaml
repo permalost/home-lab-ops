@@ -23,7 +23,7 @@
       secretName: hermes-secrets
       defaultMode: 0444
       items:
-        - key: FORGEJO_DEPLOY_TOKEN
+        - key: FORGEJO_READ_TOKEN
           path: token
 - op: add
   path: /spec/template/spec/initContainers

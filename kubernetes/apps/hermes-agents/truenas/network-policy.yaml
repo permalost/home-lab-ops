@@ -1,7 +1,9 @@
-# The agent reads from the NAS instances, the model endpoints and (at start) Forgejo, and from
-# nothing else. Same Gateway rule as forgejo-runner/network-policy.yaml. The NAS URLs go through
-# the Gateway, so this allows the Gateway's HTTPS port; the NAS API key is what limits what that
-# reaches. Tightening it needs the helper to reach a NAS directly (open follow-up).
+# Egress allowlist: the model endpoints, Forgejo (at start), the NAS instances, and the public
+# internet on 80 and 443. Nothing else: not the cluster, not the LAN. Same Gateway rule as
+# forgejo-runner/network-policy.yaml. The NAS URLs go through the Gateway, so this allows the
+# Gateway's HTTPS port; the NAS API key is what limits what that reaches. Tightening that needs
+# the helper to reach a NAS directly (open follow-up). The internet rule is a convenience
+# (documentation, package indexes) and also a way out for anything the agent could read: see README.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -52,4 +54,20 @@ spec:
         - ingress
       toPorts:
         - ports:
+            - {port: "443", protocol: TCP}
+    # The public internet, web ports only. Private, loopback, link-local and carrier-grade NAT ranges
+    # are excluded, so this reaches nothing on the cluster or the LAN (the destinations above are the
+    # only private ones).
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+            - 100.64.0.0/10
+            - 127.0.0.0/8
+            - 169.254.0.0/16
+      toPorts:
+        - ports:
+            - {port: "80", protocol: TCP}
             - {port: "443", protocol: TCP}

@@ -14,6 +14,8 @@ recipe); this directory is only how it runs here. Plan and evidence: `kubernetes
 - The agent's own state (learned skills, memory, sessions) is the PVC at `/opt/data`.
 - It reaches the NAS instances through the Gateway, with a **read-only** TrueNAS account per instance. The helper
   allows only read methods, but the account is the real fence.
+- Egress is an allowlist (`truenas/network-policy.yaml`): the model endpoints, the in-cluster Forgejo, the NAS
+  instances (through the Gateway), and the public internet on ports 80 and 443. Nothing on the cluster or the LAN.
 - Approvals are off (the Paperclip gateway cannot answer them). The fences are the read-only NAS account, the
   read-only checkout, no cluster credentials (no service account token), and the network policy.
 
@@ -22,13 +24,13 @@ recipe); this directory is only how it runs here. Plan and evidence: `kubernetes
 | Key | What | Needed |
 |---|---|---|
 | `API_SERVER_KEY` | Bearer key for the Hermes API. Generated. | yes |
-| `FORGEJO_DEPLOY_TOKEN` | Token of a read-only account on the in-cluster Forgejo with read access to the recipe repository. | yes: without it the init container fails and the pod does not start |
+| `FORGEJO_READ_TOKEN` | Token of a read-only account on the in-cluster Forgejo with read access to the recipe repository. | yes: without it the init container fails and the pod does not start |
 | `TRUENAS_<ID>_API_KEY` | A read-only TrueNAS API key for instance `<ID>`. Empty means no key. | per instance: the agent starts without it and reports the instance as having no key |
 
 Set a value without opening the file:
 
 ```bash
-sops set kubernetes/apps/hermes-agents/truenas/secret.yaml '["stringData"]["FORGEJO_DEPLOY_TOKEN"]' '"<token>"'
+sops set kubernetes/apps/hermes-agents/truenas/secret.yaml '["stringData"]["FORGEJO_READ_TOKEN"]' '"<token>"'
 sops set kubernetes/apps/hermes-agents/truenas/secret.yaml '["stringData"]["TRUENAS_BIGNAS_API_KEY"]' '"<key>"'
 ```
 
@@ -63,6 +65,10 @@ Never dump the container environment: it holds the keys.
 
 ## Known limits
 
+- Internet access (80 and 443) is a way out as well as a way in: an agent that reads untrusted text (a task, an
+  alert, a log line) and can run commands could send what it has read to the internet. What it can read is
+  limited by the read-only NAS account, but it is not nothing. Remove the internet rule from the network policy if
+  you do not need it; the model, Forgejo and NAS rules do not depend on it.
 - Egress allows the Gateway's HTTPS port (the NAS is reached through it, as the runner reaches Forgejo). The NAS
   API key, not the network policy, limits what that reaches. Reaching a NAS directly needs the helper to accept a
   certificate name that differs from the address; the NAS certificate names only `localhost`.
