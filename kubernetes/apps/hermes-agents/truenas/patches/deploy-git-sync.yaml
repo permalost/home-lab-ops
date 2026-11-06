@@ -41,6 +41,9 @@
         # A dedicated read-only account on the in-cluster Forgejo; its token is the password.
         - --username=hermes-agents-reader
         - --password-file=/etc/git-token/token
+        # The emptyDir is root-owned and git-sync runs as 65533; git refuses it as "dubious ownership" otherwise.
+        # Trusts this exact path only.
+        - --git-config=safe.directory:/srv/agent-content
       env:
         - name: HOME
           value: /tmp
