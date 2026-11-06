@@ -51,7 +51,8 @@ under `terminal.env_passthrough` in `config/config.yaml` (Hermes strips any vari
   pod restarts and fetches it. Hermes caches the skill directories, so a restart is the only way a change applies.
 - **Image:** the digest in `truenas/kustomization.yaml` is `v2026.9.24`, the same as the other Hermes pods.
   Check the helper and skills still load before bumping.
-- **git-sync:** `v4.8.0`, by digest.
+- **git-sync:** `v4.8.0`, by digest. It runs as uid 65533 into a root-owned `emptyDir`, so it passes
+  `--git-config=safe.directory:/srv/agent-content`; without it git refuses the directory ("dubious ownership").
 
 ## Read-only checks after a change
 
