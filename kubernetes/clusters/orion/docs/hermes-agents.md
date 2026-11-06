@@ -63,10 +63,44 @@ The recipe's `tn_ro.py --check` prints nothing and exits 0 when every instance i
 - Alert on a failed Job (exit 1 or 2) and on **no successful Job within two intervals**. A silent miss looks exactly like a quiet healthy night, and one operator lost six days to that.
 - Prove each alert fires once (a wrong key, a stopped instance), then restore it.
 
+### UniFi agent: one MCP server per controller
+
+The recipe's `agents/unifi/mcp/README.md` is the contract; this section is how to meet it here. The server is
+`sirkirby/unifi-mcp` (Network server), at the release pinned in the recipe's `agents/unifi/mcp/PIN`. Its behavior
+below is from its docs and manifest and has not been run against our controller.
+
+- **One Deployment per controller**, one process per container, with a ClusterIP Service. Hermes reaches it over HTTP, so the server needs `UNIFI_MCP_HTTP_ENABLED=true` and a bearer token of at least 32 characters (`UNIFI_MCP_HTTP_AUTH_TOKEN`, from a mounted Secret, `_FILE` form). Hermes sends the token in a header; `${VAR}` substitution applies to MCP headers.
+- **Image pinned by digest.** The project releases several times a day, so pin and re-check on every bump.
+- **Settings from the contract:** `UNIFI_TOOL_REGISTRATION_MODE=eager`, `UNIFI_META_TOOLS_ENABLED=false`, `UNIFI_ENABLED_TOOLS` set to the names in the recipe's `read-tools.txt`, `UNIFI_POLICY_CREATE`, `UPDATE` and `DELETE` set to `false`, `UNIFI_TOOL_PERMISSION_MODE=confirm`, `UNIFI_AUTO_CONFIRM=false`, redaction left on, no `UNIFI_API_KEY`.
+- **The tool list is a ConfigMap** built from the recipe's `read-tools.txt` at the pinned recipe commit, with a CI check that the two match. Kustomize cannot read a file from another repository, so a copy is unavoidable; the check is what keeps it honest. Not yet built.
+- **Login:** a dedicated local controller account with the **View Only** role (not a cloud SSO account, not one that needs MFA), password from a mounted Secret (`UNIFI_PASSWORD_FILE`).
+- **TLS:** verification on, with the controller's certificate pinned (`UNIFI_VERIFY_SSL=true`, `UNIFI_SSL_FINGERPRINT`). Never disable verification.
+- **Hermes config** for each controller: `mcp_servers.<id>` with the Service URL, the token header, `tools.include` set to the same names, and resource and prompt wrappers off.
+- **Network policy:** the server pod accepts traffic only from its Hermes pod and reaches only its controller and DNS. The Hermes pod reaches the server and the usual model endpoint.
+- **Alerting is not the agent's job.** Routine UniFi monitoring is UnPoller with Prometheus and Alertmanager, tracked separately. The agent investigates after an alert.
+
+Checks that need a real controller (recipe design 0001, T14 to T18): the View Only login works and a write is
+refused; a mutating tool is absent from the tool list and calling it fails; the policy gates deny when set; the
+context cost of the full list is acceptable; device state codes against a real, owner-approved upgrade.
+
+### Runbooks the agents write
+
+Agents save draft runbooks as local skills after the owner confirms an incident is resolved (recipe skill
+`runbook-authoring`). Learned skills live in each agent's data volume, so:
+
+- the curator archives an agent-created skill idle for 30 days by default. A runbook for a rare incident would
+  vanish. Raise `curator.archive_after_days` well past a year, or pin the runbooks, and prefer that over
+  disabling the curator (the image's defaults are in the evidence table above);
+- `skills.write_approval` stays off: drafts are saved at once and reach shared files only through a reviewed pull
+  request from the exporter (not built yet);
+- the data volume is where runbooks live until promoted, so it is covered by the volume restore drill below;
+- a runbook is instructions future sessions will follow; promotion by reviewed pull request is the gate.
+
 ### Credentials (created here, not in the recipe repo)
 
 - A read-only TrueNAS user and API key **per instance** (the UI role is "Readonly Admin"; the role id is reported as `READONLY_ADMIN` but should be confirmed on each version). Not the existing maintenance account.
 - A read-only Forgejo deploy token for the recipe repo.
+- A **View Only** local account per UniFi controller, and its certificate fingerprint for pinning.
 - Optional per instance: the instance's certificate as a CA file (mounted, named by `TRUENAS_<ID>_CA_FILE`) if it uses a self-signed certificate. Certificate checks stay on; there is no insecure option.
 - Kill switch: revoke the instance's key on the NAS. That works even if the cluster is unreachable. Removing the agent is then a normal PR, since `kubectl` is read-only here.
 - Deliver through SOPS for now. To use ESO later, store the machine-account tokens first (`task bitwarden:token`). The `bitwarden-orion` store is usable from any namespace and reads one shared project; a dedicated store and project limited to the `hermes-agents` namespace (like `bitwarden-paperclip`) would keep agents' secrets apart from other apps.
