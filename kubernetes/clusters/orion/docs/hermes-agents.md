@@ -5,7 +5,7 @@ The Hermes agent fleet (a TrueNAS agent, later a UniFi agent) is split in two:
 - **Recipe**: the `hermes-agents` content repo on the in-cluster Forgejo. Rules (`AGENTS.md`), skills, and tests. It knows nothing about this cluster.
 - **Implementation**: this repo. Pods, the pinned checkout, config, network policy, secrets, credentials.
 
-This page holds what the implementation needs: facts about the cluster, the plan, and what is still unknown. Status: **proposed, nothing here is deployed.** Facts were read on 2026-11-05 from `origin/main` and the live cluster with read-only commands.
+This page holds what the implementation needs: facts about the cluster, the plan, and what is still unknown. Status: the first slice, the TrueNAS agent, is defined in `kubernetes/apps/hermes-agents/` (see its README). The UniFi agent, the scheduled check and Paperclip wiring are not built. Facts were read on 2026-11-05 from `origin/main` and the live cluster with read-only commands.
 
 ## What exists today
 
@@ -48,7 +48,7 @@ Process note: read this repo from `origin/main` or the live cluster, not a long-
 | `.../truenas/patches/deploy-git-sync.yaml` | Init container (pinned git-sync tag, one-time mode, `--ref=<sha>`), `emptyDir`, read-only mount in the Hermes container. Clone from the in-cluster Forgejo service, not its public address. |
 | `.../truenas/config/config.yaml` | `terminal.cwd`, `skills.external_dirs`, memory settings, and **`terminal.env_passthrough`** listing the exact `TRUENAS_<ID>_URL`, `TRUENAS_<ID>_API_KEY` (and optional `TRUENAS_<ID>_CA_FILE`) names for every instance. Without it Hermes strips them and the helper sees no instances. Also `curator.archive_after_days` raised (an infrastructure agent may go a month without an incident and would otherwise lose that learned skill) and a non-zero `restart_drain_timeout` (about 60 seconds). Key names confirmed in the image. |
 | `.../truenas/cronjob-check.yaml` | The scheduled check, see below. |
-| `.../truenas/secret.yaml` (SOPS) | `API_SERVER_KEY`; for each TrueNAS instance `TRUENAS_<ID>_URL` and `TRUENAS_<ID>_API_KEY` (`<ID>` is chosen here; the recipe handles any number); a read-only Forgejo deploy token for the init container only. |
+| `.../truenas/secret.yaml` (SOPS) | `API_SERVER_KEY`; for each TrueNAS instance `TRUENAS_<ID>_URL` and `TRUENAS_<ID>_API_KEY` (`<ID>` is chosen here; the recipe handles any number); a read-only Forgejo token for the init container only. |
 | `.../truenas/network-policy.yaml` | `CiliumNetworkPolicy`: egress to DNS, the model endpoint, each TrueNAS instance, and Forgejo. Nothing else. |
 | `.../truenas/patches/deploy-security.yaml` | Same container override as `hermes-hearth`/`hermes-dev` (the image needs root for s6), plus `automountServiceAccountToken: false` and resource limits. |
 
@@ -99,7 +99,7 @@ Agents save draft runbooks as local skills after the owner confirms an incident 
 ### Credentials (created here, not in the recipe repo)
 
 - A read-only TrueNAS user and API key **per instance** (the UI role is "Readonly Admin"; the role id is reported as `READONLY_ADMIN` but should be confirmed on each version). Not the existing maintenance account.
-- A read-only Forgejo deploy token for the recipe repo.
+- A read-only Forgejo token for the recipe repo (the account can only read it).
 - A **View Only** local account per UniFi controller, and its certificate fingerprint for pinning.
 - Optional per instance: the instance's certificate as a CA file (mounted, named by `TRUENAS_<ID>_CA_FILE`) if it uses a self-signed certificate. Certificate checks stay on; there is no insecure option.
 - Kill switch: revoke the instance's key on the NAS. That works even if the cluster is unreachable. Removing the agent is then a normal PR, since `kubectl` is read-only here.
@@ -123,7 +123,7 @@ Agents save draft runbooks as local skills after the owner confirms an incident 
 - Revert the implementation PR. Flux prunes the namespace objects.
 - The PVC uses `reclaimPolicy: Delete`. If learned skills matter, copy `$HERMES_HOME` out first.
 - Content rollback: move the `--ref` SHA back and roll the pod.
-- Revoke each TrueNAS key and user, and the Forgejo deploy token.
+- Revoke each TrueNAS key and user, and the read-only Forgejo token.
 - Existing Hermes instances and Paperclip are untouched, so nothing to roll back there.
 - After deploying, watch the pod's restart count over a window longer than the restart interval; a short check can pass inside an up-window.
 - Drill a restore of the agent's data volume before relying on it. A copy that was never restored is not a backup.

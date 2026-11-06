@@ -1,0 +1,37 @@
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: PUID
+      value: "1001"                      # distinct from the other Hermes pods
+    - name: PGID
+      value: "1001"
+    - name: API_SERVER_ENABLED
+      value: "true"
+    - name: API_SERVER_HOST
+      value: "0.0.0.0"
+    - name: API_SERVER_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: API_SERVER_KEY
+    # One instance per TRUENAS_<ID>_URL and TRUENAS_<ID>_API_KEY pair; the ids are chosen here.
+    # The URL is the Gateway address (a trusted certificate). The key is a read-only TrueNAS
+    # account's key, added with `sops set`; optional so the pod still starts when one is missing,
+    # and `tn_ro.py --list` then shows the instance without a key. Every name here must also be
+    # listed under terminal.env_passthrough in config/config.yaml, or Hermes strips it.
+    - name: TRUENAS_BIGNAS_URL
+      value: "https://bignas.${domain}"
+    - name: TRUENAS_BIGNAS_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: TRUENAS_BIGNAS_API_KEY
+          optional: true
+    - name: TRUENAS_FASTNAS_URL
+      value: "https://fastnas.${domain}"
+    - name: TRUENAS_FASTNAS_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-secrets
+          key: TRUENAS_FASTNAS_API_KEY
+          optional: true

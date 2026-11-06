@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# One namespace, one directory per agent. Each agent has its own Secret, PVC, ServiceAccount
+# setting and UID; see README.md. Add the next agent as a sibling of truenas/.
+resources:
+  - namespace.yaml
+  - truenas

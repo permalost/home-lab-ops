@@ -1,0 +1,4 @@
+# pvc component mounts its volume at /data by default; Hermes expects /opt/data.
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /opt/data

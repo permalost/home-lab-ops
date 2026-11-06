@@ -1,0 +1,73 @@
+# Egress allowlist: the model endpoints, Forgejo (at start), the NAS instances, and the public
+# internet on 80 and 443. Nothing else: not the cluster, not the LAN. Same Gateway rule as
+# forgejo-runner/network-policy.yaml. The NAS URLs go through the Gateway, so this allows the
+# Gateway's HTTPS port; the NAS API key is what limits what that reaches. Tightening that needs
+# the helper to reach a NAS directly (open follow-up). The internet rule is a convenience
+# (documentation, package indexes) and also a way out for anything the agent could read: see README.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-truenas
+  ingress:
+    # Only pods in this namespace (the API also needs its bearer key). Paperclip, when wired in,
+    # gets its own rule.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: hermes-agents
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - {port: "53", protocol: ANY}
+    # git-sync init container: in-cluster Forgejo only.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: forgejo
+      toPorts:
+        - ports:
+            - {port: "3000", protocol: TCP}
+    # Model endpoints (Services without a selector).
+    - toServices:
+        - k8sService:
+            serviceName: main
+            namespace: external-endpoints
+        - k8sService:
+            serviceName: aux
+            namespace: external-endpoints
+      toPorts:
+        - ports:
+            - {port: "8888", protocol: TCP}
+    # NAS instances through the Gateway. The Gateway address may match as the ingress entity.
+    - toCIDR:
+        - ${externalIp}/32
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    - toEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    # The public internet, web ports only. Private, loopback, link-local and carrier-grade NAT ranges
+    # are excluded, so this reaches nothing on the cluster or the LAN (the destinations above are the
+    # only private ones).
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+            - 100.64.0.0/10
+            - 127.0.0.0/8
+            - 169.254.0.0/16
+      toPorts:
+        - ports:
+            - {port: "80", protocol: TCP}
+            - {port: "443", protocol: TCP}
