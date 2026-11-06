@@ -23,6 +23,9 @@ This page holds what the implementation needs: facts about the cluster, the plan
 | Paperclip `2026.1023.0` ships both Hermes adapters. `hermes_gateway` is a deprecated shim for `@paperclipai/hermes-paperclip-adapter` 0.3.1; the adapter type name stays `hermes_gateway`. Plain HTTP to a non-loopback host is refused, so use HTTPS. | Paperclip pod `/app/packages/adapters/`; `hermes-dev` README |
 | Flux: source, kustomize, helm and notification controllers only (no image automation). One `GitRepository`, `flux-system`, pointing at this repo on GitHub. Nothing points Flux at Forgejo. | live `flux-system` |
 | Secrets today: SOPS (age). External Secrets Operator is installed with two `ClusterSecretStore`s, but both report `InvalidProviderConfig` because their access tokens are not stored yet, so ESO is not usable until that is done. | `kubernetes/infrastructure/external-secrets/README.md`, live stores |
+| The Hermes image ships Python 3.13.5 with `websockets` 15.0.1 in `/opt/hermes/.venv`. | installed image |
+| Hermes passes a child process (the terminal tool, scheduled scripts) only the environment variables it is told to: a skill's `required_environment_variables`, or `terminal.env_passthrough` in `config.yaml` (exact names). Names on Hermes's own block list can never be passed. | Hermes docs at the deployed tag; installed image |
+| Defaults in the image: `restart_drain_timeout: 0` (a restart cuts live conversations), `cron_drain_timeout: 30`. Curator: runs every 7 days, marks skills stale after 14 idle days, archives after 30, consolidation off; it touches only agent-created skills and skips pinned ones. | installed image (`config_defaults.py`, `agent/curator.py`) |
 | The `hermes-agents` namespace does not exist. | live |
 
 Process note: read this repo from `origin/main` or the live cluster, not a long-lived local checkout. An earlier survey used a stale checkout and got the image tag, the security context, and the External Secrets facts wrong.
@@ -43,17 +46,29 @@ Process note: read this repo from `origin/main` or the live cluster, not a long-
 | `kubernetes/apps/hermes-agents/namespace.yaml` | Namespace. |
 | `kubernetes/apps/hermes-agents/truenas/` | `webapp/base` + `pvc` component, image pinned by digest, args `[gateway, run]`, `PUID`/`PGID` distinct per agent. |
 | `.../truenas/patches/deploy-git-sync.yaml` | Init container (pinned git-sync tag, one-time mode, `--ref=<sha>`), `emptyDir`, read-only mount in the Hermes container. Clone from the in-cluster Forgejo service, not its public address. |
-| `.../truenas/config/config.yaml` | `terminal.cwd`, `skills.external_dirs`, memory settings. Key names confirmed in the image (`skills.external_dirs` defaults to `[]`, `skills.guard_agent_created` to `False`). |
+| `.../truenas/config/config.yaml` | `terminal.cwd`, `skills.external_dirs`, memory settings, and **`terminal.env_passthrough`** listing the exact `TRUENAS_<ID>_URL`, `TRUENAS_<ID>_API_KEY` (and optional `TRUENAS_<ID>_CA_FILE`) names for every instance. Without it Hermes strips them and the helper sees no instances. Also `curator.archive_after_days` raised (an infrastructure agent may go a month without an incident and would otherwise lose that learned skill) and a non-zero `restart_drain_timeout` (about 60 seconds). Key names confirmed in the image. |
+| `.../truenas/cronjob-check.yaml` | The scheduled check, see below. |
 | `.../truenas/secret.yaml` (SOPS) | `API_SERVER_KEY`; for each TrueNAS instance `TRUENAS_<ID>_URL` and `TRUENAS_<ID>_API_KEY` (`<ID>` is chosen here; the recipe handles any number); a read-only Forgejo deploy token for the init container only. |
 | `.../truenas/network-policy.yaml` | `CiliumNetworkPolicy`: egress to DNS, the model endpoint, each TrueNAS instance, and Forgejo. Nothing else. |
 | `.../truenas/patches/deploy-security.yaml` | Same container override as `hermes-hearth`/`hermes-dev` (the image needs root for s6), plus `automountServiceAccountToken: false` and resource limits. |
 
 The recipe's `tn_ro.py` discovers instances from `TRUENAS_<ID>_URL`. One key per instance, never shared. The first slice can configure just one.
 
+### Scheduled check (outside Hermes)
+
+The recipe's `tn_ro.py --check` prints nothing and exits 0 when every instance is clear, exits 1 with one line per problem, and exits 2 when an instance could not be checked or none is configured. Schedule it as a Kubernetes `CronJob`, not as a Hermes cron job:
+
+- Hermes scheduled scripts must live in its writable home (paths resolving outside are rejected), which conflicts with reading the recipe in place, and they stop if the Hermes process stops.
+- The CronJob reuses the agent's pinned image and its git-sync init container at the same commit, runs `/opt/hermes/.venv/bin/python3 .../tn_ro.py --check` with the agent's Secret, and needs no model.
+- Alert on a failed Job (exit 1 or 2) and on **no successful Job within two intervals**. A silent miss looks exactly like a quiet healthy night, and one operator lost six days to that.
+- Prove each alert fires once (a wrong key, a stopped instance), then restore it.
+
 ### Credentials (created here, not in the recipe repo)
 
 - A read-only TrueNAS user and API key **per instance** (the UI role is "Readonly Admin"; the role id is reported as `READONLY_ADMIN` but should be confirmed on each version). Not the existing maintenance account.
 - A read-only Forgejo deploy token for the recipe repo.
+- Optional per instance: the instance's certificate as a CA file (mounted, named by `TRUENAS_<ID>_CA_FILE`) if it uses a self-signed certificate. Certificate checks stay on; there is no insecure option.
+- Kill switch: revoke the instance's key on the NAS. That works even if the cluster is unreachable. Removing the agent is then a normal PR, since `kubectl` is read-only here.
 - Deliver through SOPS for now. To use ESO later, store the machine-account tokens first (`task bitwarden:token`). The `bitwarden-orion` store is usable from any namespace and reads one shared project; a dedicated store and project limited to the `hermes-agents` namespace (like `bitwarden-paperclip`) would keep agents' secrets apart from other apps.
 
 ## Still unknown, checked after deploy (not by hand-made test pods)
@@ -65,6 +80,9 @@ The recipe's `tn_ro.py` discovers instances from `TRUENAS_<ID>_URL`. One key per
 | What happens when Forgejo is down at pod start? | Decides whether to move to an image built from the recipe. |
 | Does the `$HERMES_HOME/SOUL.md` link resolve? | Identity without copying. |
 | TrueNAS version, role ids, and whether a key inherits the user's read-only role. | Needs the new accounts. Negative test: a write method must be denied by the NAS itself. |
+| Does `auth.login_ex` replace `auth.login_with_api_key` on our versions? The official TrueNAS MCP uses `login_ex`. | The helper uses the older call until this is checked. |
+| Which snapshot method names exist on each version, and do the four newly added read methods (certificates, interfaces, boot environments, scrub tasks) exist? | Sources disagree for 25.04; a missing method just shows as unavailable. |
+| Do the environment variables reach the helper through the gateway after the passthrough entries are added, and not without them? | Test T10 in the recipe. |
 
 ## Rollback
 
@@ -73,3 +91,5 @@ The recipe's `tn_ro.py` discovers instances from `TRUENAS_<ID>_URL`. One key per
 - Content rollback: move the `--ref` SHA back and roll the pod.
 - Revoke each TrueNAS key and user, and the Forgejo deploy token.
 - Existing Hermes instances and Paperclip are untouched, so nothing to roll back there.
+- After deploying, watch the pod's restart count over a window longer than the restart interval; a short check can pass inside an up-window.
+- Drill a restore of the agent's data volume before relying on it. A copy that was never restored is not a backup.
