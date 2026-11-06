@@ -65,6 +65,48 @@ kubectl -n hermes-agents exec deploy/hermes-truenas-deploy -- ls /srv/agent-cont
 
 Never dump the container environment: it holds the keys.
 
+## Troubleshooting
+
+Both failures below happened on the first deploy (2026-11-06) and were fixed as described. All commands are read-only.
+
+### Pod stuck in `Init:CrashLoopBackOff`
+
+```bash
+kubectl -n hermes-agents get pods
+kubectl -n hermes-agents logs deploy/hermes-truenas-deploy -c git-sync --tail=10
+```
+
+- `detected dubious ownership in repository at '/srv/agent-content'` and `too many failures, aborting`: git-sync runs
+  as uid 65533 into a root-owned `emptyDir`, and git refuses it. Fix: the init container arg
+  `--git-config=safe.directory:/srv/agent-content` in `truenas/patches/deploy-git-sync.yaml` (#305). A healthy run
+  ends with `updated successfully` and `exiting after one sync`, `"status":0`.
+- Any other error (authentication, unknown ref): check that `FORGEJO_READ_TOKEN` is set and that `--ref` is a commit
+  that exists on the in-cluster Forgejo.
+- While a pod crash-loops, Flux's `wait` holds the Kustomization on the old revision until its 15-minute timeout,
+  then retries. A merged fix can take several minutes to appear.
+
+### `tn_ro.py --check` says `UNREACHABLE ... InvalidStatus`
+
+```bash
+kubectl -n hermes-agents exec deploy/hermes-truenas-deploy -c hermes-agents -- sh -c \
+  'cd /srv/agent-content/current/agents/truenas/skills/truenas-health && python3 scripts/tn_ro.py --check'
+```
+
+`InvalidStatus` means the server answered the WebSocket upgrade with a plain HTTP status. Here it was `403` with the
+body `Access denied` and `server: envoy`: the Cilium Gateway's proxy, not the NAS. Confirm on the Cilium pod on the
+agent's node:
+
+```bash
+kubectl -n cilium exec <cilium pod on that node> -c cilium-agent -- \
+  hubble observe --namespace hermes-agents --last 300 -o compact | grep -i 'http-request'
+```
+
+`http-request DROPPED (GET https://<nas host>/)` confirms it. Cause: Cilium checks the calling pod's egress policy
+against the Gateway's upstream, the NAS Service in `external-endpoints`, as well as the Gateway itself. Fix: one
+`toServices` entry per NAS Service on 443 in `truenas/network-policy.yaml` (#306). After it, `--check` returned
+real data from both instances. Instances that still fail with another status are a different problem (the NAS
+address, key or account).
+
 ## Known limits
 
 - Internet access (80 and 443) is a way out as well as a way in: an agent that reads untrusted text (a task, an
