@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../webapp/base
+  - secret.yaml
+  - network-policy.yaml
+
+components:
+  - ../../webapp/components/pvc            # Hermes home, mounted at /opt/data (retargeted below)
+
+namespace: hermes-agents
+namePrefix: hermes-truenas-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: hermes-truenas
+      app.kubernetes.io/name: hermes-truenas
+
+images:
+  - name: my-app
+    newName: nousresearch/hermes-agent
+    # v2026.9.24, the same image the other Hermes pods run. Pinned by digest; re-check on every bump.
+    digest: sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
+  - name: git-sync
+    newName: registry.k8s.io/git-sync/git-sync
+    # v4.8.0 (multi-arch index digest)
+    digest: sha256:a20644562fba94773e594885cb001aadb5a3172175f13ac1215e5b2033c9200e
+
+configMapGenerator:
+  - name: hermes-config
+    files:
+      - config.yaml=config/config.yaml
+
+patches:
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-container-port.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-args.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-config-mountpath.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-mount-configmap.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-git-sync.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-add-env.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-update-resources.yaml
+  - target: {kind: Deployment, name: deploy}
+    path: patches/deploy-security-context.yaml
+  - target: {kind: Service, name: svc}
+    path: patches/svc-target-port.yaml

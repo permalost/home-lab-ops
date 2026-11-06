@@ -1,0 +1,55 @@
+# The agent reads from the NAS instances, the model endpoints and (at start) Forgejo, and from
+# nothing else. Same Gateway rule as forgejo-runner/network-policy.yaml. The NAS URLs go through
+# the Gateway, so this allows the Gateway's HTTPS port; the NAS API key is what limits what that
+# reaches. Tightening it needs the helper to reach a NAS directly (open follow-up).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-truenas
+  ingress:
+    # Only pods in this namespace (the API also needs its bearer key). Paperclip, when wired in,
+    # gets its own rule.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: hermes-agents
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - {port: "53", protocol: ANY}
+    # git-sync init container: in-cluster Forgejo only.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: forgejo
+      toPorts:
+        - ports:
+            - {port: "3000", protocol: TCP}
+    # Model endpoints (Services without a selector).
+    - toServices:
+        - k8sService:
+            serviceName: main
+            namespace: external-endpoints
+        - k8sService:
+            serviceName: aux
+            namespace: external-endpoints
+      toPorts:
+        - ports:
+            - {port: "8888", protocol: TCP}
+    # NAS instances through the Gateway. The Gateway address may match as the ingress entity.
+    - toCIDR:
+        - ${externalIp}/32
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    - toEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}

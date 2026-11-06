@@ -1,0 +1,11 @@
+# The hermes-agent image declares User: root and boots via s6-overlay, which writes supervision
+# state under /run, so root and a writable filesystem are kept (same as the other Hermes pods).
+# PUID/PGID drop privileges inside. No privilege escalation, no service account token (base default).
+# With approvals off, the real fences are: no write credential, the network policy, the read-only
+# checkout, and the read-only NAS account.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

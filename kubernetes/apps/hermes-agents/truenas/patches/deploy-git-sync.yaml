@@ -1,0 +1,74 @@
+# The agent reads its rules and skills in place from a pinned, read-only checkout of the recipe
+# repository. An init container fetches one commit and exits; Hermes holds no Git credential.
+# The volume is mounted at the same path in both containers so the checkout's absolute paths
+# resolve for either. Content changes need a pod restart (Hermes caches the skill directories).
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: agent-content
+    emptyDir:
+      sizeLimit: 256Mi
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: git-tmp
+    emptyDir:
+      sizeLimit: 64Mi
+# Mounted only in the init container. World-readable inside it so the non-root fetcher can read it.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: git-token
+    secret:
+      secretName: hermes-secrets
+      defaultMode: 0444
+      items:
+        - key: FORGEJO_DEPLOY_TOKEN
+          path: token
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: git-sync
+      image: git-sync
+      imagePullPolicy: IfNotPresent
+      args:
+        - --repo=http://forgejo-http.forgejo.svc.cluster.local:3000/wdo/hermes-agents.git
+        # Pinned to one commit of the recipe repository. Change it in a PR; a pod restart applies it.
+        - --ref=24c30d5fedd674b546fcd5faaedb1ec3941cbf11
+        - --root=/srv/agent-content
+        - --link=current
+        - --one-time
+        # A dedicated read-only account on the in-cluster Forgejo; its token is the password.
+        - --username=hermes-agents-reader
+        - --password-file=/etc/git-token/token
+      env:
+        - name: HOME
+          value: /tmp
+      securityContext:
+        runAsUser: 65533
+        runAsGroup: 65533
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
+      volumeMounts:
+        - name: agent-content
+          mountPath: /srv/agent-content
+        - name: git-tmp
+          mountPath: /tmp
+        - name: git-token
+          mountPath: /etc/git-token
+          readOnly: true
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: agent-content
+    mountPath: /srv/agent-content
+    readOnly: true

@@ -5,7 +5,7 @@ The Hermes agent fleet (a TrueNAS agent, later a UniFi agent) is split in two:
 - **Recipe**: the `hermes-agents` content repo on the in-cluster Forgejo. Rules (`AGENTS.md`), skills, and tests. It knows nothing about this cluster.
 - **Implementation**: this repo. Pods, the pinned checkout, config, network policy, secrets, credentials.
 
-This page holds what the implementation needs: facts about the cluster, the plan, and what is still unknown. Status: **proposed, nothing here is deployed.** Facts were read on 2026-11-05 from `origin/main` and the live cluster with read-only commands.
+This page holds what the implementation needs: facts about the cluster, the plan, and what is still unknown. Status: the first slice, the TrueNAS agent, is defined in `kubernetes/apps/hermes-agents/` (see its README). The UniFi agent, the scheduled check and Paperclip wiring are not built. Facts were read on 2026-11-05 from `origin/main` and the live cluster with read-only commands.
 
 ## What exists today
 

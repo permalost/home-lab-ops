@@ -1,0 +1,66 @@
+# Mounted at /opt/data/config.yaml (subPath, patches/deploy-mount-configmap.yaml). Not secret.
+# The agent's rules and skills are not here: they are read in place from the pinned checkout.
+# Recipe: the hermes-agents content repository; design and contract in its docs.
+model:
+  provider: custom
+  base_url: http://main.external-endpoints.svc.cluster.local:8888/v1
+  default: GLM-5.3-Flash-EXL3
+  context_length: 1000000
+  # Required: unset, every call 400s and Hermes misroutes it into compression
+  # (hermes-hearth/README.md "Output cap").
+  max_tokens: 8192
+
+auxiliary_models:
+  title:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  compression:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  approval:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+  web_extraction:
+    provider: custom
+    base_url: http://aux.external-endpoints.svc.cluster.local:8888/v1
+    model: GLM-5.3-Flash-EXL3
+
+# Read in place from the pinned checkout (patches/deploy-git-sync.yaml). Hermes caches this list,
+# so a new commit needs a pod restart. Absolute paths: relative ones resolve against the data volume.
+skills:
+  external_dirs:
+    - /srv/agent-content/current/shared/skills
+    - /srv/agent-content/current/agents/truenas/skills
+
+# Shell, files, skills, planning, memory. No web: this agent talks to the NAS and its own skills.
+platform_toolsets:
+  api_server: [terminal, file, skills, todo, memory]
+
+# The gateway cannot answer approval prompts (paperclipai/paperclip#15054). Safety does not rely on
+# them: the NAS account is read-only, the helper allows only read methods, the checkout is
+# read-only, the pod has no cluster credentials, and egress is limited (network-policy.yaml).
+approvals:
+  mode: "off"
+
+terminal:
+  backend: local
+  # Hermes loads AGENTS.md from the checkout root down to here. If this path is missing at start,
+  # project context is skipped with a warning.
+  cwd: /srv/agent-content/current/agents/truenas
+  # Hermes strips environment variables from commands unless they are named here (exact names).
+  env_passthrough:
+    - TRUENAS_BIGNAS_URL
+    - TRUENAS_BIGNAS_API_KEY
+    - TRUENAS_FASTNAS_URL
+    - TRUENAS_FASTNAS_API_KEY
+
+agent:
+  # Default 0 interrupts live conversations on a restart. Image defaults confirmed in v2026.9.24.
+  restart_drain_timeout: 60
+
+curator:
+  # Default 30 days idle archives an agent-created skill. A runbook for a rare incident would vanish.
+  archive_after_days: 730
