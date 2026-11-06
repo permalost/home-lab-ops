@@ -44,7 +44,20 @@ spec:
       toPorts:
         - ports:
             - {port: "8888", protocol: TCP}
-    # NAS instances through the Gateway. The Gateway address may match as the ingress entity.
+    # NAS instances through the Gateway. Cilium also checks this pod's egress against the Gateway's
+    # upstream, the NAS Service in external-endpoints, so each instance needs a toServices entry here
+    # (without it the Gateway answers 403 "Access denied"). Add one per instance.
+    - toServices:
+        - k8sService:
+            serviceName: bignas
+            namespace: external-endpoints
+        - k8sService:
+            serviceName: fastnas
+            namespace: external-endpoints
+      toPorts:
+        - ports:
+            - {port: "443", protocol: TCP}
+    # The Gateway address may match as the ingress entity.
     - toCIDR:
         - ${externalIp}/32
       toPorts:

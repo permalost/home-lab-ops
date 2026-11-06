@@ -43,7 +43,8 @@ refused before relying on it. Create the Forgejo account as read-only on the one
 An instance is an id and a URL. Today: `bignas` and `fastnas`, at `https://<id>.${domain}` (the Gateway, trusted
 certificate). To add one, in `truenas/`: a URL and key entry in `patches/deploy-add-env.yaml`, the same two names
 under `terminal.env_passthrough` in `config/config.yaml` (Hermes strips any variable not named there), a key in
-`secret.yaml`. To drop one, remove them. The agent discovers instances from `TRUENAS_<ID>_URL` at start.
+`secret.yaml`, and a `toServices` entry for its NAS Service in `network-policy.yaml` (the Gateway's upstream is
+checked against the pod's egress). To drop one, remove them. The agent discovers instances from `TRUENAS_<ID>_URL` at start.
 
 ## Changing what the agent runs
 
