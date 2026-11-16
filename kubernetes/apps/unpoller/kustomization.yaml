@@ -3,9 +3,7 @@ kind: Kustomization
 namespace: unpoller
 resources:
   - namespace.yaml
-  # Jon pushes this file (SOPS-encrypted, keys listed in the PR) onto the
-  # branch before merging — see the PR description for the sops command.
-  - unpoller-credentials.sops.yaml
+  - externalsecret.yaml
   - service.yaml
   - vmservicescrape.yaml
   - deployment.yaml

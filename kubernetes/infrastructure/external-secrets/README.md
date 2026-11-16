@@ -59,7 +59,7 @@ spec:
         key: example-token
 ```
 
-No app was moved to Bitwarden when ESO was added; migrations happen one app per PR (WDO-79 plan, phases 4–6).
+UnPoller was the first app moved to Bitwarden (WDO-79 plan phase 4); migrations continue one app per PR (phases 5–6).
 
 ## Dependencies
 
