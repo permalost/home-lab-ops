@@ -55,4 +55,5 @@ rest are kept from the decommissioned na cluster, pending migration.
 | home-automation | Mosquitto + Zigbee2MQTT | no |
 | homebox | Home inventory management | no |
 | pihole | DNS + ad-blocking | yes (`overlays/orion`) |
+| snipe-it | IT asset management | yes |
 | webapp | Shared base + components (ingress, httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |

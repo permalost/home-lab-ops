@@ -1,0 +1,11 @@
+# The image boots supervisord as root: startup.sh rewrites php.ini and the
+# Apache config in place, chowns /var/lib/snipeit and /var/www/html/storage,
+# and supervisord runs cron next to an Apache master process that binds port
+# 80. Like grocy, this consumer opts out of the base's runAsNonRoot and
+# read-only root filesystem but keeps allowPrivilegeEscalation: false.
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: false

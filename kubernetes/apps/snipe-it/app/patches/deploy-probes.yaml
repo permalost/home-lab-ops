@@ -1,0 +1,22 @@
+# Readiness and liveness hit /health — Snipe-IT's own route (routes/web.php
+# at v8.8.3, HealthController), which checks the database connection and
+# writable logs. Generous delays: first boot runs the migrations via the
+# image entrypoint before Apache answers.
+- op: add
+  path: /spec/template/spec/containers/0/readinessProbe
+  value:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    failureThreshold: 6
+- op: add
+  path: /spec/template/spec/containers/0/livenessProbe
+  value:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 3

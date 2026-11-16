@@ -1,0 +1,38 @@
+# Variable names match Snipe-IT's .env.docker at v8.8.3; an unknown name is
+# ignored silently, so each one is checked against upstream (APP_KEY, APP_URL,
+# APP_TIMEZONE, DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME,
+# DB_PASSWORD). The image bakes a .env with DB_CONNECTION=mysql, so the
+# mariadb driver is set here on purpose (spatie/laravel-backup then drives
+# mariadb-dump). snipe-it-secret is the Secret in ../snipe-it-secret.sops.yaml
+# (name: snipe-it-secret), which lives outside app/'s namePrefix (see
+# ../kustomization.yaml). APP_TRUSTED_PROXIES is left unset — the pod CIDR is
+# not in cluster-settings (see README.md, "Not yet wired").
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: APP_KEY
+      valueFrom:
+        secretKeyRef:
+          name: snipe-it-secret
+          key: APP_KEY
+    - name: APP_URL
+      value: https://${subdomain}.${domain}
+    - name: APP_TIMEZONE
+      value: America/Boise
+    - name: DB_CONNECTION
+      value: mariadb
+    # Service db-service.yaml in ../db-service.yaml — same namespace, so the
+    # short name resolves.
+    - name: DB_HOST
+      value: snipe-it-db
+    - name: DB_PORT
+      value: "3306"
+    - name: DB_DATABASE
+      value: snipeit
+    - name: DB_USERNAME
+      value: snipeit
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: snipe-it-secret
+          key: DB_PASSWORD

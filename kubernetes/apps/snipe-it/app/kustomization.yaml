@@ -1,0 +1,76 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: snipe-it
+namePrefix: snipe-it-
+
+resources:
+  - ../../webapp/base
+  - namespace.yaml
+
+components:
+  - ../../webapp/components/httproute
+  - ../../webapp/components/pvc
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: snipe-it
+      app.kubernetes.io/name: snipe-it
+
+images:
+  - name: my-app
+    newName: docker.io/snipe/snipe-it
+    # v8.8.3, the newest stable v8 release (2026-10-22).
+    newTag: "v8.8.3"
+    # Pin by digest so a re-pushed tag can't change what runs.
+    digest: sha256:eb6d78c1bdae46d15177b149fcc14d7cd795d9f6c17e53dc4d87e04da9653218
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-probes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/pvc-mountpath.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
+
+# Port 80 is set once (container port); the Service port and HTTPRoute
+# backendRef follow it (see webapp/README.md, "Changing the port").
+replacements:
+  - source:
+      kind: Deployment
+      name: deploy
+      fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+    targets:
+      - select:
+          kind: Service
+          name: svc
+        fieldPaths:
+          - spec.ports.0.port
+      - select:
+          kind: HTTPRoute
+          name: route
+        fieldPaths:
+          - spec.rules.0.backendRefs.0.port
