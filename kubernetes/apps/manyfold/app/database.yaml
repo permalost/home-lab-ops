@@ -1,0 +1,22 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  # namePrefix renders this as manyfold-db; the operator then creates the
+  # manyfold-db-app Secret that patches/deploy-add-env.yaml reads from.
+  name: db
+spec:
+  instances: 1
+  # Pinned to the same 2026-10-26 weekly build as the other CNPG consumers
+  # (paperclip, forgejo, netbox); the operator default tag is floating and
+  # never rolls existing pods. The system image is enough: Manyfold needs no
+  # extra extensions.
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-202610260820-system-trixie
+  storage:
+    size: 5Gi
+    storageClass: rook-ceph-block
+  # Creates Secret manyfold-db-app (host, port, dbname, user, password, uri, ...)
+  # that the app Deployment reads its DATABASE_* env from.
+  bootstrap:
+    initdb:
+      database: manyfold
+      owner: manyfold

@@ -1,0 +1,28 @@
+# /health is Manyfold's documented health endpoint
+# (manyfold.app/sysadmin/monitoring): the built-in Rails health controller
+# returns 200 unauthenticated, and upstream's production.rb excludes it from
+# the HTTPS redirect, so probes need no Host header. The startupProbe covers
+# first boot: the entrypoint runs db:prepare (migrations) before foreman
+# starts the web server, which can take minutes on a fresh database.
+- op: add
+  path: /spec/template/spec/containers/0/startupProbe
+  value:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 10
+    failureThreshold: 30
+- op: add
+  path: /spec/template/spec/containers/0/readinessProbe
+  value:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 10
+- op: add
+  path: /spec/template/spec/containers/0/livenessProbe
+  value:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 30

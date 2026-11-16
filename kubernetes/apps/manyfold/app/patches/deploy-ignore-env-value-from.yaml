@@ -1,0 +1,10 @@
+# manyfold-db-app is created by the CNPG operator for the manyfold-db
+# Cluster and only exists at runtime, so kube-linter cannot resolve it when
+# it renders this overlay. Same ignore as netbox, paperclip, firefly and
+# bookorbit put on their own deployments.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy
+  annotations:
+    ignore-check.kube-linter.io/env-value-from: "manyfold-db-app is created by CNPG at runtime"
