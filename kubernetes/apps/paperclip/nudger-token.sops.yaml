@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: paperclip-nudger
+    namespace: paperclip
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:lrNEppc5YCFxMT6S2sB8FFqgQ2Je48rZ15NPL4uxhBNDELd+8iMWSHDzTI4BReumX+QeL/jbMrERgA==,iv:Mm2gQLai1re5WBB6X4LvkWeYMwJZS4hKgYCaf160+3c=,tag:ICUvvNiC8a9mxasBmRbRgw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBMQVA3WlVzdFJkYkdUWjBp
+            M09aVzMwYWllZ1UrOUN1ekJINmNMS3hPTUNJCmNBM2ZLeHc5bFFUL1dMbU5GbnZT
+            TXdVdzdaYUNXbWNNQ3lkTlBROFZRNlUKLS0tIFhDMnQxRmROQWhaeHA1Q2I1VlVS
+            T2xBK081dWFsbVpXekRNc2FUUTN6ckkK9Pk2b55Fa7dxjpUko3UQYXZXCz5j0wNB
+            TztfFx1wx69pLEK8Yimz0xy7hB26M+k13Nj/SiUFbP0OB9gQs51RLA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-16T03:18:52Z"
+    mac: ENC[AES256_GCM,data:/IS+Rk0FaIykuHakBXgsWYX1c3W9vBBTpSwJivGIg75bV2AJDIdJBLSDMrO4UDLM7HqXQP0TXiTVAuM0o2+1n/Mb02nidsAXk7k/09/TRn7RtKOwOTgHA8dYsaLSojZEl/bSa0K8NynL0rtAtFMSD3lfblFYTo9/+kxhwucW0NE=,iv:YHrk3esj908XBK++PeTvW0BfzA1CEgcjqZ1YAhPspAA=,tag:qxD8lK5dHcrCNf37JjXUXQ==,type:str]
+    version: 3.13.3
