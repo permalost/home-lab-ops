@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - store-bitwarden-orion.yaml
   - store-bitwarden-paperclip.yaml
+  - eso-orion.sops.yaml
+  - eso-paperclip.sops.yaml
 # The machine-account token Secrets are appended here by
 # scripts/bitwarden-token.sh (`task bitwarden:token`); they are never
 # committed to the repo by an agent. Until they exist the stores stay

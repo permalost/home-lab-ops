@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: bitwarden-paperclip-token
+    namespace: external-secrets
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:fmUKMIAIvvqc8nvucoWcRyMXHLVELOoeJ9knH//ZjigeHAuGsx09dnyO6xU5NmC0FI75hmhUai852sLCZAOqQwrqFN/eeLyT4fdQ4hDnsUT0D689ugmorA3+3yVOxg==,iv:Zlx4/af0kwB0q1P0slmtMcrqp2HNd/qElzdx+X/PwEM=,tag:IEhAXDqKsxCYFncqOKFBfQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBFeWc1NjJRaHlNdVg3UllL
+            MnVLY29kcGdFZ3A0aUpWZDVjQ1M5cGlDOXhjCjdJZ3BadVhxbzFxejladzFNUFdL
+            MzR1THdFNzN1c2ZQNE1wT1dRZW5pcDgKLS0tIDVvbW5zNHJIUnp1MnMwcUhQSTdy
+            NnV4aDI1Y1dGN0xmQnJqUGhJa1VuNTQKGOcclrgM+rOnPCXmsBBHD1XIM3nndadf
+            PX3CzEkjqaHlwbqNkgWgRv7NIGU9P5qGMuV5Az2Ylwa2I9lYNPpwxg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-16T03:02:31Z"
+    mac: ENC[AES256_GCM,data:/DpOr+2mYIuDb2or360lt1Lb1Nm/CT7Tg8vKtHFt3l3FpyU9FWBcRHK9EFr7pLuiFpQTe1vRlOWkxOuuwo3AFphjJB8Ohpvbzb9nxpZ/k+r0zSMVagQM6abSK81EuaEziKPc0Q0WHUhL1ym5O06fBL0ccT8sHRVVxida2Sa4oxQ=,iv:ZKuo26NwwttUl4PjBSt2yuVqjpTFPzl8Rs1IW16JJ1g=,tag:YlzhmbkprS2O0G559+1msw==,type:str]
+    version: 3.13.3
