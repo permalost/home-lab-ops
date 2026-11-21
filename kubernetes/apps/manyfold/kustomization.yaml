@@ -1,0 +1,15 @@
+# Root for the Flux Kustomization in clusters/orion/manyfold.yaml. It only
+# aggregates; all naming and labels live in app/.
+#
+# manyfold-secret.sops.yaml deliberately sits outside app/, whose namePrefix
+# would rename the rendered Secret (manyfold-secret -> manyfold-manyfold-
+# secret). It was encrypted with metadata.name: manyfold-secret, and editing
+# the name of an encrypted file breaks its SOPS MAC, so the rendered Secret
+# must keep the name the MAC was computed over (same shape as apps/bookorbit/
+# and apps/firefly/).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - app
+  - manyfold-secret.sops.yaml

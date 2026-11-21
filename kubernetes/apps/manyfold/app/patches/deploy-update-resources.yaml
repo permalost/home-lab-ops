@@ -1,0 +1,13 @@
+# webapp/base's default 500Mi is sized for static file servers. The image
+# runs the Rails web process plus Sidekiq workers in one container (foreman
+# supervises the upstream Procfile: rails + default_worker +
+# performance_worker) and does memory-hungry geometric analysis and file
+# conversion against the library.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 3Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi

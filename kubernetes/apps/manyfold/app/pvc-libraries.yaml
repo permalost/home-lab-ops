@@ -1,0 +1,17 @@
+# Library storage on the bignas NFS export — the static PV contract lives in
+# kubernetes/infrastructure/nas-storage/README.md (bind by name, no storage
+# class). The export has no squash (WDO-168), so the effective UID/GID the app
+# runs as is set explicitly (PUID/PGID 3000, the bignas orion user, in
+# patches/deploy-add-env.yaml) to keep NAS file ownership stable.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: libraries
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""       # required: keeps dynamic provisioners out of the way
+  volumeName: nas-prints     # bind to the static PV by name
+  resources:
+    requests:
+      storage: 50Gi          # must be <= the PV capacity (1Ti)

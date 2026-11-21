@@ -54,5 +54,6 @@ rest are kept from the decommissioned na cluster, pending migration.
 | ai | LiteLLM proxy + Ollama + Open WebUI | no |
 | home-automation | Mosquitto + Zigbee2MQTT | no |
 | homebox | Home inventory management | no |
+| manyfold | 3D print file library (WDO-162) | yes |
 | pihole | DNS + ad-blocking | yes (`overlays/orion`) |
 | webapp | Shared base + components (ingress, httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |

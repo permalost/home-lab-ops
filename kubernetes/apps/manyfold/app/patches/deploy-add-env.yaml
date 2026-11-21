@@ -1,0 +1,75 @@
+# Variable names checked against https://manyfold.app/sysadmin/configuration.html
+# and upstream docker-compose.example.yml at v0.154.1 — an unknown name is
+# ignored silently. PUBLIC_HOSTNAME must be set for HTTPS_ONLY to work behind
+# the SSL-terminating gateway: upstream's production.rb gates config.assume_ssl
+# on it (and it is the hostname email links use). WEB_CONCURRENCY *
+# RAILS_MAX_THREADS + the worker-concurrency defaults (4 + 1) stays within the
+# CNPG default max_connections (2*8 + 4 + 1 = 21). manyfold-db-app is created
+# by the CNPG operator for the manyfold-db Cluster; manyfold-secret is the
+# Secret in ../manyfold-secret.sops.yaml (name: manyfold-secret), which lives
+# outside app/'s namePrefix (see ../kustomization.yaml).
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: TZ
+      value: America/Boise
+    # The bignas orion user: the prints NFS export has no squash (WDO-168,
+    # see clusters/orion/docs/nas.md), so files written to /libraries must
+    # get a stable, NAS-visible owner. The image's s6 entrypoint steps the
+    # process down to this UID/GID via s6-setuidgid (bin/docker-entrypoint.sh).
+    - name: PUID
+      value: "3000"
+    - name: PGID
+      value: "3000"
+    # Keep tempfiles inside the writable tmp emptyDir instead of the
+    # read-only root filesystem (see deploy-security-context.yaml).
+    - name: TMPDIR
+      value: /usr/src/app/tmp
+    - name: MULTIUSER
+      value: enabled
+    - name: HTTPS_ONLY
+      value: enabled
+    - name: PUBLIC_HOSTNAME
+      value: ${subdomain}.${domain}
+    - name: DATABASE_ADAPTER
+      value: postgresql
+    - name: DATABASE_HOST
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-db-app
+          key: host
+    - name: DATABASE_PORT
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-db-app
+          key: port
+    - name: DATABASE_NAME
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-db-app
+          key: dbname
+    - name: DATABASE_USER
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-db-app
+          key: user
+    - name: DATABASE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-db-app
+          key: password
+    # db 1 per upstream's docker-compose.example.yml.
+    - name: REDIS_URL
+      value: redis://manyfold-redis:6379/1
+    - name: SECRET_KEY_BASE
+      valueFrom:
+        secretKeyRef:
+          name: manyfold-secret
+          key: SECRET_KEY_BASE
+    # Upstream defaults are 4/16 (worst case 69 DB connections). 2/8 keeps
+    # the web side modest: 2*8 + 4 + 1 = 21 connections, well inside the
+    # CNPG default max_connections of 100.
+    - name: WEB_CONCURRENCY
+      value: "2"
+    - name: RAILS_MAX_THREADS
+      value: "8"

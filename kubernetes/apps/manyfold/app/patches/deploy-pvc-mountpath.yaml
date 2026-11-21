@@ -1,0 +1,6 @@
+# The pvc component mounts its volume at /data by default; the persistent
+# path upstream documents is /usr/src/app/plugins (the PLUGINS_PATH default
+# in the image), where optional Manyfold plugins are stored.
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /usr/src/app/plugins
