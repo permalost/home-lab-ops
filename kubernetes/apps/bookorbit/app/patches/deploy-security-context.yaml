@@ -1,0 +1,31 @@
+# The image's entrypoint (upstream server/entrypoint.sh) has a non-root path:
+# it checks /data writability as the current user and runs migrations + node
+# directly, so no capabilities or privilege escalation are needed and the
+# base's drop-ALL / read-only-rootfs posture stays intact.
+#
+# UID/GID 3000 matches the bignas `orion` user: the books NFS export has no
+# squash (WDO-168, see clusters/orion/docs/nas.md), so files BookOrbit writes
+# to /books must get a stable, NAS-visible owner. fsGroup makes the CSI
+# drivers chown the /data (rook-ceph-block) and /tmp volumes to gid 3000.
+- op: add
+  path: /spec/template/spec/securityContext/runAsUser
+  value: 3000
+- op: add
+  path: /spec/template/spec/securityContext/runAsGroup
+  value: 3000
+- op: add
+  path: /spec/template/spec/securityContext/fsGroup
+  value: 3000
+# webapp/base's default 10m/500Mi is sized for static file servers. BookOrbit
+# is a Node.js server with an embedded reader (PDF rendering, cover
+# processing) against a large library; memory limit is read by the
+# entrypoint's NODE_MAX_OLD_SPACE_SIZE auto-detection (75% of the cgroup
+# limit) so the two stay consistent.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi

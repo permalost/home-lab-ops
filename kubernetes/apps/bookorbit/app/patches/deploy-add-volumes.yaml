@@ -1,0 +1,27 @@
+# Upstream runs the app container with read_only: true and a /tmp tmpfs
+# (docker-compose.yml). webapp/base keeps the root filesystem read-only, so
+# /tmp gets a memory-backed emptyDir. The books PVC is appended after the pvc
+# component has already populated volumes[0]/volumeMounts[0] with /data (see
+# obsidian-livesync's deploy-mount-config.yaml for the pattern).
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: tmp
+    emptyDir:
+      medium: Memory
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: books
+    persistentVolumeClaim:
+      claimName: books
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: tmp
+    mountPath: /tmp
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: books
+    mountPath: /books
