@@ -123,6 +123,39 @@ nodes:
     patches:
       - "@./patches/nodes/orion-cp-03.yaml"
 
+  # Hardware: Raspberry Pi CM5 Lite in a Compute Blade, booting from NVMe.
+  # Image is the community build (official rpi_5 overlay can't boot NVMe).
+  # The disk is selected by serial: by-id paths aren't visible in maintenance mode.
+
+  - hostname: orion-cp-04
+    ipAddress: 10.50.0.14
+    controlPlane: true
+    installDiskSelector:
+      serial: "26071027630000357"
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "98:fe:54:24:b9:49"
+        dhcp: false
+        vlans:
+          - vlanId: 50
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.50.0.14/24
+            routes:
+              - network: 0.0.0.0/0
+                gateway: 10.50.0.1
+            vip:
+              ip: 10.50.0.10
+          - vlanId: 10
+            mtu: 1500
+            dhcp: false
+            addresses:
+              - 10.10.0.14/24
+    patches:
+      - "@./patches/nodes/orion-cp-04.yaml"
+      - "@./patches/hardware/cm5.yaml"
+
   # ── Workers ────────────────────────────────────────────────────────────────
   # Hardware: Bosgame — trunk NIC is enp1s0, boot disk is Kingston 1 TB NVMe
   # (enp2s0 also exists; it carried stale VLANs from the old doubled-interface

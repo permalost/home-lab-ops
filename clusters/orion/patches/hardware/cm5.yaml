@@ -1,0 +1,13 @@
+# Raspberry Pi CM5 (arm64) control-plane nodes, booting from NVMe.
+# Official rpi_5 overlay can't boot NVMe yet, so use the community image:
+# https://github.com/yama6a/talos-raspberry-pi5 (see NODES.md).
+machine:
+  install:
+    image: ghcr.io/yama6a/talos-raspberry-pi5:v1.13.9-9
+  kubelet:
+    extraConfig:
+      # Appends to the cluster-wide list (30-cilium-prep.yaml). Keeps amd64-only
+      # workloads off the arm64 nodes.
+      registerWithTaints:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
