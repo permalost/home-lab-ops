@@ -32,6 +32,11 @@ spec:
             - name: http
               containerPort: 3100
           env:
+            # Node defaults to a ~2GB heap even when the container limit is
+            # higher; agents running harness tests need more. 3GB leaves ~1GB
+            # of native headroom under the 4Gi limit.
+            - name: NODE_OPTIONS
+              value: --max-old-space-size=3072
             - name: PAPERCLIP_CONFIG
               value: /config/config.json
             - name: PAPERCLIP_DEPLOYMENT_MODE
