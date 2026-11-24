@@ -7,7 +7,8 @@ metadata:
   name: paperclip-nudger
 spec:
   # `task paperclip:nudger-key` mints the board key, adds its secret and sets this to false.
-  suspend: false
+  # Suspended 2026-11-23: server down (heap OOM from WDO-263 review loop).
+  suspend: true
   schedule: "*/2 * * * *"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 120
