@@ -20,6 +20,7 @@ includes:
   paperclip: .taskfiles/Paperclip/Tasks.yml
   bitwarden: .taskfiles/Bitwarden/Tasks.yml
   webapp: .taskfiles/Webapp/Tasks.yml
+  backup: .taskfiles/Backup/Tasks.yml
 
 tasks:
   default:
