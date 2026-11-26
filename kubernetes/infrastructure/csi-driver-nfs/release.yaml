@@ -3,6 +3,15 @@ kind: HelmRelease
 metadata:
   name: csi-driver-nfs
   namespace: csi-driver-nfs
+  annotations:
+    # One-shot forced install: the first install exhausted install.remediation.retries
+    # on 2026-11-05 while the namespace was still rejected by Pod Security (fixed in
+    # #299), leaving the release Stalled. The controller acts on these tokens once and
+    # ignores the same values afterwards; to re-force a release, change both to a new
+    # arbitrary token.
+    # https://fluxcd.io/flux/components/helm/helmreleases/#forcing-a-release
+    reconcile.fluxcd.io/requestedAt: "2026-11-16T04:30:00Z-wdo-194"
+    reconcile.fluxcd.io/forceAt: "2026-11-16T04:30:00Z-wdo-194"
 spec:
   interval: 30m
   chart:

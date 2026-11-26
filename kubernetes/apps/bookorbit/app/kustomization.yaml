@@ -1,0 +1,78 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: bookorbit
+namePrefix: bookorbit-
+
+resources:
+  - ../../webapp/base
+  - namespace.yaml
+  - database.yaml
+  - pvc-books.yaml
+
+components:
+  - ../../webapp/components/httproute
+  - ../../webapp/components/pvc
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: bookorbit
+      app.kubernetes.io/name: bookorbit
+
+images:
+  - name: my-app
+    newName: ghcr.io/bookorbit/bookorbit
+    # v3.8.0, the newest stable release (2026-11-11).
+    newTag: "3.8.0"
+    # Pin by digest so a re-pushed tag can't change what runs.
+    digest: sha256:d318f7732f6f6330312e2c5f854f7899f858b54cc4b18a13cde1f43b5bea0515
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-probes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-volumes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-ignore-env-value-from.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
+
+# Port 3000 is set once (container port); the Service port and HTTPRoute
+# backendRef follow it (see webapp/README.md, "Changing the port").
+replacements:
+  - source:
+      kind: Deployment
+      name: deploy
+      fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+    targets:
+      - select:
+          kind: Service
+          name: svc
+        fieldPaths:
+          - spec.ports.0.port
+      - select:
+          kind: HTTPRoute
+          name: route
+        fieldPaths:
+          - spec.rules.0.backendRefs.0.port

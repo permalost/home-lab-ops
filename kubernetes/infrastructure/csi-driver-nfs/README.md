@@ -14,3 +14,8 @@ Ceph. All chart images are pinned by the chart itself
 The node plugin runs a privileged DaemonSet on every node (standard for CSI);
 no Talos extension or node change is required — kubelet mounts NFSv4 with the
 in-kernel client.
+
+`release.yaml` carries one-shot `reconcile.fluxcd.io/requestedAt` and
+`reconcile.fluxcd.io/forceAt` annotations: the controller acts on each token
+value once, then ignores it. To re-force a release, change both values to a
+new arbitrary token.

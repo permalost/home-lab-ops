@@ -1,0 +1,57 @@
+# Variable names match BookOrbit's docker-compose.yml / .env.example; an
+# unknown name is ignored silently, so each one is checked against upstream
+# (PORT, APP_URL, TZ, LIBRARY_BROWSE_ROOT, POSTGRES_HOST/PORT/USER/PASSWORD/DB,
+# JWT_SECRET, SETUP_BOOTSTRAP_TOKEN). bookorbit-db-app is created by the CNPG
+# operator for the bookorbit-db Cluster; bookorbit-secrets is the Secret in
+# ../bookorbit-secret.sops.yaml (name: bookorbit-secret), which lives
+# outside app/'s namePrefix (see
+# ../kustomization.yaml).
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: PORT
+      value: "3000"
+    - name: APP_URL
+      value: https://${subdomain}.${domain}
+    - name: TZ
+      value: America/Boise
+    # Keep the library creation folder picker inside the NAS mount instead of
+    # offering the whole container filesystem (upstream's recommended NAS
+    # setting in .env.example).
+    - name: LIBRARY_BROWSE_ROOT
+      value: /books
+    - name: POSTGRES_HOST
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-db-app
+          key: host
+    - name: POSTGRES_PORT
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-db-app
+          key: port
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-db-app
+          key: user
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-db-app
+          key: password
+    - name: POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-db-app
+          key: dbname
+    - name: JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-secret
+          key: JWT_SECRET
+    - name: SETUP_BOOTSTRAP_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: bookorbit-secret
+          key: SETUP_BOOTSTRAP_TOKEN

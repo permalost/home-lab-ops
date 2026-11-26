@@ -12,6 +12,7 @@ const APPLY = env.APPLY === "1" || env.APPLY === "true";
 const GRACE_S = Number(env.GRACE_SECONDS || 120); // let a normal wake land first
 const MAX_AGE_S = Number(env.MAX_AGE_HOURS || 24) * 3600; // older stalls need a human
 const MAX_WAKES = Number(env.MAX_WAKES || 5);
+const MAX_ISSUE_RUNS = Number(env.MAX_ISSUE_RUNS || 3); // runs by the reviewer per issue per 24h
 const BUCKET_S = 600; // at most one wake attempt per issue per 10 minutes
 const token = (env.PAPERCLIP_TOKEN || readFileSync(env.PAPERCLIP_TOKEN_FILE, "utf8")).trim();
 
@@ -63,6 +64,20 @@ for (const issue of issues) {
     const runs = await api("GET", "/api/issues/" + issue.id + "/runs");
     if (runs.some((r) => r.agentId === agentId && Date.parse(r.createdAt) >= Date.parse(part.since) - 5000)) {
       rec.skip = "ran_since"; continue;
+    }
+    // A reviewer that runs but never decides resets `since`, so the guards above never trip.
+    const recent = runs.filter((r) => r.agentId === agentId && now - Date.parse(r.createdAt) < 86400e3).length;
+    if (recent >= MAX_ISSUE_RUNS) {
+      rec.skip = "issue_budget_exhausted"; rec.runs_24h = recent;
+      if (APPLY && issue.status === "in_review") {
+        // Leaving in_review ends the loop and surfaces the issue to a human.
+        await api("PATCH", "/api/issues/" + issue.id, { status: "blocked" });
+        await api("POST", "/api/issues/" + issue.id + "/comments", {
+          body: "Nudger: " + rec.agent + " ran " + recent + " times in 24h without a review decision. Marked blocked; needs a human.",
+        });
+        rec.blocked = true;
+      }
+      continue;
     }
     rec.age_min = Math.round(ageS / 60);
     if (!APPLY) { rec.would_wake = true; continue; }
