@@ -16,6 +16,7 @@ resources:
   - bootstrap-job.yaml
   - nudger-cronjob.yaml
   - nudger-token.sops.yaml
+  - rustfs-credentials.sops.yaml
 configMapGenerator:
   - name: paperclip-config
     files:

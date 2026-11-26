@@ -12,3 +12,4 @@ kind: Kustomization
 resources:
   - app
   - bookorbit-secret.sops.yaml
+  - rustfs-credentials.sops.yaml
