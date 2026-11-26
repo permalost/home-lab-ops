@@ -46,13 +46,33 @@ See [infrastructure/README.md](infrastructure/README.md) for the full component 
 
 ## Apps
 
-Only `pihole/overlays/orion` is currently wired into the orion cluster. The
-rest are kept from the decommissioned na cluster, pending migration.
+Apps live in `apps/<name>/`; a cluster shell at `clusters/orion/<name>.yaml`
+wires one into orion (the "Wired" column). `manyfold/` and `snipe-it/` are
+kept from the decommissioned na cluster, pending migration.
 
 | App | Description | Wired into orion? |
 |-----|-------------|--------------------|
-| ai | LiteLLM proxy + Ollama + Open WebUI | no |
-| home-automation | Mosquitto + Zigbee2MQTT | no |
-| homebox | Home inventory management | no |
-| pihole | DNS + ad-blocking | yes (`overlays/orion`) |
-| webapp | Shared base + components (ingress, httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |
+| actual-budget | Personal budgeting | yes |
+| bookorbit | PDF and ebook library | yes |
+| external-endpoints | EndpointSlices for off-cluster services | yes |
+| firefly | Personal finance manager | yes |
+| flow-collector | Network flow collection | yes |
+| forgejo | Git forge | yes |
+| forgejo-runner | Forgejo CI runners | yes |
+| godseye | Live flights, ships, satellites, earthquakes and CCTV on a 3D globe | yes |
+| grocy | Grocery & pantry inventory tracking | yes |
+| hermes-agents | Hermes agent deployments | yes |
+| hermes-dev | Hermes dev instance | yes |
+| hermes-hearth | Hermes Hearth | yes |
+| hermes-k8s-mcp | Hermes Kubernetes MCP | yes |
+| hermes-sage | Hermes Sage | yes |
+| home-automation | Mosquitto, Zigbee2MQTT and Home Assistant | yes |
+| homebox | Home inventory management | yes |
+| manyfold | 3D model library | no |
+| netbox | IPAM and DCIM | yes |
+| obsidian-livesync | CouchDB sync backend for Obsidian notes | yes |
+| paperclip | Paperclip control plane | yes |
+| pihole | DNS / ad-block | yes |
+| snipe-it | Asset management | no |
+| unpoller | UniFi exporter | yes |
+| webapp | Shared base + components (httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |
