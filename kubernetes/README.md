@@ -68,7 +68,7 @@ kept from the decommissioned na cluster, pending migration.
 | hermes-sage | Hermes Sage | yes |
 | home-automation | Mosquitto, Zigbee2MQTT and Home Assistant | yes |
 | homebox | Home inventory management | yes |
-| manyfold | 3D model library | no |
+| manyfold | 3D model library | yes |
 | netbox | IPAM and DCIM | yes |
 | obsidian-livesync | CouchDB sync backend for Obsidian notes | yes |
 | paperclip | Paperclip control plane | yes |

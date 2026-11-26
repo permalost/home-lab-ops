@@ -1,0 +1,92 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: manyfold
+namePrefix: manyfold-
+
+resources:
+  - ../../webapp/base
+  - namespace.yaml
+  - database.yaml
+  - redis.yaml
+  - pvc-libraries.yaml
+
+components:
+  - ../../webapp/components/httproute
+  - ../../webapp/components/pvc
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: manyfold
+      app.kubernetes.io/name: manyfold
+
+images:
+  - name: my-app
+    newName: ghcr.io/manyfold3d/manyfold
+    # v0.154.1, the newest stable release (2026-11-05); GHCR tags carry no
+    # v prefix. Image runs on the pre-x86-64-v3 control-plane nodes: the
+    # Ruby 3.4.12 binary records GNU_PROPERTY_X86_ISA_1_USED = baseline
+    # (x86-64-v1), and everything else is Alpine packages, which build for
+    # the x86-64 baseline by distro policy (WDO-151).
+    newTag: "0.154.1"
+    # Pin by digest so a re-pushed tag can't change what runs.
+    digest: sha256:050e8dde3f59fe0aca5e294b5f3697550c6344d12e2a1bcd8219b7134c97286b
+
+patches:
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-container-port.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-env.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-probes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-security-context.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-pvc-mountpath.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-add-volumes.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-update-resources.yaml
+  - target:
+      kind: Deployment
+      name: deploy
+    path: patches/deploy-ignore-env-value-from.yaml
+  - target:
+      kind: HTTPRoute
+      name: route
+    path: patches/httproute-add-homepage-annotations.yaml
+
+# Port 3214 is set once (container port, the image's PORT default); the
+# Service port and HTTPRoute backendRef follow it (see webapp/README.md,
+# "Changing the port").
+replacements:
+  - source:
+      kind: Deployment
+      name: deploy
+      fieldPath: spec.template.spec.containers.0.ports.0.containerPort
+    targets:
+      - select:
+          kind: Service
+          name: svc
+        fieldPaths:
+          - spec.ports.0.port
+      - select:
+          kind: HTTPRoute
+          name: route
+        fieldPaths:
+          - spec.rules.0.backendRefs.0.port

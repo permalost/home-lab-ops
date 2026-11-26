@@ -1,0 +1,52 @@
+# Writable scratch for the s6 entrypoint and Rails, appended after the pvc
+# component has already populated volumes[0]/volumeMounts[0] with the plugins
+# PVC (repointed at /usr/src/app/plugins by deploy-pvc-mountpath.yaml):
+# - /run — s6-overlay stages its supervision state there when the root
+#   filesystem is read-only (S6_READ_ONLY_ROOT=1, see
+#   deploy-security-context.yaml)
+# - /usr/src/app/tmp — Rails cache, pids and TMPDIR (the entrypoint clears
+#   tmp/cache and chowns this tree to PUID/PGID on every start)
+# - /usr/src/app/log — chowned by the entrypoint alongside tmp
+# The library PVC is appended last and mounted at /libraries.
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: run
+    emptyDir: {}
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: tmp
+    emptyDir:
+      medium: Memory
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: log
+    emptyDir: {}
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: libraries
+    persistentVolumeClaim:
+      claimName: libraries
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: run
+    mountPath: /run
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: tmp
+    mountPath: /usr/src/app/tmp
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: log
+    mountPath: /usr/src/app/log
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: libraries
+    mountPath: /libraries

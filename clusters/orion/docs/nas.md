@@ -11,7 +11,7 @@ dynamic provisioning only.
 | Share (NAS dataset) | NFS export path | PersistentVolume | PVC |
 |---------------------|-----------------|------------------|-----|
 | `storage/books`     | `/mnt/storage/books` | `nas-books`  | `bookorbit-books` (BookOrbit, WDO-157) |
-| `storage/prints`    | `/mnt/storage/prints` | `nas-prints`  | created by the consuming app (Manyfold, WDO-162) |
+| `storage/prints`    | `/mnt/storage/prints` | `nas-prints`  | `manyfold-libraries` (Manyfold, WDO-162) |
 | `storage/photos`    | `/mnt/storage/photos` | `nas-photos`  | unclaimed — first consumer binds it |
 
 A `PersistentVolumeClaim` is namespaced, so each app adds its own PVC in its

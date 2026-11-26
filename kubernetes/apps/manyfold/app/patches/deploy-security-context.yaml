@@ -1,0 +1,22 @@
+# The image's s6-overlay entrypoint must start as root:
+# bin/docker-entrypoint.sh chowns tmp/log to $PUID:$PGID and steps down with
+# s6-setuidgid. Upstream's own docker docs run the container with cap_drop
+# ALL + cap_add CHOWN,DAC_OVERRIDE,SETUID,SETGID and no-new-privileges — the
+# exact set kept here (the base's drop-ALL stays, with only those four
+# granted back). runAsNonRoot is false for the root start; the process the
+# app itself runs as is PUID/PGID (deploy-add-env.yaml, 3000/3000).
+#
+# The image ships S6_READ_ONLY_ROOT=1, so the root filesystem stays
+# read-only; writable emptyDirs are mounted at /run (s6-overlay copies its
+# supervision state there and must not have to mount a tmpfs itself — that
+# would need CAP_SYS_ADMIN, which is dropped) and at /usr/src/app/tmp and
+# log (see deploy-add-volumes.yaml).
+- op: replace
+  path: /spec/template/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+      add: ["CHOWN", "DAC_OVERRIDE", "SETUID", "SETGID"]
+    readOnlyRootFilesystem: true
+    runAsNonRoot: false
