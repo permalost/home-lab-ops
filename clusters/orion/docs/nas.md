@@ -32,6 +32,50 @@ in `kubernetes/infrastructure/nas-storage/README.md`.
 - `persistentVolumeReclaimPolicy: Retain` — deleting a PVC never touches NAS
   data.
 
+## Backup landing zone (both NASes)
+
+Orion backups (spec: restic copies, the CNPG S3 shim, tier-2 source snapshots)
+land in a dedicated dataset tree on **both** boxes: bignas is the primary
+target, fastnas holds the tier-1 second copies. Tier-2 bulk data is copied to
+bignas only, but the matching dataset, export and snapshot task exist on
+fastnas too so the layout is identical.
+
+| Dataset (tree) | NFS export path | Purpose |
+|---|---|---|
+| `backups/orion/tier1-critical` | `/mnt/<pool>/backups/orion/tier1-critical` | restic tier-1 repos, CNPG barman store |
+| `backups/orion/tier2-bulk` | `/mnt/<pool>/backups/orion/tier2-bulk` | restic tier-2 repo (bignas) |
+
+The tree sits under each box's data pool (`storage` on bignas,
+`temp-storage` on fastnas), so full dataset names are
+`storage/backups/orion/…` and `temp-storage/backups/orion/…`.
+
+- **Exports** are restricted to the five orion node addresses on VLAN 50
+  (per-node entries; the list lives in `NODES.md`) — unlike the existing
+  stores above, they are never open to the LAN.
+- **Snapshots**: one recursive daily ZFS snapshot task per box on the
+  `backups/orion` tree, keep 14 days — a deletion bug inside the cluster
+  cannot destroy the restic repos themselves.
+- **Creation**: the `agent-maint` NAS user is read-only on purpose, so the
+  datasets, exports and snapshot task are created by Jon in the TrueNAS UI.
+- **Preflight gate**: no backup writes until bignas is verified healthy.
+  Recorded 2026-11-26 after the `sdf` replacement: pool `storage` ONLINE and
+  healthy, resilver finished with 0 errors, no active alerts. The
+  `smart.test.results` API call is broken on TrueNAS 25.04.2.6 (EINVAL on its
+  own schema), so SMART state is evidenced by the alert list and the weekly
+  SHORT test schedule instead.
+
+## Checking the landing zone
+
+`task backup:nas-status` queries both NASes read-only and reports datasets,
+exports, snapshot tasks, pool health and alerts at a glance. It exits 0 only
+when every expected piece is in place on both reachable boxes.
+
+Credentials are read from the environment (`TRUENAS_BIGNAS_URL`,
+`TRUENAS_BIGNAS_API_KEY`, and the `FASTNAS` pair — the same names as
+`Secret/hermes-secrets`); keep them in `.config.env`, never in git. The
+script needs the `websockets` python package (`pip install --user websockets`
+or `uv run scripts/backup-nas-status.py`).
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Check or fix |

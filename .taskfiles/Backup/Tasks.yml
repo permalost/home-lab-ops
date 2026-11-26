@@ -1,0 +1,11 @@
+---
+version: "3"
+
+# Read-only status of the NAS backup landing zone (GH #322). Credentials come
+# from the environment (TRUENAS_<NAS>_URL / TRUENAS_<NAS>_API_KEY, or
+# <NAS>_URL / <NAS>_API_KEY); keep them in .config.env, never in git.
+tasks:
+  nas-status:
+    desc: Report backup datasets, NFS exports and snapshot tasks on bignas + fastnas
+    cmds:
+      - python3 scripts/backup-nas-status.py
