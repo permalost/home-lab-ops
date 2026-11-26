@@ -1,0 +1,12 @@
+# webapp/base's cpu: 10m default throttles anything heavier than a static
+# file server (see #90, #104). Snipe-IT is Laravel + Apache with PHP
+# migrations on boot; sized like grocy's PHP stack from the start. Memory is
+# bounded both ways so a leak cannot take the node; CPU keeps no limit.
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi

@@ -1,0 +1,5 @@
+# Apache listens on 80 inside the image (upstream docker-compose.yml maps
+# ${APP_PORT:-8000}:80, so the container port is 80 regardless of APP_PORT).
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 80

@@ -73,6 +73,6 @@ kept from the decommissioned na cluster, pending migration.
 | obsidian-livesync | CouchDB sync backend for Obsidian notes | yes |
 | paperclip | Paperclip control plane | yes |
 | pihole | DNS / ad-block | yes |
-| snipe-it | Asset management | no |
+| snipe-it | Asset management | yes |
 | unpoller | UniFi exporter | yes |
 | webapp | Shared base + components (httproute, pvc, tls-cert, linkerd) consumed by the apps above | n/a (library, not standalone) |

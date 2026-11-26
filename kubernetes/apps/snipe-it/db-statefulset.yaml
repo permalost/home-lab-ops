@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: snipe-it-db
+spec:
+  replicas: 1
+  serviceName: snipe-it-db
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snipe-it-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: snipe-it-db
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: db
+          image: docker.io/library/mariadb:11.4.13@sha256:5e73baf8179b29f115101bb102763a47a017361f3e9792daccba6646c3ab1532
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MYSQL_DATABASE
+              value: snipeit
+            - name: MYSQL_USER
+              value: snipeit
+            # The app and the database share DB_PASSWORD from snipe-it-secret.
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: snipe-it-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: snipe-it-secret
+                  key: MYSQL_ROOT_PASSWORD
+          readinessProbe:
+            exec:
+              # https://mariadb.com/kb/en/using-healthcheck-sh/ — the same
+              # probe upstream's docker-compose.yml uses.
+              command: [healthcheck.sh, --connect, --innodb_initialized]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: [healthcheck.sh, --connect]
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+          # The entrypoint runs as root, drops to the mysql user with gosu,
+          # and writes the socket under /run, so no runAsNonRoot and no
+          # read-only root filesystem. Nothing escalates further.
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: false
+            readOnlyRootFilesystem: false
+          # A CPU request but no CPU limit (webapp/README.md, "Secure by
+          # default"): boot bursts would otherwise throttle.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: rook-ceph-block
+        # volumeClaimTemplates are immutable once created, so the size is
+        # pinned here instead of coming from the cluster shell substitute.
+        resources:
+          requests:
+            storage: 5Gi
