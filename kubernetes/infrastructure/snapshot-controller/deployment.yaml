@@ -1,0 +1,49 @@
+# The snapshot controller implements the control loop for CSI snapshot
+# functionality (kubernetes-csi/external-snapshotter). The csi-snapshotter
+# sidecar in the rook-ceph ctrlplugin (see ../rook-ceph-cluster/csi-driver.yaml)
+# already talks to the API, but without this controller no VolumeSnapshot ever
+# becomes ReadyToUse. Pinned to the v8.7.1 release; min k8s 1.25, cluster runs 1.33.
+#
+# Lives in kube-system, matching upstream's deploy/kubernetes/snapshot-controller:
+# it is base-system functionality, like CNI. The upstream file is kept close to
+# verbatim except for the image digest pin, log verbosity (5 → 2) and resources.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snapshot-controller
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snapshot-controller
+  # The snapshot controller won't be marked as ready if the v1 CRDs are unavailable.
+  # It waits --retry-crd-interval-max (default 30s) before exiting, so
+  # minReadySeconds sits slightly above that.
+  minReadySeconds: 35
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: snapshot-controller
+    spec:
+      serviceAccountName: snapshot-controller
+      containers:
+        - name: snapshot-controller
+          image: registry.k8s.io/sig-storage/snapshot-controller:v8.7.1@sha256:d3c3893704c86f0fe428a6429c705b7103a653bea151db0fc5ab0fdb25bb2290
+          args:
+            - "--v=2"
+            - "--leader-election=true"
+            - "--leader-election-namespace=kube-system"
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
