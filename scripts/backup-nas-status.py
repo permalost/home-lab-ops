@@ -29,7 +29,8 @@ import websockets
 
 TREE = "backups/orion"
 LEAF_DATASETS = (f"{TREE}/tier1-critical", f"{TREE}/tier2-bulk")
-KEEP_VALUE, KEEP_UNIT = 14, "DAYS"
+# The API returns the unit singular ("DAY") even though the ticket says 14 days.
+KEEP_VALUE, KEEP_UNIT = 14, "DAY"
 # bignas (25.04) and fastnas (25.10) name the snapshot query differently.
 SNAPSHOT_METHOD = {"bignas": "zfs.snapshot.query", "fastnas": "pool.snapshot.query"}
 
@@ -105,8 +106,12 @@ def task_shape(t: dict) -> str:
             f"keep {t.get('lifetime_value', '?')} {t.get('lifetime_unit', '?')}",
             f"{'recursive' if t.get('recursive') else 'non-recursive'}",
             "enabled" if t.get("enabled") else "DISABLED"]
-    if t.get("state"):
-        bits.append(f"last run {t['state'].lower()}")
+    # 25.04/25.10 return state as {"state": "..."}; older builds returned a string.
+    state = t.get("state")
+    if isinstance(state, dict):
+        state = state.get("state")
+    if isinstance(state, str) and state:
+        bits.append(f"last run {state.lower()}")
     return ", ".join(bits)
 
 
