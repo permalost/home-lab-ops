@@ -6,6 +6,7 @@ namespace: netbox
 resources:
   - namespace.yaml
   - netbox-secret.sops.yaml
+  - rustfs-credentials.sops.yaml
   - database.yaml
   - objectstore.yaml
   - backup.yaml

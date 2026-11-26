@@ -18,5 +18,6 @@ kind: Kustomization
 resources:
   - app
   - firefly-secrets.sops.yaml
+  - rustfs-credentials.sops.yaml
   - objectstore.yaml
   - backup.yaml

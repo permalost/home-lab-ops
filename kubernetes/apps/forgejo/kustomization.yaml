@@ -4,6 +4,7 @@ namespace: forgejo
 resources:
   - namespace.yaml
   - secret.yaml
+  - rustfs-credentials.sops.yaml
   - database.yaml
   - objectstore.yaml
   - backup.yaml

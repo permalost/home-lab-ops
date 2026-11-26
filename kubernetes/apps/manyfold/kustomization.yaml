@@ -19,5 +19,6 @@ kind: Kustomization
 resources:
   - app
   - manyfold-secret.sops.yaml
+  - rustfs-credentials.sops.yaml
   - objectstore.yaml
   - backup.yaml
