@@ -15,6 +15,13 @@ GH #324 → #325); CNPG cannot write to plain NFS — S3 API only.
   `secret-key`), wired to the Deployment as `RUSTFS_ACCESS_KEY` /
   `RUSTFS_SECRET_KEY`. Rotate by editing the plaintext values, re-running
   `sops --encrypt --in-place`, and restarting the pod.
+- **Consumers:** the six CNPG namespaces (forgejo, paperclip, netbox,
+  bookorbit, manyfold, firefly) each hold a copy of this secret under the
+  same name — a SOPS MAC covers name and namespace, so one encrypted file
+  cannot serve two namespaces — referenced by their `ObjectStore`s (GH #325).
+  Rotating these credentials means re-encrypting all seven files, then
+  restarting the rustfs pod (the CNPG sidecars re-read the secret on every
+  backup/WAL-archive call, so they need no restart).
 - **Bucket:** `orion-cnpg`, created at container start by the image's own
   bootstrap (`configmap-bootstrap.yaml` overrides the image's
   `/etc/rustfs/bootstrap/buckets.json`; idempotent on every restart). The

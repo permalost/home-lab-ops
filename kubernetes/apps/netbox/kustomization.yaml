@@ -8,6 +8,8 @@ resources:
   - netbox-secret.sops.yaml
   - rustfs-credentials.sops.yaml
   - database.yaml
+  - objectstore.yaml
+  - backup.yaml
   - pvc-media.yaml
   - valkey.yaml
   - service.yaml

@@ -10,7 +10,10 @@ Single `fireflyiii/core` container backed by a CNPG PostgreSQL cluster.
 - Database: CNPG `Cluster` `firefly-db` (1 instance, 5Gi on
   `rook-ceph-block`, in `database.yaml`). The operator creates Secret
   `firefly-db-app`; `deploy-add-env.yaml` maps its `host`, `port`, `dbname`,
-  `user` and `password` keys to Firefly's `DB_*` variables.
+  `user` and `password` keys to Firefly's `DB_*` variables. Backed up daily
+  (12:30 UTC) via the barman-cloud plugin to RustFS (`objectstore.yaml` +
+  `backup.yaml` at this level; procedure in
+  `kubernetes/infrastructure/cnpg/README.md`).
 - Uploads: PVC `firefly-upload` (1Gi on `rook-ceph-block`) mounted at
   `/var/www/html/storage/upload`.
 - Secrets: `APP_KEY` and `STATIC_CRON_TOKEN` live in

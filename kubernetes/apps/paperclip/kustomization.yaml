@@ -9,6 +9,8 @@ resources:
   - hobbes-readonly.yaml
   - hobbes-readonly-token.sops.yaml
   - database.yaml
+  - objectstore.yaml
+  - backup.yaml
   - pvc.yaml
   - service.yaml
   - httproute.yaml

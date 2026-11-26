@@ -6,6 +6,8 @@ resources:
   - secret.yaml
   - rustfs-credentials.sops.yaml
   - database.yaml
+  - objectstore.yaml
+  - backup.yaml
   - repository.yaml
   - release.yaml
 
