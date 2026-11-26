@@ -1,0 +1,12 @@
+# Single replica; the plugin's ObjectStore controller uses leader election
+# and the barman-cloud Service load-balances gRPC across ready pods.
+replicaCount: 1
+
+# Pinned to the plugin release; the chart's default tag is its own appVersion
+# (v0.16.0 for chart 0.9.0) — kept explicit so a chart bump never silently
+# changes what runs. The sidecar tag must match the plugin tag.
+image:
+  tag: "v0.16.0"
+
+sidecarImage:
+  tag: "v0.16.0"

@@ -16,6 +16,9 @@ namespace, so this app is plain manifests rather than the `webapp` base
   `rook-ceph-block`), pinned to the same post-eMudhra-fix image as
   `paperclip-db`/`forgejo-db`. Its `netbox-db-app` Secret feeds the `DB_*`
   env on both Deployments (keys `host`, `port`, `dbname`, `user`, `password`).
+  Backed up daily (11:00 UTC) via the barman-cloud plugin to RustFS
+  (`objectstore.yaml` + `backup.yaml` here; procedure in
+  `kubernetes/infrastructure/cnpg/README.md`).
 
 ## Configuration
 

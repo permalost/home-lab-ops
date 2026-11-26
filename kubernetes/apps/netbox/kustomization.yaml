@@ -7,6 +7,8 @@ resources:
   - namespace.yaml
   - netbox-secret.sops.yaml
   - database.yaml
+  - objectstore.yaml
+  - backup.yaml
   - pvc-media.yaml
   - valkey.yaml
   - service.yaml

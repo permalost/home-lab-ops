@@ -5,11 +5,15 @@ resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
+  - plugin-barman-cloud-release.yaml
 
 configMapGenerator:
 - name: cnpg-helm-chart-values
   files:
   - values.yaml
+- name: plugin-barman-cloud-helm-chart-values
+  files:
+  - plugin-barman-cloud-values.yaml
 
 configurations:
   - kustomizeconfig.yaml

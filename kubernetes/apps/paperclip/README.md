@@ -1,7 +1,10 @@
 # paperclip
 
 Agent orchestrator at `paperclip.${domain}` (company W.D.O.). Postgres via CNPG
-(`paperclip-db`), state on `paperclip-data`, runtime config in `config.json`
+(`paperclip-db`, backed up daily at 10:30 UTC via the barman-cloud plugin to
+RustFS — `objectstore.yaml` + `backup.yaml` here; procedure in
+`kubernetes/infrastructure/cnpg/README.md`), state on `paperclip-data`,
+runtime config in `config.json`
 (secret-free; the DB URL comes from `DATABASE_URL`).
 
 - **First login:** read the invite URL from `kubectl -n paperclip logs job/paperclip-bootstrap-ceo`.
@@ -106,7 +109,10 @@ policy boundary, not enforcement.
   read-only credential, injected into his adapter env (below) — it is never mounted
   into the pod.
 - Secrets are encrypted with `master.key` on `paperclip-data`; the stored Claude login is encrypted
-  in the database. Back both up together (no backups are configured yet).
+  in the database. Back both up together: the database is covered by CNPG's
+  barman-cloud backups (GH #325), but `paperclip-data` itself has no backup
+  yet (restic tier-1, spec #321) — so a `master.key` loss is still
+  unrecoverable until that lands.
 - A subscription sign-in refreshes itself but can expire; Paperclip then shows a reconnect card.
 - The Spark GLM server takes 4 concurrent streams (TensorFold `max` in `/health`), shared with Hermes. One stream runs about
   25 tok/s, four about 10 each. Keep concurrent GLM agent runs low.

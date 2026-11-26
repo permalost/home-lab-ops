@@ -1,0 +1,28 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: daily-backup
+  namespace: netbox
+spec:
+  # Daily at 11:00 UTC (04:00 America/Boise in winter). ScheduledBackup uses
+  # robfig/cron v1, which has no timezone support, so the schedule is UTC;
+  # the wall-clock local time shifts by an hour across DST. Staggered 30
+  # minutes per cluster so the six backups and their S3 uploads don't pile up
+  # on one another (or on the 02:00 local tier-1 ceph snapshots).
+  schedule: "0 0 11 * * *"
+  # Take the first base backup as soon as the ScheduledBackup is created, so
+  # PITR has a base without waiting for the first scheduled slot.
+  immediate: true
+  # Backups die with the Cluster (barman's S3 catalog, not these CRs, is the
+  # PITR source of truth) and don't pile up one-per-day in the namespace.
+  backupOwnerReference: cluster
+  # Backups run on the primary: all six clusters are small and the primary is
+  # the deterministic choice for the single-instance ones.
+  target: primary
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+    parameters:
+      barmanObjectName: rustfs-store
+  cluster:
+    name: netbox-db

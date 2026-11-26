@@ -7,9 +7,17 @@
 # the name of an encrypted file breaks its SOPS MAC, so the rendered Secret
 # must keep the name the MAC was computed over (same shape as apps/bookorbit/
 # and apps/firefly/).
+#
+# objectstore.yaml and backup.yaml sit here for the same reason (plus
+# rustfs-credentials.sops.yaml, a copy of the rustfs app's encrypted
+# credentials re-encrypted for this namespace): the Cluster's
+# barmanObjectName and the ScheduledBackup's cluster.name are plain strings
+# that kustomize cannot rewrite, so these resources keep their final names.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
   - app
   - manyfold-secret.sops.yaml
+  - objectstore.yaml
+  - backup.yaml
