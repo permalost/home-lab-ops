@@ -9,6 +9,7 @@ resources:
   - database.yaml
   - objectstore.yaml
   - backup.yaml
+  - rustfs-credentials.sops.yaml
   - pvc-media.yaml
   - valkey.yaml
   - service.yaml

@@ -11,6 +11,7 @@ resources:
   - database.yaml
   - objectstore.yaml
   - backup.yaml
+  - rustfs-credentials.sops.yaml
   - pvc.yaml
   - service.yaml
   - httproute.yaml
