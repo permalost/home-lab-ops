@@ -1,0 +1,32 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: rustfs-store
+  namespace: paperclip
+spec:
+  configuration:
+    # Barman puts each cluster's backups under <bucket>/<serverName>/, and
+    # serverName defaults to the Cluster name (paperclip-db), so all six
+    # clusters share the orion-cnpg bucket without colliding.
+    destinationPath: s3://orion-cnpg/
+    # In-cluster only: the RustFS S3 shim from GH #324 (no HTTPRoute).
+    endpointURL: http://rustfs.storage-system.svc:9000
+    # RustFS is MinIO-style path-addressed S3; be explicit so barman never
+    # guesses virtual-host style (supported since barman 3.18, shipped in the
+    # v0.16.0 sidecar).
+    s3AddressingStyle: path
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-credentials
+        key: access-key
+      secretAccessKey:
+        name: rustfs-credentials
+        key: secret-key
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  # Recovery window for barman-cloud-backup-delete: keep enough to restore to
+  # any point ~14 days back (matches the tier-1 restic daily x 14 window from
+  # ADR-0003, far beyond the 24h RPO).
+  retentionPolicy: 14d

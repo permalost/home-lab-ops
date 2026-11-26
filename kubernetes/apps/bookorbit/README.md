@@ -14,7 +14,10 @@ Built on `webapp/base` with the `httproute` and `pvc` components.
   `rook-ceph-block`). The **standard** CNPG image is required: it ships the
   `pgvector` extension (plus `uuid-ossp`, `pg_trgm`, `unaccent`) that
   BookOrbit's migrations create on first boot. `POSTGRES_*` env comes from
-  the operator's `bookorbit-db-app` Secret.
+  the operator's `bookorbit-db-app` Secret. Backed up daily (11:30 UTC) via
+  the barman-cloud plugin to RustFS (`objectstore.yaml` + `backup.yaml` at
+  this level, next to `bookorbit-secret.sops.yaml`; procedure in
+  `kubernetes/infrastructure/cnpg/README.md`).
 - `JWT_SECRET`/`SETUP_BOOTSTRAP_TOKEN` come from `bookorbit-secret`
   (`bookorbit-secret.sops.yaml`, WDO-158). Values live with Jon; the
   `SETUP_BOOTSTRAP_TOKEN` header is required for the initial

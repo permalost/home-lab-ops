@@ -82,7 +82,14 @@ round-trip check).
 - **Credentials:** `Secret/rustfs-credentials` (SOPS-encrypted in
   `kubernetes/apps/rustfs/rustfs-credentials.sops.yaml`), generated 2026-11-26
   (GH #324); rotate per the app README. The #325 `ObjectStore` references the
-  same access/secret keys.
+  same access/secret keys — each CNPG namespace holds its own SOPS copy under
+  the same name (see `kubernetes/infrastructure/cnpg/README.md`).
+- **Backups (GH #325):** the barman-cloud plugin (deployed in `cnpg-system`
+  next to the operator) writes gzip-compressed base backups + WAL for all six
+  clusters to `s3://orion-cnpg/<cluster-name>/`, with a 14-day recovery
+  window and daily `ScheduledBackup`s staggered from 10:00 UTC. PITR to any
+  point within that window; restores go to a scratch namespace, never in
+  place.
 - **Bucket:** `orion-cnpg`, created by the container entrypoint at every
   start (`rc bucket create --ignore-existing`) from
   `configmap-bootstrap.yaml`.

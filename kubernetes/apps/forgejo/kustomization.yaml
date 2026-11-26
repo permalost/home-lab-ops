@@ -5,6 +5,8 @@ resources:
   - namespace.yaml
   - secret.yaml
   - database.yaml
+  - objectstore.yaml
+  - backup.yaml
   - repository.yaml
   - release.yaml
 

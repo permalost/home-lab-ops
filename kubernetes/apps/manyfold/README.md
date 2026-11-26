@@ -19,7 +19,10 @@ library with scanning, previews and geometric analysis. Built on
   no-persistence Redis (`manyfold-redis`). `DATABASE_*` env comes from the
   operator's `manyfold-db-app` Secret, `REDIS_URL` points at
   `manyfold-redis`, and `SECRET_KEY_BASE` comes from `manyfold-secret`
-  (`manyfold-secret.sops.yaml`, WDO-163).
+  (`manyfold-secret.sops.yaml`, WDO-163). The database is backed up daily
+  (12:00 UTC) via the barman-cloud plugin to RustFS (`objectstore.yaml` +
+  `backup.yaml` at this level; procedure in
+  `kubernetes/infrastructure/cnpg/README.md`).
 - `PUID`/`PGID` `3000` (the bignas `orion` user): the prints NFS export has
   no squash, so the effective UID/GID must be explicit to keep NAS file
   ownership stable (see `clusters/orion/docs/nas.md`). The image's s6
