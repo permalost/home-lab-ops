@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: storage-system
+resources:
+  - namespace.yaml
+  # cluster-scoped; kept here because it names this app's bignas share
+  - storageclass-nfs-backups-pg.yaml
+  - pvc.yaml
+  - configmap-bootstrap.yaml
+  - rustfs-credentials.sops.yaml
+  - service.yaml
+  - deployment.yaml
+images:
+  - name: rustfs
+    newName: rustfs/rustfs
+    newTag: 1.0.7
+    digest: sha256:69bd3c4d8d79b74723bfd68c9fbd9085155d4d4b44a5a136d87502f3075cc68c

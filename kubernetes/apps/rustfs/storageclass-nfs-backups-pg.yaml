@@ -1,0 +1,30 @@
+# The bignas share that backs the CNPG barman store (spec #321 / GH #324).
+# The controller creates the `pg` subdirectory on first provision — no NAS-side
+# change is needed. `server` comes from Secret/nas-nfs-secrets (see
+# kubernetes/infrastructure/nas-storage/README.md) so the NAS address never
+# appears in plain YAML in this public repo.
+#
+# This class is deliberately NOT the cluster default: a stray PVC without an
+# explicit storageClassName must keep landing on rook-ceph-block.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-backups-pg
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: ${nasNfsIp}
+  share: /mnt/storage/backups/orion/tier1-critical
+  subDir: pg
+  # The controller mkdirs `pg` as root (the export has no squash, by decision
+  # — nas.md "Backup landing zone"), while the rustfs container runs as
+  # 10001:10001. The export only accepts the five orion node addresses, so
+  # the permissive mode is contained to that path.
+  mountPermissions: "0777"
+  # Belt and braces: a deleted PVC must never take the backups with it.
+  onDelete: retain
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: false
+mountOptions:
+  - nfsvers=4
+  - hard

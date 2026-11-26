@@ -64,6 +64,33 @@ The tree sits under each box's data pool (`storage` on bignas,
   own schema), so SMART state is evidenced by the alert list and the weekly
   SHORT test schedule instead.
 
+## CNPG S3 endpoint (rustfs) — GH #324
+
+CNPG cannot write backups to plain NFS (spec #321 research comment), so a
+single-replica [RustFS](https://rustfs.com) S3-compatible server runs in the
+cluster as the `plugin-barman-cloud` (#325) target. Manifests:
+`kubernetes/apps/rustfs/` (see its README for the full contract and the
+round-trip check).
+
+- **Endpoint:** `http://rustfs.storage-system.svc:9000` — in-cluster only,
+  no HTTPRoute.
+- **On the NAS:** the rustfs PVC is dynamically provisioned by
+  `csi-driver-nfs` (StorageClass `nfs-backups-pg`) into a `pg` **subdirectory**
+  of the `tier1-critical` export → `/mnt/<pool>/backups/orion/tier1-critical/pg`
+  on bignas. No separate export or dataset exists for it — the existing
+  node-restricted `tier1-critical` export and its daily snapshots cover it.
+- **Credentials:** `Secret/rustfs-credentials` (SOPS-encrypted in
+  `kubernetes/apps/rustfs/rustfs-credentials.sops.yaml`), generated 2026-11-26
+  (GH #324); rotate per the app README. The #325 `ObjectStore` references the
+  same access/secret keys.
+- **Bucket:** `orion-cnpg`, created by the container entrypoint at every
+  start (`rc bucket create --ignore-existing`) from
+  `configmap-bootstrap.yaml`.
+- **Sizing note:** the PVC requests 100Gi, but NFS datasets carry no quota —
+  the effective cap is the bignas pool. ADR-0002 (sizing/credentials decisions)
+  is not on disk — `docs/adr/` was never committed — so the rationale lives in
+  the app README and the spec (#321) summary.
+
 ## Checking the landing zone
 
 `task backup:nas-status` queries both NASes read-only and reports datasets,
