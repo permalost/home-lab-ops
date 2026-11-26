@@ -1,0 +1,22 @@
+# Readiness and liveness hit the same endpoint as upstream's own image
+# HEALTHCHECK (/api/v1/health). Generous delays — first boot runs the DB
+# migrations and an initial library scan can follow, so the app needs time
+# before it can answer.
+- op: add
+  path: /spec/template/spec/containers/0/readinessProbe
+  value:
+    httpGet:
+      path: /api/v1/health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 6
+- op: add
+  path: /spec/template/spec/containers/0/livenessProbe
+  value:
+    httpGet:
+      path: /api/v1/health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3

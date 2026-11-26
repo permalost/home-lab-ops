@@ -1,0 +1,11 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: route
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: "snipe-it"
+    gethomepage.dev/name: "Snipe-IT"
+    gethomepage.dev/description: "IT asset management"
+    gethomepage.dev/group: "Inventory"
+    gethomepage.dev/icon: "snipe-it.png"

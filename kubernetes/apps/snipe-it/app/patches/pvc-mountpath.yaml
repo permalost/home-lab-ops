@@ -1,0 +1,6 @@
+# pvc component mounts its volume at /data by default; Snipe-IT expects
+# /var/lib/snipeit (uploads, dumps, keys — see the symlinks in the upstream
+# Dockerfile).
+- op: replace
+  path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+  value: /var/lib/snipeit

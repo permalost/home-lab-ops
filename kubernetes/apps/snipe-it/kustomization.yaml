@@ -1,0 +1,21 @@
+# Root for the Flux Kustomization in clusters/orion/snipe-it.yaml. It only
+# aggregates; all naming and labels live in app/.
+#
+# snipe-it-secret.sops.yaml deliberately sits outside app/, whose namePrefix
+# would rename the rendered Secret (snipe-it-secret -> snipe-it-snipe-it-
+# secret). It was encrypted with metadata.name: snipe-it-secret, and editing
+# the name of an encrypted file breaks its SOPS MAC, so the rendered Secret
+# must keep the name the MAC was computed over (same shape as apps/bookorbit/).
+# The MariaDB StatefulSet and its Service also live here: app/'s labels block
+# would stamp `app: snipe-it` onto both the db pods and the webapp Service
+# selector, making the HTTPRoute backend load-balance across the database.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: snipe-it
+
+resources:
+  - app
+  - db-statefulset.yaml
+  - db-service.yaml
+  - snipe-it-secret.sops.yaml
