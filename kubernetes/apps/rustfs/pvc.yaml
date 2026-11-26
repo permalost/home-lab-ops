@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-backups-pg
+  resources:
+    requests:
+      # NFS capacity is metadata only (no quota on the dataset) — this is the
+      # sizing record: ~40Gi of raw postgres across the six clusters plus
+      # retained base backups and WAL for PITR (spec #321). The real cap is
+      # the bignas pool, currently 12.3% used (backup:nas-status, 2026-11-26).
+      storage: 100Gi

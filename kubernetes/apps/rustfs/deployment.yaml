@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustfs
+  labels:
+    app: rustfs
+spec:
+  # Single replica by design (spec #321: S3 shim on the NAS export). Recreate
+  # keeps two pods from ever touching the same SNSD drive set at once.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rustfs
+  template:
+    metadata:
+      labels:
+        app: rustfs
+    spec:
+      automountServiceAccountToken: false
+      # The official image runs as rustfs 10001:10001 (Dockerfile USER) —
+      # secure by default with no opt-out.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: rustfs
+          image: rustfs
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: s3
+              containerPort: 9000
+              protocol: TCP
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: access-key
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: secret-key
+            - name: RUSTFS_VOLUMES
+              value: /data
+            - name: RUSTFS_ADDRESS
+              value: 0.0.0.0:9000
+            # The console is an admin UI with nothing to do here; the S3 API
+            # is the product (endpointURL in the #325 ObjectStore).
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "false"
+            # Empty = log to stdout. The image default /logs is a plain image
+            # directory and would be unwritable under readOnlyRootFilesystem.
+            - name: RUSTFS_OBS_LOG_DIRECTORY
+              value: ""
+            # Drives the entrypoint's bucket bootstrap (configmap-bootstrap.yaml).
+            - name: RUSTFS_BOOTSTRAP_ENDPOINT
+              value: http://localhost:9000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: bootstrap
+              mountPath: /etc/rustfs/bootstrap
+              readOnly: true
+            # The entrypoint's rc client stages its config here (mktemp /tmp).
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: s3
+            # First start on NFS creates the .rustfs.sys metadata under /data;
+            # give the startup readiness budget (RUSTFS default 120s) room.
+            periodSeconds: 10
+            failureThreshold: 36
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: s3
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          # Backup traffic is nightly and bursty; no CPU limit (repo
+          # convention — a tight limit throttles boot bursts).
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: bootstrap
+          configMap:
+            name: rustfs-bootstrap
+        - name: tmp
+          emptyDir: {}

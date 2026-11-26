@@ -1,0 +1,31 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rustfs
+  namespace: flux-system
+spec:
+  # The PVC is dynamically provisioned through the csi-driver-nfs
+  # StorageClass (nfs-backups-pg); the driver must be ready first.
+  dependsOn:
+    - name: cluster-settings
+    - name: csi-driver-nfs
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/apps/rustfs
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      # nasNfsIp: the bignas NFS address (same secret nas-storage uses)
+      - kind: Secret
+        name: nas-nfs-secrets

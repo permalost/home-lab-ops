@@ -1,0 +1,20 @@
+# Buckets created at container start by the image's own bootstrap mechanism
+# (rustfs/rustfs entrypoint): it mounts over /etc/rustfs/bootstrap, starts the
+# server, waits for /health/ready and runs `rc bucket create --ignore-existing`
+# for every name in buckets.json. Idempotent on every restart, so the bucket
+# survives even a wiped NAS path being re-provisioned. plugin-barman-cloud
+# (#325) writes into orion-cnpg; add more names here when needed.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rustfs-bootstrap
+data:
+  buckets.json: |
+    ["orion-cnpg"]
+  public-access-block.json: |
+    {
+      "block_public_acls": true,
+      "ignore_public_acls": true,
+      "block_public_policy": true,
+      "restrict_public_buckets": true
+    }
