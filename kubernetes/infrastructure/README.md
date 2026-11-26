@@ -15,7 +15,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | [snapshot-controller](snapshot-controller/README.md) | CSI snapshot controller + CRDs; makes VolumeSnapshots reach ReadyToUse | `kube-system` |
 | [nas-storage](nas-storage/README.md) | Static NFS PVs exposing the bignas stores (books/prints/photos) | — |
 | rook-ceph-operator | Ceph operator | `rook-ceph` |
-| rook-ceph-cluster | Ceph cluster (default block storage) | `rook-ceph` |
+| rook-ceph-cluster | Ceph cluster (default block storage) + RBD VolumeSnapshotClass | `rook-ceph` |
 | gateway-api | Gateway API CRDs | `gateway-system` |
 | gateway | Gateway + HTTPRoutes, wildcard TLS | `gateway` |
 | external-dns | DNS record automation | `external-dns` |
