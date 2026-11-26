@@ -1,0 +1,55 @@
+# Daily VolumeSnapshots of every tier-1 PVC, keep 7. A plain CronJob over
+# kubectl: k8up is a restic orchestrator and has no CSI VolumeSnapshot mode
+# (spec #321 picked between the two at implementation). The script lives in
+# snapshot-script.yaml; the protected PVC list and its reasoning live in the
+# README.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-tier1-snapshots
+  namespace: ceph-snapshots
+spec:
+  schedule: "0 2 * * *"
+  timeZone: America/Boise
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: ceph-snapshots
+        spec:
+          restartPolicy: Never
+          serviceAccountName: ceph-snapshots
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: snapshot
+              image: docker.io/alpine/kubectl:1.33.4@sha256:f032392d7c23894ac391425ff5ff9658c064279d8519df8eb8c7d38dde867ce5
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/snapshot.sh"]
+              env:
+                # kubectl writes its discovery cache under $HOME; /tmp is the
+                # only writable path for the non-root user.
+                - name: HOME
+                  value: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: ceph-snapshots-script

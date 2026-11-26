@@ -13,6 +13,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | [homepage](homepage/README.md) | Link dashboard, auto-discovers HTTPRoutes via annotations | `homepage` |
 | [csi-driver-nfs](csi-driver-nfs/README.md) | CSI NFS driver (chart pinned); dynamic NFS provisioning for later | `csi-driver-nfs` |
 | [snapshot-controller](snapshot-controller/README.md) | CSI snapshot controller + CRDs; makes VolumeSnapshots reach ReadyToUse | `kube-system` |
+| [ceph-snapshots](ceph-snapshots/README.md) | Daily tier-1 VolumeSnapshot CronJob, keep 7 | `ceph-snapshots` |
 | [nas-storage](nas-storage/README.md) | Static NFS PVs exposing the bignas stores (books/prints/photos) | — |
 | rook-ceph-operator | Ceph operator | `rook-ceph` |
 | rook-ceph-cluster | Ceph cluster (default block storage) + RBD VolumeSnapshotClass | `rook-ceph` |

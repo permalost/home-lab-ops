@@ -1,0 +1,35 @@
+# The job creates and deletes VolumeSnapshots in every tier-1 namespace and
+# reads PVCs cluster-wide for CNPG label discovery, so the rights are
+# ClusterRole-scoped. It never touches VolumeSnapshotContents: with the
+# VolumeSnapshotClass deletionPolicy Delete, the snapshot-controller deletes
+# the content when the VolumeSnapshot object goes away.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ceph-snapshots
+  namespace: ceph-snapshots
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ceph-snapshots
+rules:
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-snapshots
+subjects:
+  - kind: ServiceAccount
+    name: ceph-snapshots
+    namespace: ceph-snapshots
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-snapshots
