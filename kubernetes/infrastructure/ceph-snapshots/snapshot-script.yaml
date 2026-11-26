@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ceph-snapshots-script
+  namespace: ceph-snapshots
+  # The script's shell variables (${pvc}, ${name}, ...) are runtime-only and
+  # must not go through Flux postBuild substitution.
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+data:
+  snapshot.sh: |
+    #!/bin/sh
+    # Daily tier-1 CSI snapshots + keep-7 retention. Mounted into the
+    # daily-tier1-snapshots CronJob; RBAC is in rbac.yaml. Dates in snapshot
+    # names are UTC (the container runs UTC; the CronJob timeZone only sets
+    # the schedule).
+    set -u
+
+    SNAPSHOT_CLASS="rook-ceph-rbd"
+    KEEP=7
+    PREFIX="daily"
+    TODAY="$(date +%Y%m%d)"
+    MANAGED_LABEL="app.kubernetes.io/managed-by=ceph-snapshots"
+    # Any PVC carrying this label is a CNPG instance volume; all six CNPG
+    # clusters are tier-1. Instance names are stable across failovers, so
+    # per-PVC retention keeps a full history.
+    CNPG_LABEL="cnpg.io/cluster"
+    TMP="$(mktemp)"
+    trap 'rm -f "$TMP"' EXIT
+    failed=0
+
+    # Tier-1 PVCs with fixed names (spec #321 / ADR-0003). CNPG instance PVCs
+    # are discovered by label below and not listed here.
+    STATIC_PVCS='
+    forgejo/gitea-shared-storage
+    paperclip/paperclip-data
+    grocy/grocy-data
+    homebox/homebox-data
+    actual-budget/actual-budget-data
+    obsidian-livesync/obsidian-livesync-data
+    home-automation/homeassistant-data
+    home-automation/mosquitto-data
+    home-automation/mosquitto-conf
+    home-automation/zigbee2mqtt-data
+    snipe-it/snipe-it-data
+    snipe-it/data-snipe-it-db-0
+    flow-collector/flow-collector-data
+    '
+
+    snapshot_pvc() {
+      ns="$1"; pvc="$2"; name="${PREFIX}-${TODAY}-${pvc}"
+      if ! kubectl get pvc -n "$ns" "$pvc" >/dev/null 2>&1; then
+        echo "MISS  $ns/$pvc (PVC not found)"
+        return 0
+      fi
+      if kubectl get volumesnapshot -n "$ns" "$name" >/dev/null 2>&1; then
+        echo "SKIP  $ns/$pvc ($name already exists)"
+        return 0
+      fi
+      if ! kubectl create -f - <<EOF
+    apiVersion: snapshot.storage.k8s.io/v1
+    kind: VolumeSnapshot
+    metadata:
+      name: $name
+      namespace: $ns
+      labels:
+        app.kubernetes.io/managed-by: ceph-snapshots
+    spec:
+      volumeSnapshotClassName: $SNAPSHOT_CLASS
+      source:
+        persistentVolumeClaimName: $pvc
+    EOF
+      then
+        echo "FAIL  $ns/$pvc"
+        return 1
+      fi
+      echo "SNAP  $ns/$pvc -> $name"
+    }
+
+    prune_snapshots() {
+      ns="$1"; pvc="$2"
+      # Oldest first; keep the newest KEEP. --wait=false so a snapshot that is
+      # still being created or deleted cannot hang the job; the next run retries.
+      kubectl get volumesnapshot -n "$ns" -l "$MANAGED_LABEL" \
+        -o 'jsonpath={range .items[*]}{.metadata.creationTimestamp}{" "}{.metadata.name}{"\n"}{end}' \
+        | sort | awk -v keep="$KEEP" 'NR > keep {print $2}' \
+        | while read -r old; do
+            echo "PRUNE $ns/$old"
+            kubectl delete volumesnapshot -n "$ns" "$old" --wait=false --ignore-not-found
+          done
+      return 0
+    }
+
+    run_for() {
+      ns="$1"; pvc="$2"
+      snapshot_pvc "$ns" "$pvc" || failed=$((failed + 1))
+      prune_snapshots "$ns" "$pvc"
+    }
+
+    for entry in $STATIC_PVCS; do
+      ns="${entry%%/*}"; pvc="${entry#*/}"
+      run_for "$ns" "$pvc"
+    done
+
+    if kubectl get pvc -A -l "$CNPG_LABEL" \
+         -o 'jsonpath={range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' > "$TMP"
+    then
+      while read -r ns pvc; do
+        [ -n "$ns" ] || continue
+        run_for "$ns" "$pvc"
+      done < "$TMP"
+    else
+      echo "FAIL  CNPG PVC discovery"
+      failed=$((failed + 1))
+    fi
+
+    if [ "$failed" -gt 0 ]; then
+      echo "ERROR: $failed operation(s) failed"
+      exit 1
+    fi
+    echo "OK"

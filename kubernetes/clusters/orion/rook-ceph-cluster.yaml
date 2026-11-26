@@ -11,6 +11,7 @@ spec:
   wait: true
   dependsOn:
     - name: rook-ceph-operator
+    - name: snapshot-controller
   sourceRef:
     kind: GitRepository
     name: flux-system
