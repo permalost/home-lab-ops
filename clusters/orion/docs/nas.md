@@ -64,6 +64,21 @@ The tree sits under each box's data pool (`storage` on bignas,
   own schema), so SMART state is evidenced by the alert list and the weekly
   SHORT test schedule instead.
 
+## restic tier-1 copies (GH #326)
+
+Nightly in-cluster CronJobs write every tier-1 file source to a restic repo
+on bignas and a second repo on fastnas — plain NFS (ADR-0001), not the
+RustFS S3 shim, which stays CNPG-only. Repos live in
+`restic/<namespace>/<pvc-name>` subdirectories of each `tier1-critical`
+export, one repo per destination PVC, provisioned by the
+`nfs-restic-bignas` / `nfs-restic-fastnas` StorageClasses
+(`kubernetes/infrastructure/restic-tier1/`). The CronJobs, destination PVCs
+and the sops restic password live in each app's directory — the full list of
+covered sources, the restore steps and the RWO-affinity design are in the
+[restic-tier1 README](../../../kubernetes/infrastructure/restic-tier1/README.md).
+The repo password's recovery copy is in Bitwarden (ADR-0003 flow).
+
+
 ## CNPG S3 endpoint (rustfs) — GH #324
 
 CNPG cannot write backups to plain NFS (spec #321 research comment), so a
