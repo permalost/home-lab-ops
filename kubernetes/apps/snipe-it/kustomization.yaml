@@ -19,3 +19,6 @@ resources:
   - db-statefulset.yaml
   - db-service.yaml
   - snipe-it-secret.sops.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml

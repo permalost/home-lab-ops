@@ -4,6 +4,9 @@ kind: Kustomization
 resources:
   - ../webapp/base
   - namespace.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 components:
   - ../webapp/components/httproute      # Gateway API route — the default; orion has no nginx ingress controller

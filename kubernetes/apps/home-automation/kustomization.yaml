@@ -7,3 +7,8 @@ resources:
   - namespace.yaml
   - mosquitto
   - zigbee2mqtt
+  - backup-pvc-mosquitto.yaml
+  - backup-cronjob-mosquitto.yaml
+  - backup-pvc-zigbee2mqtt.yaml
+  - backup-cronjob-zigbee2mqtt.yaml
+  - restic-password.sops.yaml

@@ -1,0 +1,113 @@
+# Tier-1 restic backup (spec #321, GH #326): nightly encrypted copy of this
+# namespace's source data to the restic repos on bignas and fastnas, then
+# retention (daily x14 / weekly x8 / monthly x6) per repo. Repo layout and
+# restore steps: kubernetes/infrastructure/restic-tier1/README.md.
+#
+# The source PVCs are RWO (rook-ceph-block), so the pod prefers the node of
+# the app pod that holds them — a mount from any other node would fail with
+# Multi-Attach. If the app pod is gone the volume is free anywhere, hence
+# preferred (soft) affinity, never required. The source mounts are
+# read-only; reads are crash-consistent (same as the ceph snapshots).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic-tier1-backup
+spec:
+  schedule: "20 9 * * *"
+  timeZone: America/Boise
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      # One pass over both NAS targets; generous for the first full copy,
+      # incrementals after that are fast.
+      activeDeadlineSeconds: 14400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: restic-tier1-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          affinity:
+            podAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    topologyKey: kubernetes.io/hostname
+                    labelSelector:
+                      matchLabels:
+                        app: hermes-hearth
+          containers:
+            - name: restic
+              image: docker.io/restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: RESTIC_PASSWORD_FILE
+                  value: /etc/restic/password
+                - name: RESTIC_CACHE_DIR
+                  value: /tmp/restic-cache
+                - name: HOME
+                  value: /tmp
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # Init-if-missing, backup, retention — per repo. Every repo
+                  # is this job's own NAS subdirectory, so no cross-app
+                  # restic locking and forget --prune is always safe.
+                  for repo in /mnt/restic-bignas /mnt/restic-fastnas; do
+                    export RESTIC_REPOSITORY="$repo"
+                    if ! restic cat config >/dev/null 2>&1; then
+                      echo "restic init $repo"
+                      restic init
+                    fi
+                    restic backup --host hermes-hearth --tag restic-tier1 /srv/hermes-hearth-data
+                    restic forget --host hermes-hearth --group-by host,paths \
+                      --keep-daily 14 --keep-weekly 8 --keep-monthly 6 --prune
+                  done
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: src-hermes-hearth-data
+                  mountPath: /srv/hermes-hearth-data
+                  readOnly: true
+                - name: restic-bignas
+                  mountPath: /mnt/restic-bignas
+                - name: restic-fastnas
+                  mountPath: /mnt/restic-fastnas
+                - name: password
+                  mountPath: /etc/restic
+                  readOnly: true
+                # /tmp is the container's only writable path: restic cache
+                # and any $HOME writes land on this emptyDir.
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: src-hermes-hearth-data
+              persistentVolumeClaim:
+                claimName: hermes-hearth-data
+            - name: restic-bignas
+              persistentVolumeClaim:
+                claimName: hermes-hearth-restic-bignas
+            - name: restic-fastnas
+              persistentVolumeClaim:
+                claimName: hermes-hearth-restic-fastnas
+            - name: password
+              secret:
+                secretName: hermes-hearth-restic-repo-password
+            - name: tmp
+              emptyDir: {}

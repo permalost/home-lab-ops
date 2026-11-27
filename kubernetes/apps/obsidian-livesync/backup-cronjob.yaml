@@ -1,0 +1,159 @@
+# Tier-1 restic backup for obsidian-livesync (spec #321, GH #326): the
+# CouchDB data directory is never copied raw — an init container exports
+# every database through CouchDB's HTTP API into an emptyDir, and the restic
+# container stores that export. Restic only starts if the dump succeeded.
+#
+# One GET per DB (_all_docs?include_docs=true&attachments=true) inlines every
+# document plus its attachments (base64) in a single JSON file. Restore =
+# POST each file's array as {"docs": [...], "new_edits": false} to
+# /<db>/_bulk_docs on a fresh CouchDB (recreates the exact revisions).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic-tier1-backup
+spec:
+  schedule: "40 6 * * *"
+  timeZone: America/Boise
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      # One pass over both NAS targets; generous for the first full copy,
+      # incrementals after that are fast.
+      activeDeadlineSeconds: 14400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: restic-tier1-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: couchdb-dump
+              image: docker.io/library/python:3.12-alpine@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+              imagePullPolicy: IfNotPresent
+              env:
+                # The service port is 8080 (targetPort 5984); creds are the
+                # same secret the CouchDB boot uses (deploy-add-env.yaml).
+                - name: COUCHDB_URL
+                  value: http://obsidian-livesync-svc:8080
+                - name: COUCHDB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: obsidian-livesync-auth
+                      key: couchdbUser
+                - name: COUCHDB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: obsidian-livesync-auth
+                      key: couchdbPassword
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: "1"
+              command: ["python3", "-c"]
+              args:
+                - |
+                  import base64, json, os, urllib.request
+
+                  base = os.environ["COUCHDB_URL"].rstrip("/")
+                  auth = "Basic " + base64.b64encode(
+                      f"{os.environ['COUCHDB_USER']}:{os.environ['COUCHDB_PASSWORD']}".encode()
+                  ).decode()
+
+                  def get(path, timeout=1800):
+                      req = urllib.request.Request(base + path, headers={"Authorization": auth})
+                      with urllib.request.urlopen(req, timeout=timeout) as r:
+                          return json.load(r)
+
+                  out = "/dump"
+                  os.makedirs(out, exist_ok=True)
+                  dbs = get("/_all_dbs")
+                  manifest = {}
+                  for db in dbs:
+                      data = get(f"/{db}/_all_docs?include_docs=true&attachments=true")
+                      docs = [row["doc"] for row in data.get("rows", []) if row.get("doc")]
+                      with open(os.path.join(out, db + ".json"), "w") as f:
+                          json.dump(docs, f)
+                      manifest[db] = len(docs)
+                  with open(os.path.join(out, "manifest.json"), "w") as f:
+                      json.dump(manifest, f, indent=2)
+                  print("dumped dbs:", manifest)
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: dump
+                  mountPath: /dump
+          containers:
+            - name: restic
+              image: docker.io/restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: RESTIC_PASSWORD_FILE
+                  value: /etc/restic/password
+                - name: RESTIC_CACHE_DIR
+                  value: /tmp/restic-cache
+                - name: HOME
+                  value: /tmp
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # Init-if-missing, backup, retention — per repo. Every repo
+                  # is this job's own NAS subdirectory, so no cross-app
+                  # restic locking and forget --prune is always safe.
+                  for repo in /mnt/restic-bignas /mnt/restic-fastnas; do
+                    export RESTIC_REPOSITORY="$repo"
+                    if ! restic cat config >/dev/null 2>&1; then
+                      echo "restic init $repo"
+                      restic init
+                    fi
+                    restic backup --host obsidian-livesync --tag restic-tier1 /dump
+                    restic forget --host obsidian-livesync --group-by host,paths \
+                      --keep-daily 14 --keep-weekly 8 --keep-monthly 6 --prune
+                  done
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: dump
+                  mountPath: /dump
+                  readOnly: true
+                - name: restic-bignas
+                  mountPath: /mnt/restic-bignas
+                - name: restic-fastnas
+                  mountPath: /mnt/restic-fastnas
+                - name: password
+                  mountPath: /etc/restic
+                  readOnly: true
+                # /tmp is the container's only writable path: restic cache
+                # and any $HOME writes land on this emptyDir.
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: dump
+              emptyDir: {}
+            - name: restic-bignas
+              persistentVolumeClaim:
+                claimName: obsidian-livesync-restic-bignas
+            - name: restic-fastnas
+              persistentVolumeClaim:
+                claimName: obsidian-livesync-restic-fastnas
+            - name: password
+              secret:
+                secretName: obsidian-livesync-restic-repo-password
+            - name: tmp
+              emptyDir: {}

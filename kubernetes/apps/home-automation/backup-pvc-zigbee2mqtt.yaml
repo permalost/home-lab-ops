@@ -1,0 +1,28 @@
+# Destination PVCs for the restic tier-1 copy (spec #321, GH #326). Each
+# provisioned volume is this namespace's own restic repo directory under the
+# NAS export — restic/<namespace>/<pvc-name> (see
+# kubernetes/infrastructure/restic-tier1/README.md). NFS datasets carry no
+# quota: the size is a record, the real cap is each NAS pool.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zigbee2mqtt-restic-bignas
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-restic-bignas
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zigbee2mqtt-restic-fastnas
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-restic-fastnas
+  resources:
+    requests:
+      storage: 20Gi
