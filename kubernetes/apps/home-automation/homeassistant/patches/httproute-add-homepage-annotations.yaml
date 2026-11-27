@@ -7,5 +7,5 @@ metadata:
     gethomepage.dev/app: "homeassistant"
     gethomepage.dev/name: "Home Assistant"
     gethomepage.dev/description: "Home automation"
-    gethomepage.dev/group: "Home"
+    gethomepage.dev/group: "Home Automation"
     gethomepage.dev/icon: "home-assistant.png"
