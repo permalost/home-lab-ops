@@ -1,0 +1,25 @@
+# The fastnas share holding the tier-1 second copies (spec #321 / GH #326).
+# Identical layout to nfs-restic-bignas — same dataset tree
+# (`backups/orion/tier1-critical`) under fastnas's data pool `temp-storage`.
+# `server` comes from Secret/fastnas-nfs-secrets
+# (kubernetes/settings/orion/fastnas-nfs.sops.yaml).
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-restic-fastnas
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: ${fastnasNfsIp}
+  share: /mnt/temp-storage/backups/orion/tier1-critical
+  subDir: restic/$${pvc.metadata.namespace}/$${pvc.metadata.name}
+  csi.storage.k8s.io/pvc/name: $${pvc.metadata.name}
+  csi.storage.k8s.io/pvc/namespace: $${pvc.metadata.namespace}
+  csi.storage.k8s.io/pv/name: $${pv.metadata.name}
+  mountPermissions: "0777"
+  onDelete: retain
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: false
+mountOptions:
+  - nfsvers=4
+  - hard

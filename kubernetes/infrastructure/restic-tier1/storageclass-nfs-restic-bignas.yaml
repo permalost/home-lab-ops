@@ -1,0 +1,40 @@
+# The bignas share backing the restic tier-1 repos (spec #321 / GH #326).
+# Each destination PVC provisions into its own subdirectory
+# `restic/<namespace>/<pvc-name>` — one restic repo per destination PVC, so
+# per-job `restic forget --prune` never contends with another app. The
+# controller creates the directories on first provision — no NAS-side change.
+# `server` comes from Secret/nas-nfs-secrets (see
+# kubernetes/infrastructure/nas-storage/README.md) so the NAS address never
+# appears in plain YAML in this public repo.
+#
+# This class is deliberately NOT the cluster default: a stray PVC without an
+# explicit storageClassName must keep landing on rook-ceph-block.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-restic-bignas
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: ${nasNfsIp}
+  share: /mnt/storage/backups/orion/tier1-critical
+  # csi-driver-nfs templates the subdirectory from the requesting PVC
+  # (v4.13+). The `$$` doubles the dollar for Flux postBuild substitution —
+  # `$${pvc.metadata.namespace}` reaches the driver as the literal
+  # `${pvc.metadata.namespace}` template (dotted refs are not Flux vars).
+  subDir: restic/$${pvc.metadata.namespace}/$${pvc.metadata.name}
+  csi.storage.k8s.io/pvc/name: $${pvc.metadata.name}
+  csi.storage.k8s.io/pvc/namespace: $${pvc.metadata.namespace}
+  csi.storage.k8s.io/pv/name: $${pv.metadata.name}
+  # The controller mkdirs the subdirectory as root (the export has no
+  # squash, by decision — nas.md "Backup landing zone"), while the restic
+  # containers run as 65534. The export only accepts the five orion node
+  # addresses, so the permissive mode is contained to that path.
+  mountPermissions: "0777"
+  # Belt and braces: a deleted PVC must never take the backups with it.
+  onDelete: retain
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: false
+mountOptions:
+  - nfsvers=4
+  - hard
