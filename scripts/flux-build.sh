@@ -117,6 +117,106 @@ check_homepage() {
   return "$bad"
 }
 
+# CNPG backup wiring (the #337/#339 bug class): every CNPG Cluster with a
+# plugin backup story must have the barman-cloud plugin bound to an
+# ObjectStore that exists in the same namespace, and every ObjectStore's
+# S3 credentials must resolve to a Secret in the same build. Nothing here
+# is schema-checkable — kubeconform passes all three failure modes.
+# Input: rendered manifests as a YAML stream; yq converts to JSON.
+check_cnpg_backups() {
+  printf '%s\n' "$1" | yq eval-all -o=json '.' - 2>/dev/null | python3 -c '
+import sys, json
+
+METADATA_KEY = "metadata"
+NAME_KEY = "name"
+
+raw = sys.stdin.read()
+# yq emits either a single JSON array or newline-separated JSON documents.
+decoder = json.JSONDecoder()
+docs = []
+idx = 0
+try:
+    while idx < len(raw):
+        while idx < len(raw) and raw[idx] in " \t\r\n":
+            idx += 1
+        if idx >= len(raw):
+            break
+        obj, end = decoder.raw_decode(raw, idx)
+        docs.append(obj)
+        idx = end
+except Exception:
+    sys.exit(0)  # unparseable stream: yq already handles real errors elsewhere
+
+# Flatten: eval-all may nest arrays.
+flat = []
+def flatten(x):
+    if isinstance(x, list):
+        for i in x:
+            flatten(i)
+    elif isinstance(x, dict):
+        flat.append(x)
+for d in docs:
+    flatten(d)
+
+clusters, objectstores, secrets = [], [], []
+seen = set()
+for d in flat:
+    key = (d.get("kind"), d.get("apiVersion"), json.dumps(d.get("metadata"), sort_keys=True))
+    if key in seen:
+        continue
+    seen.add(key)
+    k = d.get("kind") or ""
+    av = d.get("apiVersion") or ""
+    if k == "Cluster" and "postgresql.cnpg.io" in av:
+        clusters.append(d)
+    elif k == "ObjectStore" and "barmancloud.cnpg.io" in av:
+        objectstores.append(d)
+    elif k == "Secret":
+        secrets.append(d)
+
+errors = []
+def ns(x):
+    return ((x.get("metadata") or {}).get("namespace")) or ""
+
+os_index = {(ns(o), (o.get("metadata") or {}).get("name")) for o in objectstores}
+secret_index = set()
+for s in secrets:
+    secret_index.add((ns(s), (s.get("metadata") or {}).get("name")))
+
+for c in clusters:
+    ident = f"{ns(c)}/Cluster/{(c.get(METADATA_KEY) or {}).get(NAME_KEY)}"
+    plugins = ((c.get("spec") or {}).get("plugins")) or []
+    if not plugins:
+        errors.append(f"{ident}: no spec.plugins — plugin backups fail \"cluster has no plugin configured\"")
+        continue
+    for p in plugins:
+        if (p.get("name") or "") != "barman-cloud.cloudnative-pg.io":
+            continue
+        bound = (p.get("parameters") or {}).get("barmanObjectName")
+        if not bound:
+            errors.append(f"{ident}: barman-cloud plugin lacks parameters.barmanObjectName — daemon refuses lifecycle (no WAL, no backups)")
+        elif (ns(c), bound) not in os_index:
+            errors.append(f"{ident}: barmanObjectName {bound!r} has no ObjectStore in namespace {ns(c)!r} in this build")
+
+for o in objectstores:
+    ident = f"{ns(o)}/ObjectStore/{(o.get(METADATA_KEY) or {}).get(NAME_KEY)}"
+    s3 = (((o.get("spec") or {}).get("configuration") or {}).get("s3Credentials")) or {}
+    for field in ("accessKeyId", "secretAccessKey"):
+        ref = s3.get(field) or {}
+        name = ref.get("name")
+        if not name:
+            continue
+        if (ns(o), name) not in secret_index:
+            errors.append(f"{ident}: s3Credentials.{field} references Secret {name!r} not present in namespace {ns(o)!r} in this build")
+        elif not ref.get("key"):
+            errors.append(f"{ident}: s3Credentials.{field} has no key")
+
+for e in errors:
+    print(e)
+sys.exit(1 if errors else 0)
+'
+}
+
 # ── Build each Flux Kustomization ────────────────────────────────────────────
 
 FAILED=0
@@ -164,11 +264,19 @@ for ks_file in $(find "$CLUSTER_DIR" -maxdepth 3 -name '*.yaml' \
         echo "  ✗ $name — unresolved variable(s):"
         echo "$UNRESOLVED" | sed 's/^/      /'
         FAILED=$((FAILED + 1))
-      elif HOMEPAGE_ERRORS="$(check_homepage "$RENDERED")"; then
+      elif HOMEPAGE_ERRORS="$(check_homepage "$RENDERED")" \
+        && CNPG_ERRORS="$(check_cnpg_backups "$RENDERED")"; then
         echo "  ✓ $name"
       else
-        echo "  ✗ $name — homepage tags:"
-        echo "$HOMEPAGE_ERRORS" | sed 's/^/      /'
+        echo "  ✗ $name — semantic checks:"
+        if [[ -n "${HOMEPAGE_ERRORS:-}" ]]; then
+          echo "$HOMEPAGE_ERRORS" | sed 's/^/      /'
+        fi
+        if [[ -n "${CNPG_ERRORS:-}" ]]; then
+          echo "$CNPG_ERRORS" | sed 's/^/      /'
+        fi
+        HOMEPAGE_ERRORS=""
+        CNPG_ERRORS=""
         FAILED=$((FAILED + 1))
       fi
     else
