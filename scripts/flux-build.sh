@@ -210,6 +210,14 @@ for o in objectstores:
             errors.append(f"{ident}: s3Credentials.{field} references Secret {name!r} not present in namespace {ns(o)!r} in this build")
         elif not ref.get("key"):
             errors.append(f"{ident}: s3Credentials.{field} has no key")
+        else:
+            # The #335 follow-up bug class: the Secret exists but its key value
+            # was encrypted empty (silent awk failure), so barman gets
+            # "Unable to locate credentials" at runtime.
+            sec = next(s for s in secrets if ns(s) == ns(o) and (s.get("metadata") or {}).get("name") == name)
+            data = {**(sec.get("data") or {}), **(sec.get("stringData") or {})}
+            if data.get(ref.get("key"), "") in ("", None):
+                errors.append(f"{ident}: Secret {name!r} key {ref.get('key')!r} is empty in this build")
 
 for e in errors:
     print(e)
