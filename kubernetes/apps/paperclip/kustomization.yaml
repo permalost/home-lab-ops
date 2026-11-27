@@ -24,3 +24,5 @@ configMapGenerator:
   - name: paperclip-nudger-script
     files:
       - nudger.mjs
+patches:
+  - path: cluster-wal-archiver-patch.yaml

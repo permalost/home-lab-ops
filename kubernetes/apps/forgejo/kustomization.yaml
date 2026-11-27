@@ -16,3 +16,5 @@ configMapGenerator:
 
 configurations:
   - kustomizeconfig.yaml
+patches:
+  - path: cluster-wal-archiver-patch.yaml
