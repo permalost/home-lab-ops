@@ -9,3 +9,8 @@ spec:
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
+      parameters:
+        # Binds the plugin to this namespace's ObjectStore; without it the
+        # plugin daemon refuses lifecycle calls ("no reference to
+        # barmanObjectName") and never starts WAL archiving.
+        barmanObjectName: rustfs-store
