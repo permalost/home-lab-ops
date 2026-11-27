@@ -29,6 +29,7 @@ images:
     digest: sha256:d318f7732f6f6330312e2c5f854f7899f858b54cc4b18a13cde1f43b5bea0515
 
 patches:
+  - path: patches/cluster-wal-archiver.yaml
   - target:
       kind: Deployment
       name: deploy

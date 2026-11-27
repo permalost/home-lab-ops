@@ -1,0 +1,11 @@
+# Enable the barman-cloud plugin + continuous WAL archiving on the Cluster
+# (GH #325). Without .spec.plugins the ScheduledBackup fails with "cluster
+# has no plugin configured" and no WAL is archived (no PITR).
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: paperclip-db
+spec:
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
