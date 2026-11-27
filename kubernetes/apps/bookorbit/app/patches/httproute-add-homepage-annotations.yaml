@@ -7,5 +7,5 @@ metadata:
     gethomepage.dev/app: "bookorbit"
     gethomepage.dev/name: "BookOrbit"
     gethomepage.dev/description: "PDF and ebook library"
-    gethomepage.dev/group: "Home"
+    gethomepage.dev/group: "Inventory"
     gethomepage.dev/icon: "bookorbit.png"
