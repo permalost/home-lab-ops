@@ -38,9 +38,11 @@ config:
     # Group order, and the only groups a gethomepage.dev/group may use:
     # scripts/flux-build.sh fails on any other.
     layout:
-      Home:
+      Home Automation:
         style: columns
       Inventory:
+        style: columns
+      Libraries:
         style: columns
       Finances:
         style: columns

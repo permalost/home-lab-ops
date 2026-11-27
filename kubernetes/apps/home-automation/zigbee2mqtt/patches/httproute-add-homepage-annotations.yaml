@@ -7,5 +7,5 @@ metadata:
     gethomepage.dev/app: "zigbee2mqtt"
     gethomepage.dev/name: "Zigbee2MQTT"
     gethomepage.dev/description: "Zigbee bridge frontend"
-    gethomepage.dev/group: "Home"
+    gethomepage.dev/group: "Home Automation"
     gethomepage.dev/icon: "zigbee2mqtt.png"
