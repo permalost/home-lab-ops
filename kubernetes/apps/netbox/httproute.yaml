@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/app: "netbox"
     gethomepage.dev/name: "NetBox"
     gethomepage.dev/description: "IPAM and DCIM"
-    gethomepage.dev/group: "Network"
+    gethomepage.dev/group: "Inventory"
     gethomepage.dev/icon: "netbox.png"
 spec:
   parentRefs:
