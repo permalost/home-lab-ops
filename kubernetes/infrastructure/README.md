@@ -14,6 +14,7 @@ Shared HelmRelease and Kustomize building blocks consumed by any cluster. Each c
 | [csi-driver-nfs](csi-driver-nfs/README.md) | CSI NFS driver (chart pinned); dynamic NFS provisioning (first consumer: the rustfs backup endpoint, GH #324) | `csi-driver-nfs` |
 | [snapshot-controller](snapshot-controller/README.md) | CSI snapshot controller + CRDs; makes VolumeSnapshots reach ReadyToUse | `kube-system` |
 | [ceph-snapshots](ceph-snapshots/README.md) | Daily tier-1 VolumeSnapshot CronJob, keep 7 | `ceph-snapshots` |
+| [restic-tier1](restic-tier1/README.md) | NFS StorageClasses backing the encrypted restic tier-1 copies to bignas + fastnas (jobs live in the app dirs) | — |
 | [cnpg](cnpg/README.md) | CloudNativePG operator + barman-cloud backup plugin (GH #325: WAL archiving + daily base backups to RustFS) | `cnpg-system` |
 | [nas-storage](nas-storage/README.md) | Static NFS PVs exposing the bignas stores (books/prints/photos) | — |
 | rook-ceph-operator | Ceph operator | `rook-ceph` |

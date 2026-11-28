@@ -5,6 +5,9 @@ resources:
   - ../webapp/base
   - namespace.yaml
   - secret.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 components:
   - ../webapp/components/httproute      # hermes-dev.${domain} -> the API (see README)

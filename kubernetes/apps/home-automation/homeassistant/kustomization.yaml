@@ -7,6 +7,9 @@ resources:
   - ../../webapp/base
   - configMap.yaml
   - secret.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 namePrefix: homeassistant-
 

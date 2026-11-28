@@ -6,6 +6,9 @@ resources:
   - namespace.yaml
   - secret.yaml
   - tokentelemetry-httproute.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 components:
   - ../webapp/components/httproute      # optional external access (dashboard) — see README

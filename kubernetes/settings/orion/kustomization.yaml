@@ -4,3 +4,4 @@ resources:
   - cluster-settings.yaml
   - cluster-secrets.sops.yaml
   - nas-nfs.sops.yaml
+  - fastnas-nfs.sops.yaml

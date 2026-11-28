@@ -4,6 +4,9 @@ kind: Kustomization
 resources:
   - ../webapp/base
   - namespace.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 namespace: flow-collector
 namePrefix: flow-collector-

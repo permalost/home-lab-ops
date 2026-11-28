@@ -19,6 +19,9 @@ resources:
   - nudger-cronjob.yaml
   - nudger-token.sops.yaml
   - rustfs-credentials.sops.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 configMapGenerator:
   - name: paperclip-config
     files:

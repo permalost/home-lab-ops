@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Sibling of truenas/ (see the root kustomization comment): its namespace and
+# namePrefix live here, not at the root, so the restic job gets the same
+# hermes-truenas- names as the agent it backs up.
+namespace: hermes-agents
+namePrefix: hermes-truenas-
+
+resources:
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml

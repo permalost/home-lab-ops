@@ -1,0 +1,37 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: restic-tier1
+  namespace: flux-system
+spec:
+  # The StorageClasses need csi-driver-nfs ready. The per-namespace
+  # CronJobs/PVCs/secrets live in the app directories and ride each app's
+  # own Kustomization — nothing to order here beyond the driver.
+  dependsOn:
+    - name: cluster-settings
+    - name: csi-driver-nfs
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./kubernetes/infrastructure/restic-tier1
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets
+      # nasNfsIp: the bignas NFS address (same secret nas-storage uses)
+      - kind: Secret
+        name: nas-nfs-secrets
+      # fastnasNfsIp: the fastnas NFS address (tier-1 second copies, GH #326)
+      - kind: Secret
+        name: fastnas-nfs-secrets

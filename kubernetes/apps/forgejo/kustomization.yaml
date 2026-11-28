@@ -10,6 +10,9 @@ resources:
   - backup.yaml
   - repository.yaml
   - release.yaml
+  - backup-pvc.yaml
+  - backup-cronjob.yaml
+  - restic-password.sops.yaml
 
 configMapGenerator:
 - name: forgejo-helm-chart-values

@@ -86,13 +86,20 @@ shopt -u nullglob
 SUBST_SCOPE='select((.metadata.annotations."kustomize.toolkit.fluxcd.io/substitute" // .metadata.labels."kustomize.toolkit.fluxcd.io/substitute" // "") != "disabled")'
 
 # Python-based ${VAR} substitution (cross-platform, no envsubst dependency).
-# Matches ${VAR} and ${VAR:=default} — resolves from env, keeps original if missing.
+# Matches ${VAR} and ${VAR:=default} — resolves from env, keeps original if
+# missing. Mirrors Flux's envsubst escape: `$$` renders as a literal `$`, so
+# `$${x}` reaches the applied manifest as `${x}` (used by the restic-tier1
+# StorageClasses for the csi-driver-nfs dotted subDir templates).
 ENVSUBST_PY='
 import sys, re, os
 content = sys.stdin.read()
+ESC = "\x00escaped-dollar\x00"
+content = content.replace("$$", ESC)
 def sub(m):
     return os.environ.get(m.group(1), m.group(0))
-sys.stdout.write(re.sub(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::[^}]*)?\}", sub, content))
+content = re.sub(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::[^}]*)?\}", sub, content)
+content = content.replace(ESC, "$")
+sys.stdout.write(content)
 '
 
 # Homepage tags: every HTTPRoute says gethomepage.dev/enabled "true" or "false",

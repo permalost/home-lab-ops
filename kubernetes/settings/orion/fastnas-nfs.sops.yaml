@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: fastnas-nfs-secrets
+    namespace: flux-system
+stringData:
+    fastnasNfsIp: ENC[AES256_GCM,data:XYqbgw2CuHeEig==,iv:maAgsK/v9UWm5Zc1yI37wxFk/75FTiBlfaTTSXjWVto=,tag:f+94kchbopaOH0CO8vpqvw==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age13tszh09s5hr9hzjdy8enq7uncz9p2z09hsvky2dn25vudr4cx37s6k5n9z
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBZMFY1enY0VWRHOXFFNzZk
+            NW93dE5MRGRzNGJEOTlMeGQyQ3dXSUJPbVRnCk9VZVZFWEdSc282SE0xczZwTk9B
+            T2YzU1Q0S1k3RFZ1MnFrdFlQNTBpRDgKLS0tIEJzVDNiRUk3M2dPbU5HRlFrdXA2
+            OHo1eXdlZ01QT0NGdFovVWdSTFJLSHcKGxIvLDH0b4x6CWqqQteB0j35ciYkL8dZ
+            W6CivrULA+S+sX2X7RTJclckce9gsIkm6lXx+Xwq6L7CxfIS27GFQA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-11-27T05:14:15Z"
+    mac: ENC[AES256_GCM,data:/5gcxmQKllaCR6O1FZnNSqNQMa+nnTdv3TEQ+wk2Ctp4mM3un+HHhdt/Io05bS0lrCGlyP+sWVO7aI0rzzW0OU2qNB2OzOjbsb2aCypAORO5uHwe0H87C6YEaPX9NfM09T8XGmHsVgLNeynIgfAfHgI0N0VdKpAouYs/nTZoD0Y=,iv:69AaMRUSTW/ondT6+jt343Gs53ft9kX7LlSOAfQpyRY=,tag:kX1wIn7fbBHBLYJKlij33Q==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.9.4
